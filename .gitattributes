@@ -1,0 +1,14 @@
+# Normalizar line endings: LF en el repo, conversión automática en checkout
+* text=auto eol=lf
+
+# Binarios explícitos — sin conversión
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.db  binary
+*.sqlite binary
+*.sqlite3 binary
+
+# JSON con LF explícito (fixtures de tests)
+*.json text eol=lf

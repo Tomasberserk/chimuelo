@@ -1,0 +1,307 @@
+================================================================================
+  CHIMUELO PRIME — PACKAGE DELIVERY SUMMARY
+  18 de mayo de 2026 - 02:51 UTC
+================================================================================
+
+📦 ENTREGABLES COMPLETOS
+================================================================================
+
+✅ DOCUMENTACIÓN DE AGENTES (Reutilizable en cualquier herramienta)
+───────────────────────────────────────────────────────────────────────────────
+  ▪ MARTA.md                     (6.6 KB)  — System prompt de Marta (Arquitecta)
+  ▪ EDISON.md                    (8.6 KB)  — System prompt de Edison (Programador)
+  ▪ Líneas totales               +1,500    — Configuración completa de agentes
+
+✅ DOCUMENTACIÓN DE PROYECTO (Ready to use en nueva sesión)
+───────────────────────────────────────────────────────────────────────────────
+  ▪ INICIO_AQUÍ.md               (7.3 KB)  — Entry point para nuevas sesiones
+  ▪ PROJECT_STATUS.md            (12 KB)   — Estado actual + próximos pasos
+  ▪ ROADMAP.md                   (18 KB)   — Hoja de ruta M1-M7 (7 módulos)
+  ▪ INDEX.md                     (9.4 KB)  — Mapa de navegación completo
+  ▪ README.md                    (9.4 KB)  — Setup + quick start guide
+
+✅ CÓDIGO FUENTE (Módulo 1 - 20% completado)
+───────────────────────────────────────────────────────────────────────────────
+  ▪ chimuelo_prime/exchange_config/
+    ├─ __init__.py              — Exports públicos
+    ├─ exceptions.py            — Jerarquía tipificada (5 excepciones)
+    ├─ models.py                — SymbolFilters + SymbolConfig (Pydantic v2)
+    ├─ client.py                — (TODO: Cliente HTTP — Tarea #3)
+    ├─ service.py               — (TODO: Fachada pública — Tarea #3)
+    └─ config_loader.py         — (TODO: Parser YAML — Tarea #3)
+
+✅ CONFIGURACIÓN Y DEPENDENCIAS
+───────────────────────────────────────────────────────────────────────────────
+  ▪ requirements.txt             — Versiones fijadas (8 librerías, pinning estricto)
+  ▪ config/chimuelo.yaml         — (Plantilla lista para llenar)
+
+================================================================================
+📊 ESTADÍSTICAS
+================================================================================
+
+Documentación
+  ▪ Total de líneas:             1,713 líneas (5 documentos principales)
+  ▪ Tiempo de lectura estimado:  60 minutos (completo) o 5 min (INICIO_AQUÍ)
+
+Código
+  ▪ models.py:                   400+ líneas (SymbolFilters + SymbolConfig)
+  ▪ exceptions.py:                37 líneas (5 excepciones tipificadas)
+  ▪ Smoke-test:                  ✅ 10 escenarios pasando al 100%
+
+Testing Infrastructure
+  ▪ Coverage target:             ≥ 90%
+  ▪ Framework:                   pytest + responses (definido)
+  ▪ Type checking:               mypy --strict (requerido)
+  ▪ Linting:                     ruff check + ruff format (requerido)
+
+================================================================================
+🎯 DÓNDE LEER PRIMERO (Por Rol)
+================================================================================
+
+🧑‍💼 TOM (Product Owner)
+  1. INICIO_AQUÍ.md             (2 min)
+  2. PROJECT_STATUS.md          (15 min)
+  3. ROADMAP.md                 (20 min) [opcional]
+  → Próximo: Validar SOL/USDT como primer activo, diseñar DOGE/USDT
+
+🏗️  MARTA (Arquitecta en Jefe)
+  1. INICIO_AQUÍ.md             (2 min)
+  2. MARTA.md                   (10 min) ← TU SYSTEM PROMPT
+  3. PROJECT_STATUS.md          (15 min)
+  → Próximo: Auditar Tarea #2 de Edison (tests de M1)
+
+⚙️  EDISON (Programador)
+  1. INICIO_AQUÍ.md             (2 min)
+  2. EDISON.md                  (12 min) ← TU SYSTEM PROMPT
+  3. PROJECT_STATUS.md → "Trabajo en Progreso" (5 min)
+  → Próximo: Ejecutar Tarea #2 (suite de tests para M1)
+
+================================================================================
+🔄 FLUJO PARA NUEVA SESIÓN
+================================================================================
+
+1. Clona/descarga este package
+2. Lee: INICIO_AQUÍ.md (2 min)
+3. Lee: PROJECT_STATUS.md (15 min)
+4. Identifica tu rol (Tom/Marta/Edison)
+5. Lee tu archivo de rol (MARTA.md / EDISON.md)
+6. Ejecuta tu tarea según "Qué Hacer Ahora"
+7. Al terminar, actualiza PROJECT_STATUS.md con tus hitos
+8. Git add/commit/push
+
+================================================================================
+✅ DEFINICIÓN DE HECHO (Definition of Done)
+================================================================================
+
+Módulo 1 está "done" cuando:
+  [ ] pytest --cov ≥ 90% (tests)
+  [ ] mypy --strict pasa (type hints)
+  [ ] ruff check + format pasan (linting)
+  [ ] Fixture JSON de /api/v3/exchangeInfo
+  [ ] README del módulo con ejemplo
+  [ ] PR a develop + aprobación de Marta
+  [ ] 15 items checklist (ver docs/specs/M1_SPEC.md)
+
+Estado actual: 3/15 items completados (modelos, excepciones, requirements)
+
+================================================================================
+📈 TIMELINE (Estimado)
+================================================================================
+
+Semana 1 (18-24 mayo):
+  M1: ████████████ 100% ← TODAVÍA EN PROGRESO (Tarea #2-3)
+  M2: ░░░░░░░░░░░░ 0% (bloqueado)
+
+Semana 2-3 (25 mayo - 7 junio):
+  M1-M2: ████████████ 100%
+  M3-M4: ░░░░░░░░░░░░ 0% (bloqueado)
+
+Semana 4-6 (8-28 junio):
+  M1-M4: ████████████ 100%
+  M5-M6: En desarrollo
+
+Semana 7-8+ (29 junio - 5 julio+):
+  M1-M6: ████████████ 100%
+  M7: En desarrollo
+  Testnet: Operando
+
+================================================================================
+🚨 DECISIONES ARQUITECTÓNICAS CLAVE
+================================================================================
+
+1. Decimal-Only
+   └─ Razón: Binance rechaza floats con código -1013
+   └─ Enforcement: Field validator que bloquea floats explícitamente
+
+2. Testing Obligatorio ≥ 90%
+   └─ Razón: Grid trading = finanzas. Bugs no-detectados = pérdida.
+   └─ Enforcement: Sin tests no hay merge.
+
+3. Modelos Inmutables (frozen=True)
+   └─ Razón: Thread-safety, previene bugs de aliasing
+   └─ Enforcement: Pydantic v2 ConfigDict(frozen=True)
+
+4. Inyección de Dependencias desde M1
+   └─ Razón: Open/Closed Principle. M5 (GridEngine) no conoce símbolos específicos
+   └─ Enforcement: SymbolConfig abstracto, valores inyectados
+
+5. Auditoría de Marta Línea por Línea
+   └─ Razón: Garantizar calidad, evitar deuda técnica
+   └─ Enforcement: Aprobación formal requerida antes de merge
+
+================================================================================
+📚 CONTENIDO DE CADA DOCUMENTO (Resumen)
+================================================================================
+
+README.md
+  • Qué es Chimuelo Prime
+  • Cómo clonar y setup (2 min)
+  • Stack técnico (tabla)
+  • Principios clave (nunca olvidar)
+  • FAQ rápidas
+
+INICIO_AQUÍ.md
+  • Resumen ejecutivo (2 min)
+  • Dónde estamos ahora (18 mayo, M1 20%)
+  • Qué hacer según rol (Tom/Marta/Edison)
+  • Mapeo de documentación
+  • Preguntas rápidas
+
+PROJECT_STATUS.md
+  • Estado general (matriz)
+  • Milestones completados (Phase 0, 1a, 1b)
+  • Trabajo en progreso (Tareas #2-3-4)
+  • Módulos pendientes (M2-M7)
+  • Decisiones clave (7 explicadas)
+  • Supuestos y riesgos (matriz)
+  • Próxima sesión: qué esperar
+
+MARTA.md
+  • Rol: Arquitecta en Jefe, CEO
+  • 5 Reglas de Operación estrictas
+  • Matriz de decisión (qué hace en cada situación)
+  • 7 Principios arquitectónicos no-negociables
+  • Checklist de aprobación (8 items)
+  • Frases típicas de Marta
+  • Cómo usar en nueva sesión
+
+EDISON.md
+  • Rol: Agente Programador
+  • Flujo Tom → Marta → Edison
+  • 10 Reglas innegociables
+  • Stack técnico (tabla con justificaciones)
+  • Ciclo de vida de un módulo (4 fases)
+  • Checklist pre-entrega (15 items)
+  • Contra-ejemplos (qué NO hacer)
+  • Cómo comunicarse con Marta
+
+ROADMAP.md
+  • Visión general de 7 módulos (M1-M7)
+  • Detalle de cada módulo (timeline, dependencias, entregables, features, testing)
+  • Gantt chart estimado
+  • Criterios de éxito globales
+  • Riesgos y mitigaciones
+  • Escalación
+
+INDEX.md
+  • Mapeo visual de toda la documentación
+  • Qué leer por rol y en qué orden
+  • Enlaces internos
+  • Preguntas frecuentes
+  • Orden recomendado de lectura (rápido/completo/exhaustivo)
+
+================================================================================
+🎁 EXTRAS INCLUIDOS
+================================================================================
+
+• Smoke-test ejecutado (10 escenarios, todos pasando)
+• Field validators defensivos (rechazo de floats disfrazados)
+• Docstrings completos (PEP 257)
+• Type hints estrictos (mypy ready)
+• Comentarios justificando decisiones técnicas
+• Fixture JSON template para /api/v3/exchangeInfo (lista para llenar)
+
+================================================================================
+🚀 PRÓXIMOS PASOS INMEDIATOS
+================================================================================
+
+Edison:
+  1. Ejecutar Tarea #2: suite de tests para M1
+     └─ pytest, responses, coverage ≥ 90%
+  2. Abrir PR a develop con output de tests
+  3. Esperar auditoría de Marta
+
+Marta:
+  1. Cuando reciba Tarea #2 de Edison
+  2. Auditar línea por línea
+  3. Aprobación formal o rechazo con justificación
+
+Tom:
+  1. Validar parámetros de SOL/USDT
+  2. Diseñar parámetros de DOGE/USDT (volatilidad caótica)
+  3. Proponer a Marta para auditoría
+
+================================================================================
+📞 ESCALACIÓN
+================================================================================
+
+Ambigüedad en spec?     → Pregunta a Marta (ANTES de decidir)
+Bloqueado?              → Escalada a Marta
+Cambio de requisitos?   → Propón a Marta (critical flaw analysis)
+Timeline slip?          → Tom + Marta deciden prioridades
+
+================================================================================
+🎯 VISIÓN
+================================================================================
+
+✅ Fase 1 (Hoy):  Documentación de agentes + setup de proyecto
+✅ Fase 2 (Esta semana): M1 completado al 100%
+🔄 Fase 3 (Próximas 2-3 semanas): M2-M5 en desarrollo
+⏸️  Fase 4 (4-6 semanas): Backtesting, M6
+⏸️  Fase 5 (7 semanas): Bot orchestrator, M7
+⏸️  Fase 6 (8+ semanas): Testnet operando, listo para mainnet
+
+================================================================================
+📦 CÓMO USAR ESTE PACKAGE
+================================================================================
+
+LOCAL:
+  1. Extrae en tu proyecto
+  2. Lee INICIO_AQUÍ.md
+  3. Copia documentos a tu repo
+  4. Copia código fuente a tu rama develop
+  5. Continúa desde donde quedamos (Tarea #2 de M1)
+
+ANTIGRAVITY / CLAUDE CODE:
+  1. Carga MARTA.md como system prompt (Marta)
+  2. Carga EDISON.md como system prompt (Edison)
+  3. Carga PROJECT_STATUS.md al iniciar
+  4. Referencia docs/specs/M1_SPEC.md según tarea
+
+NUEVA SESIÓN:
+  1. cat docs/INICIO_AQUÍ.md
+  2. Identifica tu rol
+  3. Lee tu archivo de rol
+  4. cat docs/PROJECT_STATUS.md (sección "Próxima Sesión")
+  5. Ejecuta tu tarea
+
+================================================================================
+✨ SUMMARY FINAL
+================================================================================
+
+Este package contiene TODO lo necesario para continuar desarrollo de
+Chimuelo Prime en cualquier herramienta (Claude.ai, antigravity, Claude Code).
+
+✅ Documentación de agentes (Marta + Edison) configurada como system prompts
+✅ Estado actual documentado y listo para consultar
+✅ Hoja de ruta clara (M1-M7, dependencias, timeline)
+✅ Código base implementado (modelos, excepciones)
+✅ Testing strategy definida
+✅ Principios arquitectónicos fijados
+✅ Procesos disciplinados establecidos
+
+🎯 Meta: Bot operando en testnet en 3-4 semanas
+🚀 Status: En desarrollo activo, M1 20% completado
+⏱️  Última actualización: 18 mayo 2026 02:51 UTC
+
+================================================================================

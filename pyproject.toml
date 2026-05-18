@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=70"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "chimuelo"
+version = "0.1.0-dev"
+description = "Grid Trading Bot automatizado para Binance — Decimal-only, SOLID, multi-activo"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic==2.9.2",
+    "structlog==24.4.0",
+    "PyYAML==6.0.2",
+    "requests==2.32.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.3",
+    "pytest-cov==5.0.0",
+    "responses==0.25.3",
+    "mypy==1.11.2",
+    "ruff==0.6.9",
+    "types-PyYAML==6.0.12.20260510",
+]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+ignore_missing_imports = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["chimuelo_prime"]
+
+[tool.coverage.run]
+source = ["chimuelo_prime"]
+omit = ["tests/*", "demo_*.py"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true

@@ -1,0 +1,46 @@
+# =============================================================================
+# Chimuelo Prime — Configuración Externalizada
+# =============================================================================
+# REGLA: ningún valor de este archivo debe ser hardcodeado en código Python.
+# El config_loader.py valida este archivo contra un schema Pydantic al arranque.
+# Si la validación falla, el bot NO inicia. Falla ruidosamente, nunca silenciosa.
+# =============================================================================
+
+# Entorno activo: "testnet" | "production"
+# Cambiar este valor es la ÚNICA acción necesaria para alternar entornos.
+active_environment: "testnet"
+
+environments:
+  testnet:
+    base_url: "https://testnet.binance.vision"
+    ws_base_url: "wss://testnet.binance.vision"
+    http_timeout_seconds: 10
+    # Testnet usa keys distintas. Nunca mezclar con producción.
+    # Las keys reales se inyectan por variables de entorno (CHIMUELO_API_KEY,
+    # CHIMUELO_API_SECRET). Este archivo NO almacena secrets.
+
+  production:
+    base_url: "https://api.binance.com"
+    ws_base_url: "wss://stream.binance.com:9443"
+    http_timeout_seconds: 10
+    # Misma política de secrets: variables de entorno exclusivamente.
+
+# -----------------------------------------------------------------------------
+# Símbolos operativos
+# Cada entrada es un símbolo habilitado para el bot.
+# El GridEngine solo opera con símbolos listados aquí (OCP: Open/Closed).
+# -----------------------------------------------------------------------------
+symbols:
+  - "SOLUSDT"
+
+# -----------------------------------------------------------------------------
+# Logging
+# -----------------------------------------------------------------------------
+logging:
+  # "json" → structlog JSON renderer (producción / parsing por Datadog, etc.)
+  # "console" → structlog ConsoleRenderer (desarrollo / legibilidad humana)
+  format: "json"
+
+  # Nivel mínimo de severidad. Valores válidos (en orden ascendente):
+  # "debug" | "info" | "warning" | "error" | "critical"
+  level: "info"

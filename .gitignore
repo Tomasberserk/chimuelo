@@ -1,0 +1,67 @@
+# =============================================================================
+# Chimuelo Prime — .gitignore
+# =============================================================================
+
+# --- Entornos virtuales ---
+venv/
+.venv/
+env/
+.env/
+
+# --- Python cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# --- Testing y cobertura ---
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# --- Type checking ---
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# --- Linting ---
+.ruff_cache/
+
+# --- Build ---
+*.egg-info/
+dist/
+build/
+*.egg
+
+# --- Secrets y configuración local ---
+.env
+.env.local
+*.env
+chimuelo.local.yaml
+
+# --- IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+logs/
+
+# --- SQLite (datos de estado del bot — nunca al repo) ---
+*.db
+*.sqlite
+*.sqlite3
+
+# --- Archivos temporales y prototipos ---
+scratch/
+proto/
+tarea_marta.py
