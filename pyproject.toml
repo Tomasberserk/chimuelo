@@ -13,6 +13,7 @@ dependencies = [
     "structlog==24.4.0",
     "PyYAML==6.0.2",
     "requests==2.32.3",
+    "sqlalchemy==2.0.36",
 ]
 
 [project.optional-dependencies]
@@ -29,6 +30,7 @@ dev = [
 strict = true
 python_version = "3.12"
 ignore_missing_imports = false
+plugins = ["sqlalchemy.ext.mypy.plugin"]
 
 [tool.ruff]
 line-length = 100
