@@ -5,7 +5,6 @@ del módulo. Las implementaciones internas permanecen privadas.
 """
 
 from chimuelo_prime.exchange_config.client import BinancePublicClient
-from chimuelo_prime.exchange_config.config_loader import ChimueloConfig, load_config
 from chimuelo_prime.exchange_config.exceptions import (
     ChimueloException,
     ConfigError,
@@ -35,9 +34,6 @@ __all__ = [
     # Modelos de dominio
     "SymbolFilters",
     "SymbolConfig",
-    # Config
-    "ChimueloConfig",
-    "load_config",
     # Logging
     "configure_logging",
     "get_logger",

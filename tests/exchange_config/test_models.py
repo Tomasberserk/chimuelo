@@ -258,9 +258,7 @@ class TestValidatePrice:
         with pytest.raises(FilterValidationError, match="max_price"):
             sol_filters.validate_price(Decimal("200000.00"))
 
-    def test_price_not_multiple_of_tick_raises(
-        self, sol_filters: SymbolFilters
-    ) -> None:
+    def test_price_not_multiple_of_tick_raises(self, sol_filters: SymbolFilters) -> None:
         """Precio que no es múltiplo de tick_size debe lanzar FilterValidationError."""
         # tick_size = 0.01; 150.005 no es múltiplo exacto
         with pytest.raises(FilterValidationError, match="tick_size"):
@@ -340,9 +338,7 @@ class TestValidateNotional:
             qty=Decimal("0.040"),
         )
 
-    def test_error_message_contains_price_qty_notional(
-        self, sol_filters: SymbolFilters
-    ) -> None:
+    def test_error_message_contains_price_qty_notional(self, sol_filters: SymbolFilters) -> None:
         """El mensaje debe contener price, qty y notional calculado."""
         with pytest.raises(FilterValidationError) as exc_info:
             sol_filters.validate_notional(
@@ -443,9 +439,7 @@ class TestSymbolConfigInstantiation:
         )
         assert config.capital_weight == Decimal("0.6")
 
-    def test_capital_weight_above_one_rejected(
-        self, sol_filters: SymbolFilters
-    ) -> None:
+    def test_capital_weight_above_one_rejected(self, sol_filters: SymbolFilters) -> None:
         """capital_weight > 1 viola le=1."""
         with pytest.raises(ValidationError):
             SymbolConfig(
@@ -457,9 +451,7 @@ class TestSymbolConfigInstantiation:
                 capital_weight=Decimal("1.1"),
             )
 
-    def test_grid_levels_must_be_greater_than_one(
-        self, sol_filters: SymbolFilters
-    ) -> None:
+    def test_grid_levels_must_be_greater_than_one(self, sol_filters: SymbolFilters) -> None:
         """grid_levels <= 1 viola gt=1."""
         with pytest.raises(ValidationError):
             SymbolConfig(
@@ -475,9 +467,7 @@ class TestSymbolConfigInstantiation:
 # SymbolConfig — Validación cruzada (model_post_init)
 # --------------------------------------------------------------------------- #
 class TestSymbolConfigCrossValidation:
-    def test_lower_bound_greater_than_upper_bound_raises(
-        self, sol_filters: SymbolFilters
-    ) -> None:
+    def test_lower_bound_greater_than_upper_bound_raises(self, sol_filters: SymbolFilters) -> None:
         """lower_bound > upper_bound debe lanzar ValueError."""
         with pytest.raises(ValueError, match="lower_bound"):
             SymbolConfig(
@@ -488,9 +478,7 @@ class TestSymbolConfigCrossValidation:
                 capital_per_order=Decimal("6.00"),
             )
 
-    def test_lower_bound_equal_to_upper_bound_raises(
-        self, sol_filters: SymbolFilters
-    ) -> None:
+    def test_lower_bound_equal_to_upper_bound_raises(self, sol_filters: SymbolFilters) -> None:
         """lower_bound == upper_bound también debe fallar (caso límite).
 
         Un grid con rango cero no tiene sentido económico: spacing=0

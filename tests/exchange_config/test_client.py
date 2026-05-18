@@ -109,15 +109,11 @@ class TestGetExchangeInfoNetworkErrors:
             client.get_exchange_info("SOLUSDT")
 
     @resp_lib.activate
-    def test_connection_error_raises_unreachable(
-        self, client: BinancePublicClient
-    ) -> None:
+    def test_connection_error_raises_unreachable(self, client: BinancePublicClient) -> None:
         resp_lib.add(
             resp_lib.GET,
             _EXCHANGE_INFO_URL,
-            body=__import__("requests").exceptions.ConnectionError(
-                "connection refused"
-            ),
+            body=__import__("requests").exceptions.ConnectionError("connection refused"),
         )
         with pytest.raises(ExchangeUnreachableError, match="Error de conexión"):
             client.get_exchange_info("SOLUSDT")

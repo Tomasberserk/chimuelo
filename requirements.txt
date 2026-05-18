@@ -1,5 +1,5 @@
 # ============================================================
-# Chimuelo Prime - Module 1 Dependencies
+# Chimuelo Prime - Dependencies (M1 + M2)
 # Versiones fijadas (pinning) para reproducibilidad del entorno.
 # ============================================================
 
@@ -13,6 +13,7 @@ requests==2.32.3         # HTTP client para endpoints públicos de Binance
 pytest==8.3.3            # Framework de tests
 pytest-cov==5.0.0        # Cobertura de tests
 responses==0.25.3        # Mock de respuestas HTTP de la API de Binance
+freezegun==1.5.1         # Mock de time.time() y time.monotonic() en tests de rate limiter
 
 # --- Quality Gates ---
 mypy==1.11.2             # Type checking estricto
