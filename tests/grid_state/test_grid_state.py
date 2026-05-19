@@ -340,3 +340,30 @@ class TestTransactionRollback:
         assert state.get_order(9001) is not None
         assert state.get_order(9002) is not None
         assert state.get_order(9003) is not None
+
+
+# --------------------------------------------------------------------------- #
+# bulk_update_order_statuses — atomicidad real
+# --------------------------------------------------------------------------- #
+class TestBulkUpdateOrderStatuses:
+    def test_empty_dict_is_noop(self, state: GridState) -> None:
+        state.bulk_update_order_statuses({})  # no debe lanzar ni abrir sesión
+
+    def test_updates_all_statuses_in_single_transaction(self, state: GridState) -> None:
+        state.save_order(_make_order(order_id=10001, status="NEW"))
+        state.save_order(_make_order(order_id=10002, status="NEW"))
+        state.bulk_update_order_statuses({10001: "FILLED", 10002: "CANCELED"})
+        assert state.get_order(10001).status == "FILLED"  # type: ignore[union-attr]
+        assert state.get_order(10002).status == "CANCELED"  # type: ignore[union-attr]
+
+    def test_raises_if_order_not_found(self, state: GridState) -> None:
+        with pytest.raises(OrderNotFoundError):
+            state.bulk_update_order_statuses({99999: "FILLED"})
+
+    def test_rollback_on_unknown_order_leaves_db_unchanged(self, state: GridState) -> None:
+        state.save_order(_make_order(order_id=10003, status="NEW"))
+        with pytest.raises(OrderNotFoundError):
+            # 10003 existe, 99998 no — el fallo debe revertir TODO
+            state.bulk_update_order_statuses({10003: "FILLED", 99998: "CANCELED"})
+        # 10003 debe seguir en NEW (rollback)
+        assert state.get_order(10003).status == "NEW"  # type: ignore[union-attr]

@@ -133,6 +133,18 @@
 
 ---
 
+## 🔧 Backlog de Deuda Técnica — M3
+
+Registrado por auditoría de Marta (19 mayo 2026). Ítems aprobados para diferir, NO olvidar.
+
+| # | Ítem | Archivo | Target | Riesgo si se ignora |
+|---|------|---------|--------|---------------------|
+| DT-M3-01 | `side String(4)` → ya corregido a `String(10)` | `schema.py` | Resuelto en M3 | Truncamiento silencioso si Binance añade variantes |
+| DT-M3-02 | `engine.dispose()` en teardown del orquestador | `database.py` (TODO comentado), `orchestrator.py` | M7 | ResourceWarning → corrupción WAL si proceso muere con handles abiertos |
+| DT-M3-03 | Tests de concurrencia para WAL mode | `tests/grid_state/test_database.py` | M7 | WAL se vende como concurrent-reads pero nunca se verifica en tests |
+
+---
+
 ## ⏸️ Bloqueantes Actuales
 
 **NINGUNO.** El proyecto está en flow. Edison tiene luz verde para ejecutar Tarea #2 tan pronto Marta dé el OK (esperado en esta sesión).

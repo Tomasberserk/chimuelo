@@ -36,6 +36,11 @@ def build_engine(db_url: str = "sqlite:///chimuelo.db") -> Engine:
 
     Returns:
         Engine listo para usar con Session().
+
+    Note:
+        # TODO(M7): El orquestador debe llamar engine.dispose() en el teardown
+        # para liberar handles de conexión antes de que el proceso termine.
+        # Sin esto, Python 3.13 emite ResourceWarning en SQLite file-based.
     """
     engine = create_engine(db_url, echo=False)
     _register_sqlite_pragmas(engine, db_url=db_url)

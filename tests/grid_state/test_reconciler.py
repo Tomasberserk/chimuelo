@@ -92,9 +92,9 @@ class TestReconcileNoDivergences:
         client = _mock_client(open_orders=[{"orderId": 1001, "symbol": "SOLUSDT", "status": "NEW"}])
         reconciler = Reconciler(grid_state=state, api_client=client)
         result = reconciler.reconcile("SOLUSDT")
-        assert result.filled_ids == []
-        assert result.canceled_ids == []
-        assert result.unexpected_ids == []
+        assert result.filled_ids == ()
+        assert result.canceled_ids == ()
+        assert result.unexpected_ids == ()
 
     def test_no_local_orders_no_binance_orders(self, state: GridState) -> None:
         client = _mock_client(open_orders=[])
@@ -205,21 +205,26 @@ class TestReconciliationResultHasDivergences:
         assert r.has_divergences is False
 
     def test_filled_ids_triggers_divergences(self) -> None:
-        r = ReconciliationResult(symbol="SOLUSDT", filled_ids=[1])
+        r = ReconciliationResult(symbol="SOLUSDT", filled_ids=(1,))
         assert r.has_divergences is True
 
     def test_canceled_ids_triggers_divergences(self) -> None:
-        r = ReconciliationResult(symbol="SOLUSDT", canceled_ids=[2])
+        r = ReconciliationResult(symbol="SOLUSDT", canceled_ids=(2,))
         assert r.has_divergences is True
 
     def test_unexpected_ids_triggers_divergences(self) -> None:
-        r = ReconciliationResult(symbol="SOLUSDT", unexpected_ids=[3])
+        r = ReconciliationResult(symbol="SOLUSDT", unexpected_ids=(3,))
         assert r.has_divergences is True
 
     def test_result_is_frozen(self) -> None:
         r = ReconciliationResult(symbol="SOLUSDT")
         with pytest.raises(dataclasses.FrozenInstanceError):
             r.symbol = "BTCUSDT"  # type: ignore[misc]
+
+    def test_ids_are_truly_immutable(self) -> None:
+        r = ReconciliationResult(symbol="SOLUSDT", filled_ids=(1,))
+        with pytest.raises(AttributeError):
+            r.filled_ids.append(999)  # type: ignore[attr-defined]
 
 
 # --------------------------------------------------------------------------- #
@@ -262,6 +267,32 @@ class TestReconcilerAPIErrors:
         reconciler = Reconciler(grid_state=state, api_client=client)
         with pytest.raises(ReconciliationError):
             reconciler.reconcile("SOLUSDT")
+
+    def test_db_not_modified_if_second_api_call_fails(self, state: GridState) -> None:
+        state.save_order(_make_order(order_id=6001, status="NEW"))
+        state.save_order(_make_order(order_id=6002, status="NEW"))
+
+        call_count = 0
+
+        def _get(endpoint: str, params: dict[str, object] | None = None, weight: int = 1) -> object:
+            nonlocal call_count
+            if endpoint == "/api/v3/openOrders":
+                return []  # ambas órdenes desaparecen de Binance
+            call_count += 1
+            if call_count == 1:
+                return {"status": "FILLED"}
+            raise BinanceAPIError(status_code=500, binance_code=-1000, msg="Internal error")
+
+        client = MagicMock()
+        client.get.side_effect = _get
+        reconciler = Reconciler(grid_state=state, api_client=client)
+
+        with pytest.raises(ReconciliationError):
+            reconciler.reconcile("SOLUSDT")
+
+        # Ninguna orden debe haber sido modificada (atomicidad de escritura)
+        assert state.get_order(6001).status == "NEW"  # type: ignore[union-attr]
+        assert state.get_order(6002).status == "NEW"  # type: ignore[union-attr]
 
 
 # --------------------------------------------------------------------------- #

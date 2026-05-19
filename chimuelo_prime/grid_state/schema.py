@@ -15,11 +15,27 @@ Convenciones:
 
 from __future__ import annotations
 
+import enum
 from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+
+class OrderStatus(str, enum.Enum):
+    """Ciclo de vida de una orden en Binance.
+
+    Single Source of Truth para estados de orden del proyecto.
+    Importar desde aquí en M4, M5, M7 — nunca redefinir.
+    """
+
+    NEW = "NEW"
+    PARTIALLY_FILLED = "PARTIALLY_FILLED"
+    FILLED = "FILLED"
+    CANCELED = "CANCELED"
+    EXPIRED = "EXPIRED"
+    REJECTED = "REJECTED"
 
 
 class Base(DeclarativeBase):
@@ -37,7 +53,7 @@ class Order(Base):
 
     order_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
     symbol: Mapped[str] = mapped_column(String(20), nullable=False)
-    side: Mapped[str] = mapped_column(String(4), nullable=False)
+    side: Mapped[str] = mapped_column(String(10), nullable=False)
     price: Mapped[Decimal] = mapped_column(Numeric(precision=20, scale=8), nullable=False)
     qty: Mapped[Decimal] = mapped_column(Numeric(precision=20, scale=8), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False)

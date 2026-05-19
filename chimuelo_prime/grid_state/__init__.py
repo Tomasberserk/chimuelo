@@ -29,7 +29,7 @@ from chimuelo_prime.grid_state.exceptions import (
 )
 from chimuelo_prime.grid_state.grid_state import GridState
 from chimuelo_prime.grid_state.reconciler import Reconciler, ReconciliationResult
-from chimuelo_prime.grid_state.schema import GridLevel, Order, Snapshot
+from chimuelo_prime.grid_state.schema import GridLevel, Order, OrderStatus, Snapshot
 
 __all__ = [
     # Servicios
@@ -41,6 +41,7 @@ __all__ = [
     "Order",
     "GridLevel",
     "Snapshot",
+    "OrderStatus",
     # Excepciones
     "GridStateError",
     "DatabaseError",

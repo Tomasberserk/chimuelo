@@ -96,6 +96,32 @@ class GridState:
             session.commit()
         self._log.info("grid_state.order_status_updated", order_id=order_id, status=status)
 
+    def bulk_update_order_statuses(self, updates: dict[int, str]) -> None:
+        """Actualiza el status de múltiples órdenes en una sola transacción atómica.
+
+        Todos los cambios se aplican juntos o ninguno. Si falla cualquier
+        actualización (orden no encontrada), se hace rollback completo y
+        la DB queda en el estado previo a la llamada.
+
+        Args:
+            updates: {order_id: new_status}. Vacío es noop sin abrir sesión.
+
+        Raises:
+            OrderNotFoundError: si algún order_id no existe en la DB.
+        """
+        if not updates:
+            return
+        with Session(self._engine) as session:
+            for order_id, status in updates.items():
+                order = session.get(Order, order_id)
+                if order is None:
+                    raise OrderNotFoundError(f"Orden {order_id} no encontrada en DB.")
+                order.status = status
+                order.updated_at = _utcnow()
+            session.commit()
+        for order_id, status in updates.items():
+            self._log.info("grid_state.order_status_updated", order_id=order_id, status=status)
+
     # ------------------------------------------------------------------ #
     # Niveles de grid
     # ------------------------------------------------------------------ #

@@ -29,10 +29,7 @@ from chimuelo_prime.api_client.client import BinanceAuthenticatedClient
 from chimuelo_prime.exchange_config.logger import get_logger
 from chimuelo_prime.grid_state.exceptions import ReconciliationError
 from chimuelo_prime.grid_state.grid_state import GridState
-
-# Weights de endpoints usados (Binance Spot, 2024)
-_WEIGHT_OPEN_ORDERS = 3  # GET /api/v3/openOrders con symbol
-_WEIGHT_QUERY_ORDER = 2  # GET /api/v3/order
+from chimuelo_prime.shared.constants import WEIGHT_OPEN_ORDERS, WEIGHT_QUERY_ORDER
 
 
 @dataclass(frozen=True)
@@ -47,9 +44,9 @@ class ReconciliationResult:
     """
 
     symbol: str
-    filled_ids: list[int] = field(default_factory=list)
-    canceled_ids: list[int] = field(default_factory=list)
-    unexpected_ids: list[int] = field(default_factory=list)
+    filled_ids: tuple[int, ...] = field(default_factory=tuple)
+    canceled_ids: tuple[int, ...] = field(default_factory=tuple)
+    unexpected_ids: tuple[int, ...] = field(default_factory=tuple)
 
     @property
     def has_divergences(self) -> bool:
@@ -94,6 +91,10 @@ class Reconciler:
         binance_open = self._fetch_open_orders(symbol)
         binance_ids = {int(o["orderId"]) for o in binance_open}
 
+        # Fase 1: recoger todos los estados de Binance sin escribir en DB.
+        # Si cualquier API call falla aquí, la DB queda intacta y M7 puede
+        # reintentar la reconciliación completa desde un estado consistente.
+        status_updates: dict[int, str] = {}
         filled_ids: list[int] = []
         canceled_ids: list[int] = []
 
@@ -101,17 +102,20 @@ class Reconciler:
         for order_id in missing_ids:
             actual_status = self._fetch_order_status(symbol, order_id)
             if actual_status in ("FILLED", "PARTIALLY_FILLED"):
-                self._grid_state.update_order_status(order_id, "FILLED")
+                status_updates[order_id] = "FILLED"
                 filled_ids.append(order_id)
                 self._log.info("reconciler.order_filled", order_id=order_id)
             else:
-                self._grid_state.update_order_status(order_id, actual_status)
+                status_updates[order_id] = actual_status
                 canceled_ids.append(order_id)
                 self._log.info(
                     "reconciler.order_closed",
                     order_id=order_id,
                     status=actual_status,
                 )
+
+        # Fase 2: escritura atómica — todas las actualizaciones o ninguna.
+        self._grid_state.bulk_update_order_statuses(status_updates)
 
         unexpected_ids = list(binance_ids - local_ids)
         if unexpected_ids:
@@ -124,9 +128,9 @@ class Reconciler:
 
         result = ReconciliationResult(
             symbol=symbol,
-            filled_ids=filled_ids,
-            canceled_ids=canceled_ids,
-            unexpected_ids=unexpected_ids,
+            filled_ids=tuple(filled_ids),
+            canceled_ids=tuple(canceled_ids),
+            unexpected_ids=tuple(unexpected_ids),
         )
         self._log.info(
             "reconciler.done",
@@ -143,7 +147,7 @@ class Reconciler:
             result = self._api_client.get(
                 "/api/v3/openOrders",
                 params={"symbol": symbol},
-                weight=_WEIGHT_OPEN_ORDERS,
+                weight=WEIGHT_OPEN_ORDERS,
             )
         except Exception as exc:
             raise ReconciliationError(
@@ -161,7 +165,7 @@ class Reconciler:
             response = self._api_client.get(
                 "/api/v3/order",
                 params={"symbol": symbol, "orderId": order_id},
-                weight=_WEIGHT_QUERY_ORDER,
+                weight=WEIGHT_QUERY_ORDER,
             )
         except Exception as exc:
             raise ReconciliationError(
