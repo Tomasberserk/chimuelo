@@ -1,5 +1,5 @@
 # ============================================================
-# Chimuelo Prime - Module 1 Dependencies
+# Chimuelo Prime - Dependencies (M1 + M2 + M3)
 # Versiones fijadas (pinning) para reproducibilidad del entorno.
 # ============================================================
 
@@ -8,11 +8,13 @@ pydantic==2.9.2          # Validación de modelos de dominio (Decimal-aware)
 structlog==24.4.0        # Logging estructurado JSON
 PyYAML==6.0.2            # Carga de configuración externalizada
 requests==2.32.3         # HTTP client para endpoints públicos de Binance
+sqlalchemy==2.0.36       # ORM + Core para persistencia SQLite (M3)
 
 # --- Testing ---
 pytest==8.3.3            # Framework de tests
 pytest-cov==5.0.0        # Cobertura de tests
 responses==0.25.3        # Mock de respuestas HTTP de la API de Binance
+freezegun==1.5.1         # Mock de time.time() y time.monotonic() en tests de rate limiter
 
 # --- Quality Gates ---
 mypy==1.11.2             # Type checking estricto

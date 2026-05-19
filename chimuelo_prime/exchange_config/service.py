@@ -99,9 +99,7 @@ class ExchangeConfigService:
             "Verifica que el símbolo esté habilitado en Binance."
         )
 
-    def _index_filters(
-        self, symbol_data: dict[str, Any], symbol: str
-    ) -> dict[str, dict[str, Any]]:
+    def _index_filters(self, symbol_data: dict[str, Any], symbol: str) -> dict[str, dict[str, Any]]:
         """Convierte la lista de filtros en un dict indexado por `filterType`.
 
         Valida que todos los tipos requeridos estén presentes.

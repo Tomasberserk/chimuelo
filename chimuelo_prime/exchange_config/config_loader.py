@@ -21,6 +21,7 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
+from chimuelo_prime.api_client.models import APIClientConfig
 from chimuelo_prime.exchange_config.exceptions import (
     ConfigFileNotFoundError,
     ConfigValidationError,
@@ -36,15 +37,9 @@ class EnvironmentConfig(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    base_url: str = Field(
-        ..., min_length=1, description="URL base del API REST de Binance"
-    )
-    ws_base_url: str = Field(
-        ..., min_length=1, description="URL base del WebSocket de Binance"
-    )
-    http_timeout_seconds: int = Field(
-        ..., gt=0, le=120, description="Timeout HTTP en segundos"
-    )
+    base_url: str = Field(..., min_length=1, description="URL base del API REST de Binance")
+    ws_base_url: str = Field(..., min_length=1, description="URL base del WebSocket de Binance")
+    http_timeout_seconds: int = Field(..., gt=0, le=120, description="Timeout HTTP en segundos")
 
 
 class LoggingConfig(BaseModel):
@@ -84,6 +79,10 @@ class ChimueloConfig(BaseModel):
     logging: LoggingConfig = Field(
         default_factory=LoggingConfig,
         description="Configuración del sistema de logging",
+    )
+    api_client: APIClientConfig = Field(
+        default_factory=APIClientConfig,
+        description="Configuración del cliente autenticado de Binance (M2)",
     )
 
     @model_validator(mode="after")
@@ -130,9 +129,7 @@ def load_config(config_path: Path) -> ChimueloConfig:
     try:
         raw = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     except yaml.YAMLError as exc:
-        raise ConfigValidationError(
-            f"Error al parsear YAML en '{config_path}': {exc}"
-        ) from exc
+        raise ConfigValidationError(f"Error al parsear YAML en '{config_path}': {exc}") from exc
 
     if not isinstance(raw, dict):
         raise ConfigValidationError(
@@ -143,9 +140,7 @@ def load_config(config_path: Path) -> ChimueloConfig:
     try:
         config = ChimueloConfig.model_validate(raw)
     except ValidationError as exc:
-        raise ConfigValidationError(
-            f"Schema inválido en '{config_path}':\n{exc}"
-        ) from exc
+        raise ConfigValidationError(f"Schema inválido en '{config_path}':\n{exc}") from exc
 
     log.info(  # pragma: no cover
         "config.loaded",

@@ -151,9 +151,7 @@ class TestFilterParsingErrors:
 
         payload = copy.deepcopy(exchange_info_payload)
         payload["symbols"][0]["filters"] = [
-            f
-            for f in payload["symbols"][0]["filters"]
-            if f.get("filterType") != filter_type
+            f for f in payload["symbols"][0]["filters"] if f.get("filterType") != filter_type
         ]
         return payload
 

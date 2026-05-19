@@ -155,13 +155,9 @@ class SymbolFilters(BaseModel):
             * qty no es múltiplo exacto de step_size
         """
         if qty < self.min_qty:
-            raise FilterValidationError(
-                f"qty={qty} < min_qty={self.min_qty} ({self.symbol})"
-            )
+            raise FilterValidationError(f"qty={qty} < min_qty={self.min_qty} ({self.symbol})")
         if qty > self.max_qty:
-            raise FilterValidationError(
-                f"qty={qty} > max_qty={self.max_qty} ({self.symbol})"
-            )
+            raise FilterValidationError(f"qty={qty} > max_qty={self.max_qty} ({self.symbol})")
         remainder = (qty - self.min_qty) % self.step_size
         if remainder != Decimal("0"):
             raise FilterValidationError(
@@ -210,9 +206,7 @@ class SymbolFilters(BaseModel):
         provocar que el capital asignado al nivel sea insuficiente para
         cubrir la orden, generando rechazo por insufficient balance.
         """
-        steps = ((qty - self.min_qty) / self.step_size).quantize(
-            Decimal("1"), rounding=ROUND_DOWN
-        )
+        steps = ((qty - self.min_qty) / self.step_size).quantize(Decimal("1"), rounding=ROUND_DOWN)
         return steps * self.step_size + self.min_qty
 
 
@@ -284,8 +278,7 @@ class SymbolConfig(BaseModel):
         """
         if self.lower_bound >= self.upper_bound:
             raise ValueError(
-                f"lower_bound={self.lower_bound} debe ser < "
-                f"upper_bound={self.upper_bound}"
+                f"lower_bound={self.lower_bound} debe ser < upper_bound={self.upper_bound}"
             )
         # El símbolo del filtro debe coincidir con la intención del config.
         # No tenemos un campo `symbol` separado a propósito: el símbolo vive

@@ -26,9 +26,7 @@ import structlog.processors
 import structlog.stdlib
 
 
-def configure_logging(
-    level: str = "info", fmt: str = "json"
-) -> None:  # pragma: no cover
+def configure_logging(level: str = "info", fmt: str = "json") -> None:  # pragma: no cover
     """Configura structlog y el logging estándar de Python.
 
     Args:
