@@ -5,3 +5,4 @@ WEIGHT_PLACE_ORDER = 1    # POST /api/v3/order
 WEIGHT_CANCEL_ORDER = 1   # DELETE /api/v3/order
 WEIGHT_QUERY_ORDER = 2    # GET /api/v3/order
 WEIGHT_OPEN_ORDERS = 3    # GET /api/v3/openOrders (con symbol)
+WEIGHT_TICKER_PRICE = 2   # GET /api/v3/ticker/price (con symbol)
