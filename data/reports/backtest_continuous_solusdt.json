@@ -1,0 +1,2903 @@
+{
+  "symbol": "SOLUSDT",
+  "interval": "1h",
+  "start_time": "2026-05-06T16:00:00",
+  "end_time": "2026-05-20T14:00:00",
+  "initial_cash": "200.00",
+  "final_cash": "147.8049111300000000000",
+  "initial_equity": "200.00",
+  "final_equity": "207.2688411300000000000",
+  "total_return_pct": "3.63442056500000000",
+  "max_drawdown_pct": "0.6303204432094860061353347259",
+  "profit_factor": "11.59628963855421686746987952",
+  "sortino_ratio": "5.972558517359825150978329057",
+  "calmar_ratio": "6.301155336803417999642308924",
+  "win_rate_pct": "100",
+  "total_trades": 23,
+  "completed_trades": 20,
+  "recreate_buy_on_sell_fill": true,
+  "timeseries": [
+    {
+      "timestamp": "2026-05-06T16:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-06T17:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-06T18:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-06T19:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-06T20:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-06T21:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-06T22:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-06T23:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T00:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T01:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T02:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T03:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T04:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T05:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T06:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T07:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T08:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T09:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T10:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T11:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T12:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T13:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T14:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T15:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T16:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T17:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T18:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T19:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T20:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T21:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T22:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-07T23:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T00:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T01:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T02:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T03:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T04:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T05:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T06:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T07:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T08:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T09:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T10:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T11:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T12:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T13:00:00",
+      "cash": "200.00",
+      "inventory": "0",
+      "inventory_value": "0E-8",
+      "equity": "200.00000000",
+      "drawdown_pct": "0.000000"
+    },
+    {
+      "timestamp": "2026-05-08T14:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-08T15:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-08T16:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-08T17:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-08T18:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-08T19:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-08T20:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-08T21:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-08T22:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-08T23:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T00:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T01:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T02:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T03:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T04:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T05:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T06:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T07:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T08:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T09:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T10:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T11:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T12:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T13:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T14:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T15:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T16:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T17:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T18:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T19:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T20:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T21:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T22:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-09T23:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T00:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T01:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T02:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T03:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T04:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T05:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T06:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T07:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T08:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T09:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T10:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T11:00:00",
+      "cash": "201.9183290400000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "201.9183290400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T12:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T13:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T14:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T15:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T16:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T17:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T18:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T19:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T20:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T21:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T22:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-10T23:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T00:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T01:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T02:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T03:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T04:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T05:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T06:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T07:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T08:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T09:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T10:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T11:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T12:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T13:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T14:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T15:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T16:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T17:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T18:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T19:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T20:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T21:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T22:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-11T23:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T00:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T01:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T02:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T03:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T04:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T05:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T06:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T07:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T08:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T09:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T10:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T11:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T12:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T13:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T14:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T15:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T16:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T17:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T18:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T19:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T20:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T21:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T22:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-12T23:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T00:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T01:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T02:00:00",
+      "cash": "203.8366580800000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "203.8366580800000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T03:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T04:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T05:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T06:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T07:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T08:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T09:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T10:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T11:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T12:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T13:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T14:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T15:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T16:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T17:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T18:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T19:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T20:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T21:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T22:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-13T23:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T00:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T01:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T02:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T03:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T04:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T05:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T06:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T07:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T08:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T09:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T10:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T11:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T12:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T13:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T14:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T15:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T16:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T17:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T18:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T19:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T20:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T21:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T22:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-14T23:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T00:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T01:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T02:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T03:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T04:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T05:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T06:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T07:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T08:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T09:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T10:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T11:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T12:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T13:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T14:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T15:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T16:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T17:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T18:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T19:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T20:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T21:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T22:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-15T23:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-16T00:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-16T01:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-16T02:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-16T03:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-16T04:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-16T05:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-16T06:00:00",
+      "cash": "205.7549871200000000000",
+      "inventory": "0E-8",
+      "inventory_value": "0E-16",
+      "equity": "205.7549871200000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-16T07:00:00",
+      "cash": "185.8055776400000000000",
+      "inventory": "0.22800000",
+      "inventory_value": "19.9431600000000000",
+      "equity": "205.7487376400000000000",
+      "drawdown_pct": "0.003037340716487805537473866116"
+    },
+    {
+      "timestamp": "2026-05-16T08:00:00",
+      "cash": "185.8055776400000000000",
+      "inventory": "0.22800000",
+      "inventory_value": "19.9545600000000000",
+      "equity": "205.7601376400000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-16T09:00:00",
+      "cash": "185.8055776400000000000",
+      "inventory": "0.22800000",
+      "inventory_value": "19.6239600000000000",
+      "equity": "205.4295376400000000000",
+      "drawdown_pct": "0.1606725208253996578148867533"
+    },
+    {
+      "timestamp": "2026-05-16T10:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.6413900000000000",
+      "equity": "205.4752258500000000000",
+      "drawdown_pct": "0.1384679235093069993146608395"
+    },
+    {
+      "timestamp": "2026-05-16T11:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.7013200000000000",
+      "equity": "205.5351558500000000000",
+      "drawdown_pct": "0.1093417765853317981868745021"
+    },
+    {
+      "timestamp": "2026-05-16T12:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.7704700000000000",
+      "equity": "205.6043058500000000000",
+      "drawdown_pct": "0.07573468398074502765481334366"
+    },
+    {
+      "timestamp": "2026-05-16T13:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.7520300000000000",
+      "equity": "205.5858658500000000000",
+      "drawdown_pct": "0.08469657534196816646336298592"
+    },
+    {
+      "timestamp": "2026-05-16T14:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.8350100000000000",
+      "equity": "205.6688458500000000000",
+      "drawdown_pct": "0.04436806421646404182488959575"
+    },
+    {
+      "timestamp": "2026-05-16T15:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.8765000000000000",
+      "equity": "205.7103358500000000000",
+      "drawdown_pct": "0.02420380865371197950565290067"
+    },
+    {
+      "timestamp": "2026-05-16T16:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.9364300000000000",
+      "equity": "205.7702658500000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-16T17:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "40.0101900000000000",
+      "equity": "205.8440258500000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-16T18:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "40.0240200000000000",
+      "equity": "205.8578558500000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-16T19:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.9548700000000000",
+      "equity": "205.7887058500000000000",
+      "drawdown_pct": "0.03359113972817569303367442997"
+    },
+    {
+      "timestamp": "2026-05-16T20:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.9733100000000000",
+      "equity": "205.8071458500000000000",
+      "drawdown_pct": "0.02463350246732884155802791531"
+    },
+    {
+      "timestamp": "2026-05-16T21:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.9133800000000000",
+      "equity": "205.7472158500000000000",
+      "drawdown_pct": "0.05374582356508110885387908795"
+    },
+    {
+      "timestamp": "2026-05-16T22:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.8949400000000000",
+      "equity": "205.7287758500000000000",
+      "drawdown_pct": "0.06270346082592796032952560261"
+    },
+    {
+      "timestamp": "2026-05-16T23:00:00",
+      "cash": "165.8338358500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.8995500000000000",
+      "equity": "205.7333858500000000000",
+      "drawdown_pct": "0.06046405151071624746061397394"
+    },
+    {
+      "timestamp": "2026-05-17T00:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.6828800000000000",
+      "equity": "206.6950480100000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-17T01:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.5399700000000000",
+      "equity": "206.5521380100000000000",
+      "drawdown_pct": "0.06914050499801328065692153009"
+    },
+    {
+      "timestamp": "2026-05-17T02:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.6413900000000000",
+      "equity": "206.6535580100000000000",
+      "drawdown_pct": "0.02007304983813288793265463777"
+    },
+    {
+      "timestamp": "2026-05-17T03:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.8857200000000000",
+      "equity": "206.8978880100000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-17T04:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "40.0424600000000000",
+      "equity": "207.0546280100000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-17T05:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "40.0701200000000000",
+      "equity": "207.0822880100000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-17T06:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "40.0332400000000000",
+      "equity": "207.0454080100000000000",
+      "drawdown_pct": "0.01780934543190824000206583385"
+    },
+    {
+      "timestamp": "2026-05-17T07:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "40.0931700000000000",
+      "equity": "207.1053380100000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-17T08:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "40.0148000000000000",
+      "equity": "207.0269680100000000000",
+      "drawdown_pct": "0.03784064706058707926395469926"
+    },
+    {
+      "timestamp": "2026-05-17T09:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "40.0562900000000000",
+      "equity": "207.0684580100000000000",
+      "drawdown_pct": "0.01780736332262921377127279965"
+    },
+    {
+      "timestamp": "2026-05-17T10:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "40.1023900000000000",
+      "equity": "207.1145580100000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-17T11:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "40.0562900000000000",
+      "equity": "207.0684580100000000000",
+      "drawdown_pct": "0.02225821325306074268072161578"
+    },
+    {
+      "timestamp": "2026-05-17T12:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.9963600000000000",
+      "equity": "207.0085280100000000000",
+      "drawdown_pct": "0.05119389048203970816565971629"
+    },
+    {
+      "timestamp": "2026-05-17T13:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.8304000000000000",
+      "equity": "206.8425680100000000000",
+      "drawdown_pct": "0.1313234581930583818162575331"
+    },
+    {
+      "timestamp": "2026-05-17T14:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.7889100000000000",
+      "equity": "206.8010780100000000000",
+      "drawdown_pct": "0.1513558501208130502289069873"
+    },
+    {
+      "timestamp": "2026-05-17T15:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.8534500000000000",
+      "equity": "206.8656180100000000000",
+      "drawdown_pct": "0.1201943515665280104758967252"
+    },
+    {
+      "timestamp": "2026-05-17T16:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.7843000000000000",
+      "equity": "206.7964680100000000000",
+      "drawdown_pct": "0.1535816714461191244969791489"
+    },
+    {
+      "timestamp": "2026-05-17T17:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.7566400000000000",
+      "equity": "206.7688080100000000000",
+      "drawdown_pct": "0.1669365993979555701054121183"
+    },
+    {
+      "timestamp": "2026-05-17T18:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.8350100000000000",
+      "equity": "206.8471780100000000000",
+      "drawdown_pct": "0.1290976368677523075481853715"
+    },
+    {
+      "timestamp": "2026-05-17T19:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "40.0009700000000000",
+      "equity": "207.0131380100000000000",
+      "drawdown_pct": "0.04896806915673363389758755471"
+    },
+    {
+      "timestamp": "2026-05-17T20:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.9640900000000000",
+      "equity": "206.9762580100000000000",
+      "drawdown_pct": "0.06677463975918222804216484734"
+    },
+    {
+      "timestamp": "2026-05-17T21:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "40.0793400000000000",
+      "equity": "207.0915080100000000000",
+      "drawdown_pct": "0.01112910662653037134036080789"
+    },
+    {
+      "timestamp": "2026-05-17T22:00:00",
+      "cash": "167.0121680100000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.7474200000000000",
+      "equity": "206.7595880100000000000",
+      "drawdown_pct": "0.1713882420485677186415564415"
+    },
+    {
+      "timestamp": "2026-05-17T23:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.2818100000000000",
+      "equity": "206.6772865300000000000",
+      "drawdown_pct": "0.2111254197683619410390088590"
+    },
+    {
+      "timestamp": "2026-05-18T00:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.3279100000000000",
+      "equity": "206.7233865300000000000",
+      "drawdown_pct": "0.1888672065153011983582872432"
+    },
+    {
+      "timestamp": "2026-05-18T01:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.1803900000000000",
+      "equity": "206.5758665300000000000",
+      "drawdown_pct": "0.2600934889250955749365964137"
+    },
+    {
+      "timestamp": "2026-05-18T02:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.1204600000000000",
+      "equity": "206.5159365300000000000",
+      "drawdown_pct": "0.2890291661540745404215345142"
+    },
+    {
+      "timestamp": "2026-05-18T03:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.1158500000000000",
+      "equity": "206.5113265300000000000",
+      "drawdown_pct": "0.2912549874793806146896066758"
+    },
+    {
+      "timestamp": "2026-05-18T04:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.3140800000000000",
+      "equity": "206.7095565300000000000",
+      "drawdown_pct": "0.1955446704912194211625037280"
+    },
+    {
+      "timestamp": "2026-05-18T05:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.0881900000000000",
+      "equity": "206.4836665300000000000",
+      "drawdown_pct": "0.3046099154312170602980396453"
+    },
+    {
+      "timestamp": "2026-05-18T06:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.0559200000000000",
+      "equity": "206.4513965300000000000",
+      "drawdown_pct": "0.3201906647083595801745447763"
+    },
+    {
+      "timestamp": "2026-05-18T07:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.0743600000000000",
+      "equity": "206.4698365300000000000",
+      "drawdown_pct": "0.3112873794071352831022561300"
+    },
+    {
+      "timestamp": "2026-05-18T08:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.1435100000000000",
+      "equity": "206.5389865300000000000",
+      "drawdown_pct": "0.2779000595275441690811737063"
+    },
+    {
+      "timestamp": "2026-05-18T09:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "38.9498900000000000",
+      "equity": "206.3453665300000000000",
+      "drawdown_pct": "0.3713845551903992883402044926"
+    },
+    {
+      "timestamp": "2026-05-18T10:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "38.8484700000000000",
+      "equity": "206.2439465300000000000",
+      "drawdown_pct": "0.4203526243471329222377920473"
+    },
+    {
+      "timestamp": "2026-05-18T11:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.1665600000000000",
+      "equity": "206.5620365300000000000",
+      "drawdown_pct": "0.2667709529010137977408128984"
+    },
+    {
+      "timestamp": "2026-05-18T12:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.4523800000000000",
+      "equity": "206.8478565300000000000",
+      "drawdown_pct": "0.1287700307320371931203388806"
+    },
+    {
+      "timestamp": "2026-05-18T13:00:00",
+      "cash": "167.3954765300000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.0559200000000000",
+      "equity": "206.4513965300000000000",
+      "drawdown_pct": "0.3201906647083595801745447763"
+    },
+    {
+      "timestamp": "2026-05-18T14:00:00",
+      "cash": "147.4216026100000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.6391100000000000",
+      "equity": "206.0607126100000000000",
+      "drawdown_pct": "0.5088224652702190801445150427"
+    },
+    {
+      "timestamp": "2026-05-18T15:00:00",
+      "cash": "147.4216026100000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.8488100000000000",
+      "equity": "206.2704126100000000000",
+      "drawdown_pct": "0.4075741503208299751521653067"
+    },
+    {
+      "timestamp": "2026-05-18T16:00:00",
+      "cash": "147.4216026100000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.9676400000000000",
+      "equity": "206.3892426100000000000",
+      "drawdown_pct": "0.3502001051828428156565004563"
+    },
+    {
+      "timestamp": "2026-05-18T17:00:00",
+      "cash": "147.4216026100000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.9816200000000000",
+      "equity": "206.4032226100000000000",
+      "drawdown_pct": "0.3434502175195502086570104739"
+    },
+    {
+      "timestamp": "2026-05-18T18:00:00",
+      "cash": "147.4216026100000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.3874700000000000",
+      "equity": "205.8090726100000000000",
+      "drawdown_pct": "0.6303204432094860061353347259"
+    },
+    {
+      "timestamp": "2026-05-18T19:00:00",
+      "cash": "147.4216026100000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.4150000000000000",
+      "equity": "206.8366026100000000000",
+      "drawdown_pct": "0.1342036999574793916728210196"
+    },
+    {
+      "timestamp": "2026-05-18T20:00:00",
+      "cash": "147.4216026100000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.3730600000000000",
+      "equity": "206.7946626100000000000",
+      "drawdown_pct": "0.1544533629473572126712909668"
+    },
+    {
+      "timestamp": "2026-05-18T21:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.4569900000000000",
+      "equity": "207.2357750500000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-18T22:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.3970600000000000",
+      "equity": "207.1758450500000000000",
+      "drawdown_pct": "0.02891875207624775401924504733"
+    },
+    {
+      "timestamp": "2026-05-18T23:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.3555700000000000",
+      "equity": "207.1343550500000000000",
+      "drawdown_pct": "0.04893942659057312218641469549"
+    },
+    {
+      "timestamp": "2026-05-19T00:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.4569900000000000",
+      "equity": "207.2357750500000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-19T01:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.1527300000000000",
+      "equity": "206.9315150500000000000",
+      "drawdown_pct": "0.1468182797717193665592440865"
+    },
+    {
+      "timestamp": "2026-05-19T02:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.1204600000000000",
+      "equity": "206.8992450500000000000",
+      "drawdown_pct": "0.1623899155050835418003760350"
+    },
+    {
+      "timestamp": "2026-05-19T03:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.2218800000000000",
+      "equity": "207.0006650500000000000",
+      "drawdown_pct": "0.1134504889145104196139613395"
+    },
+    {
+      "timestamp": "2026-05-19T04:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.2633700000000000",
+      "equity": "207.0421550500000000000",
+      "drawdown_pct": "0.09342981440018505144679169138"
+    },
+    {
+      "timestamp": "2026-05-19T05:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.2725900000000000",
+      "equity": "207.0513750500000000000",
+      "drawdown_pct": "0.08898077561922385852075399179"
+    },
+    {
+      "timestamp": "2026-05-19T06:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.3048600000000000",
+      "equity": "207.0836450500000000000",
+      "drawdown_pct": "0.07340913988585968327962204323"
+    },
+    {
+      "timestamp": "2026-05-19T07:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.4201100000000000",
+      "equity": "207.1988950500000000000",
+      "drawdown_pct": "0.01779615512384477170415079836"
+    },
+    {
+      "timestamp": "2026-05-19T08:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.3002500000000000",
+      "equity": "207.0790350500000000000",
+      "drawdown_pct": "0.07563365927634027974264089303"
+    },
+    {
+      "timestamp": "2026-05-19T09:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.0789700000000000",
+      "equity": "206.8577550500000000000",
+      "drawdown_pct": "0.1824105900194089099675456832"
+    },
+    {
+      "timestamp": "2026-05-19T10:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.0513100000000000",
+      "equity": "206.8300950500000000000",
+      "drawdown_pct": "0.1957577063622924887456587819"
+    },
+    {
+      "timestamp": "2026-05-19T11:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "38.9314500000000000",
+      "equity": "206.7102350500000000000",
+      "drawdown_pct": "0.2535952105147879967841488766"
+    },
+    {
+      "timestamp": "2026-05-19T12:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.0789700000000000",
+      "equity": "206.8577550500000000000",
+      "drawdown_pct": "0.1824105900194089099675456832"
+    },
+    {
+      "timestamp": "2026-05-19T13:00:00",
+      "cash": "167.7787850500000000000",
+      "inventory": "0.46100000",
+      "inventory_value": "39.1066300000000000",
+      "equity": "206.8854150500000000000",
+      "drawdown_pct": "0.1690634736765253311894325844"
+    },
+    {
+      "timestamp": "2026-05-19T14:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.8138600000000000",
+      "equity": "206.6187711300000000000",
+      "drawdown_pct": "0.2977304086860170719350900992"
+    },
+    {
+      "timestamp": "2026-05-19T15:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.9606500000000000",
+      "equity": "206.7655611300000000000",
+      "drawdown_pct": "0.2268980439726446739293337084"
+    },
+    {
+      "timestamp": "2026-05-19T16:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.3101500000000000",
+      "equity": "207.1150611300000000000",
+      "drawdown_pct": "0.05824955655985325010610420664"
+    },
+    {
+      "timestamp": "2026-05-19T17:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.1983100000000000",
+      "equity": "207.0032211300000000000",
+      "drawdown_pct": "0.1122170725319465057295376472"
+    },
+    {
+      "timestamp": "2026-05-19T18:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.9746300000000000",
+      "equity": "206.7795411300000000000",
+      "drawdown_pct": "0.2201521044761330169764045284"
+    },
+    {
+      "timestamp": "2026-05-19T19:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.9606500000000000",
+      "equity": "206.7655611300000000000",
+      "drawdown_pct": "0.2268980439726446739293337084"
+    },
+    {
+      "timestamp": "2026-05-19T20:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.0794800000000000",
+      "equity": "206.8843911300000000000",
+      "drawdown_pct": "0.1695575582522955898294356778"
+    },
+    {
+      "timestamp": "2026-05-19T21:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.0305500000000000",
+      "equity": "206.8354611300000000000",
+      "drawdown_pct": "0.1931683464900863891646878081"
+    },
+    {
+      "timestamp": "2026-05-19T22:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.7928900000000000",
+      "equity": "206.5978011300000000000",
+      "drawdown_pct": "0.3078493179307845573644838693"
+    },
+    {
+      "timestamp": "2026-05-19T23:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.9117200000000000",
+      "equity": "206.7166311300000000000",
+      "drawdown_pct": "0.2505088322104354732645858387"
+    },
+    {
+      "timestamp": "2026-05-20T00:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.8697800000000000",
+      "equity": "206.6746911300000000000",
+      "drawdown_pct": "0.2707466506999704441233733789"
+    },
+    {
+      "timestamp": "2026-05-20T01:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.9746300000000000",
+      "equity": "206.7795411300000000000",
+      "drawdown_pct": "0.2201521044761330169764045284"
+    },
+    {
+      "timestamp": "2026-05-20T02:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.7020200000000000",
+      "equity": "206.5069311300000000000",
+      "drawdown_pct": "0.3516979246581103275585235398"
+    },
+    {
+      "timestamp": "2026-05-20T03:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.8068700000000000",
+      "equity": "206.6117811300000000000",
+      "drawdown_pct": "0.3011033784342729004115546892"
+    },
+    {
+      "timestamp": "2026-05-20T04:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "58.8767700000000000",
+      "equity": "206.6816811300000000000",
+      "drawdown_pct": "0.2673736809517146156469087889"
+    },
+    {
+      "timestamp": "2026-05-20T05:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.2542300000000000",
+      "equity": "207.0591411300000000000",
+      "drawdown_pct": "0.08523331454589987791782092693"
+    },
+    {
+      "timestamp": "2026-05-20T06:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.4010200000000000",
+      "equity": "207.2059311300000000000",
+      "drawdown_pct": "0.01440094983252747991206453618"
+    },
+    {
+      "timestamp": "2026-05-20T07:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.2472400000000000",
+      "equity": "207.0521511300000000000",
+      "drawdown_pct": "0.08860628429415570639428551697"
+    },
+    {
+      "timestamp": "2026-05-20T08:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.4080100000000000",
+      "equity": "207.2129211300000000000",
+      "drawdown_pct": "0.01102798008427165143559994614"
+    },
+    {
+      "timestamp": "2026-05-20T09:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.3381100000000000",
+      "equity": "207.1430211300000000000",
+      "drawdown_pct": "0.04475767756682993620024584650"
+    },
+    {
+      "timestamp": "2026-05-20T10:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.3870400000000000",
+      "equity": "207.1919511300000000000",
+      "drawdown_pct": "0.02114688932903913686499371625"
+    },
+    {
+      "timestamp": "2026-05-20T11:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.2122900000000000",
+      "equity": "207.0172011300000000000",
+      "drawdown_pct": "0.1054711330354348487766084671"
+    },
+    {
+      "timestamp": "2026-05-20T12:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.4779100000000000",
+      "equity": "207.2828211300000000000",
+      "drawdown_pct": "0"
+    },
+    {
+      "timestamp": "2026-05-20T13:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.1843300000000000",
+      "equity": "206.9892411300000000000",
+      "drawdown_pct": "0.1416325763995066675981997235"
+    },
+    {
+      "timestamp": "2026-05-20T14:00:00",
+      "cash": "147.8049111300000000000",
+      "inventory": "0.69900000",
+      "inventory_value": "59.4639300000000000",
+      "equity": "207.2688411300000000000",
+      "drawdown_pct": "0.006744408399976507980866653501"
+    }
+  ],
+  "trades": [
+    {
+      "level_index": 0,
+      "buy_price": "80.28000000",
+      "sell_price": "82.06000000",
+      "qty": "0.24900000",
+      "buy_time": "2026-05-08T14:00:00",
+      "sell_time": "2026-05-08T14:00:00",
+      "pnl": "0.4027973400000000000",
+      "pnl_pct": "2.217239661185849526656701545"
+    },
+    {
+      "level_index": 1,
+      "buy_price": "82.06000000",
+      "sell_price": "83.84000000",
+      "qty": "0.24300000",
+      "buy_time": "2026-05-08T14:00:00",
+      "sell_time": "2026-05-08T14:00:00",
+      "pnl": "0.3922263000000000000",
+      "pnl_pct": "2.169144528393858152571289301"
+    },
+    {
+      "level_index": 2,
+      "buy_price": "83.84000000",
+      "sell_price": "85.62000000",
+      "qty": "0.23800000",
+      "buy_time": "2026-05-08T14:00:00",
+      "sell_time": "2026-05-08T14:00:00",
+      "pnl": "0.3833085200000000000",
+      "pnl_pct": "2.123091603053435114503816794"
+    },
+    {
+      "level_index": 3,
+      "buy_price": "85.63000000",
+      "sell_price": "87.41000000",
+      "qty": "0.23300000",
+      "buy_time": "2026-05-08T14:00:00",
+      "sell_time": "2026-05-08T14:00:00",
+      "pnl": "0.3744216800000000000",
+      "pnl_pct": "2.078710732220016349410253416"
+    },
+    {
+      "level_index": 4,
+      "buy_price": "87.41000000",
+      "sell_price": "89.19000000",
+      "qty": "0.22800000",
+      "buy_time": "2026-05-08T14:00:00",
+      "sell_time": "2026-05-08T14:00:00",
+      "pnl": "0.3655752000000000000",
+      "pnl_pct": "2.036380276856194943370323762"
+    },
+    {
+      "level_index": 0,
+      "buy_price": "80.28000000",
+      "sell_price": "82.06000000",
+      "qty": "0.24900000",
+      "buy_time": "2026-05-10T12:00:00",
+      "sell_time": "2026-05-10T12:00:00",
+      "pnl": "0.4027973400000000000",
+      "pnl_pct": "2.217239661185849526656701545"
+    },
+    {
+      "level_index": 1,
+      "buy_price": "82.06000000",
+      "sell_price": "83.84000000",
+      "qty": "0.24300000",
+      "buy_time": "2026-05-10T12:00:00",
+      "sell_time": "2026-05-10T12:00:00",
+      "pnl": "0.3922263000000000000",
+      "pnl_pct": "2.169144528393858152571289301"
+    },
+    {
+      "level_index": 2,
+      "buy_price": "83.84000000",
+      "sell_price": "85.62000000",
+      "qty": "0.23800000",
+      "buy_time": "2026-05-10T12:00:00",
+      "sell_time": "2026-05-10T12:00:00",
+      "pnl": "0.3833085200000000000",
+      "pnl_pct": "2.123091603053435114503816794"
+    },
+    {
+      "level_index": 3,
+      "buy_price": "85.63000000",
+      "sell_price": "87.41000000",
+      "qty": "0.23300000",
+      "buy_time": "2026-05-10T12:00:00",
+      "sell_time": "2026-05-10T12:00:00",
+      "pnl": "0.3744216800000000000",
+      "pnl_pct": "2.078710732220016349410253416"
+    },
+    {
+      "level_index": 4,
+      "buy_price": "87.41000000",
+      "sell_price": "89.19000000",
+      "qty": "0.22800000",
+      "buy_time": "2026-05-10T12:00:00",
+      "sell_time": "2026-05-10T12:00:00",
+      "pnl": "0.3655752000000000000",
+      "pnl_pct": "2.036380276856194943370323762"
+    },
+    {
+      "level_index": 0,
+      "buy_price": "80.28000000",
+      "sell_price": "82.06000000",
+      "qty": "0.24900000",
+      "buy_time": "2026-05-13T03:00:00",
+      "sell_time": "2026-05-13T03:00:00",
+      "pnl": "0.4027973400000000000",
+      "pnl_pct": "2.217239661185849526656701545"
+    },
+    {
+      "level_index": 1,
+      "buy_price": "82.06000000",
+      "sell_price": "83.84000000",
+      "qty": "0.24300000",
+      "buy_time": "2026-05-13T03:00:00",
+      "sell_time": "2026-05-13T03:00:00",
+      "pnl": "0.3922263000000000000",
+      "pnl_pct": "2.169144528393858152571289301"
+    },
+    {
+      "level_index": 2,
+      "buy_price": "83.84000000",
+      "sell_price": "85.62000000",
+      "qty": "0.23800000",
+      "buy_time": "2026-05-13T03:00:00",
+      "sell_time": "2026-05-13T03:00:00",
+      "pnl": "0.3833085200000000000",
+      "pnl_pct": "2.123091603053435114503816794"
+    },
+    {
+      "level_index": 3,
+      "buy_price": "85.63000000",
+      "sell_price": "87.41000000",
+      "qty": "0.23300000",
+      "buy_time": "2026-05-13T03:00:00",
+      "sell_time": "2026-05-13T03:00:00",
+      "pnl": "0.3744216800000000000",
+      "pnl_pct": "2.078710732220016349410253416"
+    },
+    {
+      "level_index": 4,
+      "buy_price": "87.41000000",
+      "sell_price": "89.19000000",
+      "qty": "0.22800000",
+      "buy_time": "2026-05-13T03:00:00",
+      "sell_time": "2026-05-13T03:00:00",
+      "pnl": "0.3655752000000000000",
+      "pnl_pct": "2.036380276856194943370323762"
+    },
+    {
+      "level_index": 0,
+      "buy_price": "80.28000000",
+      "sell_price": "82.06000000",
+      "qty": "0.24900000",
+      "buy_time": "2026-05-17T00:00:00",
+      "sell_time": "2026-05-17T00:00:00",
+      "pnl": "0.4027973400000000000",
+      "pnl_pct": "2.217239661185849526656701545"
+    },
+    {
+      "level_index": 1,
+      "buy_price": "82.06000000",
+      "sell_price": "83.84000000",
+      "qty": "0.24300000",
+      "buy_time": "2026-05-17T00:00:00",
+      "sell_time": "2026-05-17T00:00:00",
+      "pnl": "0.3922263000000000000",
+      "pnl_pct": "2.169144528393858152571289301"
+    },
+    {
+      "level_index": 2,
+      "buy_price": "83.84000000",
+      "sell_price": "85.62000000",
+      "qty": "0.23800000",
+      "buy_time": "2026-05-17T00:00:00",
+      "sell_time": "2026-05-17T00:00:00",
+      "pnl": "0.3833085200000000000",
+      "pnl_pct": "2.123091603053435114503816794"
+    },
+    {
+      "level_index": 2,
+      "buy_price": "83.84000000",
+      "sell_price": "85.62000000",
+      "qty": "0.23800000",
+      "buy_time": "2026-05-17T23:00:00",
+      "sell_time": "2026-05-17T23:00:00",
+      "pnl": "0.3833085200000000000",
+      "pnl_pct": "2.123091603053435114503816794"
+    },
+    {
+      "level_index": 2,
+      "buy_price": "83.84000000",
+      "sell_price": "85.62000000",
+      "qty": "0.23800000",
+      "buy_time": "2026-05-18T14:00:00",
+      "sell_time": "2026-05-18T21:00:00",
+      "pnl": "0.3833085200000000000",
+      "pnl_pct": "2.123091603053435114503816794"
+    }
+  ]
+}

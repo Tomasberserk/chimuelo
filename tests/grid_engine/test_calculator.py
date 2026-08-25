@@ -24,7 +24,7 @@ from decimal import Decimal
 import pytest
 
 from chimuelo_prime.exchange_config.models import SymbolConfig, SymbolFilters
-from chimuelo_prime.grid_engine.calculator import GridCalculator, LevelSpec
+from chimuelo_prime.grid_engine.calculator import GridCalculator
 from chimuelo_prime.grid_engine.exceptions import GridCalculationError
 
 
@@ -40,9 +40,7 @@ class TestComputeLevelsStructure:
         levels = GridCalculator.compute_levels(symbol_config)
         assert [lvl.level_index for lvl in levels] == list(range(symbol_config.grid_levels))
 
-    def test_first_level_lower_price_equals_lower_bound(
-        self, symbol_config: SymbolConfig
-    ) -> None:
+    def test_first_level_lower_price_equals_lower_bound(self, symbol_config: SymbolConfig) -> None:
         levels = GridCalculator.compute_levels(symbol_config)
         # lower_price[0] = round_to_tick(lower_bound + 0 * spacing) = lower_bound
         assert levels[0].lower_price == symbol_config.lower_bound
@@ -74,8 +72,7 @@ class TestComputeLevelsStructure:
     ) -> None:
         levels = GridCalculator.compute_levels(symbol_config)
         spacings = [
-            levels[i + 1].lower_price - levels[i].lower_price
-            for i in range(len(levels) - 1)
+            levels[i + 1].lower_price - levels[i].lower_price for i in range(len(levels) - 1)
         ]
         # Todos los spacings deben ser iguales (pueden variar en un tick por redondeo)
         assert max(spacings) - min(spacings) <= symbol_config.filters.tick_size
@@ -135,9 +132,7 @@ class TestComputeLevelsInsufficientCapital:
         with pytest.raises(GridCalculationError):
             GridCalculator.compute_levels(tight_capital_config)
 
-    def test_error_is_not_value_error(
-        self, tight_capital_config: SymbolConfig
-    ) -> None:
+    def test_error_is_not_value_error(self, tight_capital_config: SymbolConfig) -> None:
         # MARTA exige GridCalculationError tipado, no ValueError genérico.
         with pytest.raises(GridCalculationError):
             GridCalculator.compute_levels(tight_capital_config)
@@ -164,7 +159,9 @@ class TestComputeLevelsBelowMinNotional:
             upper_bound=Decimal("140.00"),
             lower_bound=Decimal("100.00"),
             grid_levels=20,
-            capital_per_order=Decimal("0.50"),  # 0.50 / 100 → 0.00 redondeado → min_qty ok pero notional falla
+            capital_per_order=Decimal(
+                "0.50"
+            ),  # 0.50 / 100 → 0.00 redondeado → min_qty ok pero notional falla
         )
         # 0.50 / 100.00 = 0.005 → round_to_step → 0.00 < min_qty → error de qty antes de notional
         # Necesitamos que qty >= min_qty pero notional < min_notional.
@@ -185,9 +182,7 @@ class TestComputeLevelsBelowMinNotional:
 # Caso 5: levels_below_price filtra correctamente
 # ---------------------------------------------------------------------------
 class TestLevelsBelowPrice:
-    def test_filters_levels_strictly_below_current_price(
-        self, symbol_config: SymbolConfig
-    ) -> None:
+    def test_filters_levels_strictly_below_current_price(self, symbol_config: SymbolConfig) -> None:
         levels = GridCalculator.compute_levels(symbol_config)
         current_price = Decimal("120.00")
         below = GridCalculator.levels_below_price(levels, current_price)
@@ -202,31 +197,23 @@ class TestLevelsBelowPrice:
         above_or_equal = [lvl for lvl in levels if lvl.lower_price >= current_price]
         assert not any(lvl in below for lvl in above_or_equal)
 
-    def test_price_below_lower_bound_returns_empty(
-        self, symbol_config: SymbolConfig
-    ) -> None:
+    def test_price_below_lower_bound_returns_empty(self, symbol_config: SymbolConfig) -> None:
         levels = GridCalculator.compute_levels(symbol_config)
         below = GridCalculator.levels_below_price(levels, Decimal("99.00"))
         assert below == []
 
-    def test_price_above_upper_bound_returns_all_levels(
-        self, symbol_config: SymbolConfig
-    ) -> None:
+    def test_price_above_upper_bound_returns_all_levels(self, symbol_config: SymbolConfig) -> None:
         levels = GridCalculator.compute_levels(symbol_config)
         below = GridCalculator.levels_below_price(levels, Decimal("200.00"))
         assert len(below) == len(levels)
 
-    def test_price_at_lower_bound_returns_empty(
-        self, symbol_config: SymbolConfig
-    ) -> None:
+    def test_price_at_lower_bound_returns_empty(self, symbol_config: SymbolConfig) -> None:
         levels = GridCalculator.compute_levels(symbol_config)
         # lower_price[0] == lower_bound → NOT strictly below → vacío
         below = GridCalculator.levels_below_price(levels, symbol_config.lower_bound)
         assert below == []
 
-    def test_result_preserves_ascending_order(
-        self, symbol_config: SymbolConfig
-    ) -> None:
+    def test_result_preserves_ascending_order(self, symbol_config: SymbolConfig) -> None:
         levels = GridCalculator.compute_levels(symbol_config)
         below = GridCalculator.levels_below_price(levels, Decimal("120.00"))
         prices = [lvl.lower_price for lvl in below]
@@ -246,9 +233,7 @@ class TestDecimalPurity:
             assert isinstance(lvl.upper_price, Decimal), (
                 f"Nivel {lvl.level_index}: upper_price es {type(lvl.upper_price)}"
             )
-            assert isinstance(lvl.qty, Decimal), (
-                f"Nivel {lvl.level_index}: qty es {type(lvl.qty)}"
-            )
+            assert isinstance(lvl.qty, Decimal), f"Nivel {lvl.level_index}: qty es {type(lvl.qty)}"
 
     def test_level_index_is_int(self, symbol_config: SymbolConfig) -> None:
         levels = GridCalculator.compute_levels(symbol_config)

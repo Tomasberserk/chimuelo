@@ -17,7 +17,7 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
-from chimuelo_prime.api_client.client import BinanceAuthenticatedClient
+from chimuelo_prime.exchange_config.client import BinancePublicClient
 from chimuelo_prime.exchange_config.logger import get_logger
 from chimuelo_prime.grid_engine.exceptions import PriceFetchError
 from chimuelo_prime.shared.constants import WEIGHT_TICKER_PRICE
@@ -26,11 +26,15 @@ from chimuelo_prime.shared.constants import WEIGHT_TICKER_PRICE
 class PriceFetcher:
     """Obtiene el precio spot actual de un símbolo via GET /api/v3/ticker/price.
 
+    Usa el cliente público (sin firma) porque /api/v3/ticker/price es un
+    endpoint público que rechaza parámetros de autenticación (timestamp,
+    recvWindow, signature) con error -1101.
+
     Args:
-        client: Cliente HTTP autenticado de M2.
+        client: Cliente HTTP público (BinancePublicClient).
     """
 
-    def __init__(self, client: BinanceAuthenticatedClient) -> None:
+    def __init__(self, client: BinancePublicClient) -> None:
         self._client = client
         self._log = get_logger(__name__)
 
@@ -73,9 +77,7 @@ class PriceFetcher:
         try:
             price = Decimal(str(raw))
         except InvalidOperation as exc:
-            raise PriceFetchError(
-                f"No se pudo convertir precio a Decimal: {raw!r}"
-            ) from exc
+            raise PriceFetchError(f"No se pudo convertir precio a Decimal: {raw!r}") from exc
 
         self._log.debug("price_fetcher.price_fetched", symbol=symbol, price=str(price))
         return price

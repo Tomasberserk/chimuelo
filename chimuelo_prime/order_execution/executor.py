@@ -235,9 +235,7 @@ class OrderExecutor:
     ) -> PlacedOrder:
         # Paso 1: validación pre-vuelo (local, sin red)
         try:
-            payload = build_limit_order_payload(
-                self._config, side, price, qty, client_order_id
-            )
+            payload = build_limit_order_payload(self._config, side, price, qty, client_order_id)
         except FilterValidationError as exc:
             self._log.error(
                 "filter_violation",
@@ -353,9 +351,7 @@ class OrderExecutor:
         except BinanceAPIError:
             return None
 
-    def _parse_placed_order(
-        self, response: dict[str, Any], level_id: int
-    ) -> PlacedOrder:
+    def _parse_placed_order(self, response: dict[str, Any], level_id: int) -> PlacedOrder:
         transact_ms = response.get("transactTime") or response.get("time") or 0
         transact_time = _ms_to_datetime(transact_ms) if transact_ms else _utcnow()
         return PlacedOrder(

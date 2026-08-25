@@ -16,7 +16,6 @@ Cubre:
 from __future__ import annotations
 
 from decimal import Decimal
-from unittest.mock import MagicMock, call
 
 import pytest
 
@@ -35,9 +34,7 @@ from tests.order_execution.conftest import make_binance_order_response
 
 
 class TestPlaceLimitBuySuccess:
-    def test_returns_placed_order(
-        self, executor, mock_client, mock_grid_state
-    ) -> None:
+    def test_returns_placed_order(self, executor, mock_client, mock_grid_state) -> None:
         mock_client.post.return_value = make_binance_order_response()
         result = executor.place_limit_buy(Decimal("150.00"), Decimal("0.10"), level_id=1)
         assert isinstance(result, PlacedOrder)
@@ -50,9 +47,7 @@ class TestPlaceLimitBuySuccess:
         executor.place_limit_buy(Decimal("150.00"), Decimal("0.10"), level_id=1)
         mock_grid_state.save_order.assert_called_once()
 
-    def test_m3_update_level_buy_order_called(
-        self, executor, mock_client, mock_grid_state
-    ) -> None:
+    def test_m3_update_level_buy_order_called(self, executor, mock_client, mock_grid_state) -> None:
         mock_client.post.return_value = make_binance_order_response(order_id=12345)
         executor.place_limit_buy(Decimal("150.00"), Decimal("0.10"), level_id=7)
         mock_grid_state.update_level_buy_order.assert_called_once_with(7, 12345)
@@ -60,16 +55,12 @@ class TestPlaceLimitBuySuccess:
     def test_place_sell_calls_update_level_sell_order(
         self, executor, mock_client, mock_grid_state
     ) -> None:
-        mock_client.post.return_value = make_binance_order_response(
-            order_id=99, side="SELL"
-        )
+        mock_client.post.return_value = make_binance_order_response(order_id=99, side="SELL")
         executor.place_limit_sell(Decimal("160.00"), Decimal("0.10"), level_id=3)
         mock_grid_state.update_level_sell_order.assert_called_once_with(3, 99)
         mock_grid_state.update_level_buy_order.assert_not_called()
 
-    def test_decimal_precision_preserved(
-        self, executor, mock_client, mock_grid_state
-    ) -> None:
+    def test_decimal_precision_preserved(self, executor, mock_client, mock_grid_state) -> None:
         # El input es válido; lo que verificamos es que el precio de la respuesta
         # de Binance se parsea con precisión exacta via Decimal(str(...)), sin floats.
         mock_client.post.return_value = make_binance_order_response(price="150.00000001")
@@ -84,9 +75,7 @@ class TestPlaceLimitBuySuccess:
         for key, value in payload.items():
             assert not isinstance(value, float), f"Float encontrado en payload[{key!r}]"
 
-    def test_is_order_true_in_post_call(
-        self, executor, mock_client, mock_grid_state
-    ) -> None:
+    def test_is_order_true_in_post_call(self, executor, mock_client, mock_grid_state) -> None:
         mock_client.post.return_value = make_binance_order_response()
         executor.place_limit_buy(Decimal("150.00"), Decimal("0.10"), level_id=1)
         _, kwargs = mock_client.post.call_args
@@ -99,9 +88,7 @@ class TestPlaceLimitBuyFilterViolations:
             executor.place_limit_buy(Decimal("0.001"), Decimal("0.10"), level_id=1)
         mock_grid_state.save_order.assert_not_called()
 
-    def test_filter_violation_notional_below_min(
-        self, executor, mock_grid_state
-    ) -> None:
+    def test_filter_violation_notional_below_min(self, executor, mock_grid_state) -> None:
         # min_notional=5.00; price=6.00, qty=0.01 → notional=0.06
         with pytest.raises(FilterViolationError):
             executor.place_limit_buy(Decimal("6.00"), Decimal("0.01"), level_id=1)
@@ -109,9 +96,7 @@ class TestPlaceLimitBuyFilterViolations:
 
 
 class TestPlaceLimitBuyBinanceErrors:
-    def test_insufficient_balance(
-        self, executor, mock_client, mock_grid_state
-    ) -> None:
+    def test_insufficient_balance(self, executor, mock_client, mock_grid_state) -> None:
         mock_client.post.side_effect = BinanceAPIError(400, -2021, "Insufficient balance")
         with pytest.raises(InsufficientBalanceError):
             executor.place_limit_buy(Decimal("150.00"), Decimal("0.10"), level_id=1)
@@ -125,9 +110,7 @@ class TestPlaceLimitBuyBinanceErrors:
             executor.place_limit_buy(Decimal("150.00"), Decimal("0.10"), level_id=1)
         mock_grid_state.save_order.assert_not_called()
 
-    def test_duplicate_order_recoverable(
-        self, executor, mock_client, mock_grid_state
-    ) -> None:
+    def test_duplicate_order_recoverable(self, executor, mock_client, mock_grid_state) -> None:
         mock_client.post.side_effect = BinanceAPIError(400, -2010, "Duplicate order")
         mock_client.get.return_value = make_binance_order_response(
             order_id=777, client_order_id="my_cid"

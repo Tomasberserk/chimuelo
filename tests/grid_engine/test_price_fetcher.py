@@ -82,9 +82,7 @@ class TestGetCurrentPriceSuccess:
         _, kwargs = mock_client.get.call_args
         assert kwargs["params"]["symbol"] == "BTCUSDT"
 
-    def test_uses_correct_weight(
-        self, price_fetcher: PriceFetcher, mock_client: MagicMock
-    ) -> None:
+    def test_uses_correct_weight(self, price_fetcher: PriceFetcher, mock_client: MagicMock) -> None:
         mock_client.get.return_value = {"symbol": "SOLUSDT", "price": "100.00"}
         price_fetcher.get_current_price("SOLUSDT")
         _, kwargs = mock_client.get.call_args

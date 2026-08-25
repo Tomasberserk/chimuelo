@@ -93,6 +93,31 @@ class BinancePublicClient:
         )
         return data
 
+    def get(
+        self,
+        endpoint: str,
+        params: dict[str, Any] | None = None,
+        weight: int = 1,
+    ) -> dict[str, Any]:
+        """GET público genérico (sin autenticación).
+
+        Usado por PriceFetcher y cualquier otro componente que necesite
+        consultar endpoints públicos de Binance sin firma HMAC.
+        El parámetro `weight` se acepta por compatibilidad de interfaz pero
+        no se aplica rate-limiting aquí (responsabilidad del cliente autenticado).
+        """
+        url = f"{self._base_url}{endpoint}"
+        try:
+            response = self._session.get(url, params=params or {}, timeout=self._timeout)
+            response.raise_for_status()
+        except requests.exceptions.Timeout as exc:
+            raise ExchangeUnreachableError(f"Timeout ({self._timeout}s) en {url}") from exc
+        except requests.exceptions.ConnectionError as exc:
+            raise ExchangeUnreachableError(f"Error de conexión a {url}: {exc}") from exc
+        except requests.exceptions.HTTPError as exc:
+            raise ExchangeUnreachableError(f"HTTP {response.status_code} en {url}: {exc}") from exc
+        return response.json()  # type: ignore[no-any-return]
+
     def close(self) -> None:
         """Cierra la sesión HTTP y libera recursos de conexión."""
         self._session.close()

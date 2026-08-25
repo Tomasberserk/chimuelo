@@ -89,7 +89,7 @@ def main() -> None:
 
     cases = [
         ("Precio válido   ", Decimal("172.50"), Decimal("0.10"), True),
-        ("Precio < min    ", Decimal("0.00"),   Decimal("0.10"), False),
+        ("Precio < min    ", Decimal("0.00"), Decimal("0.10"), False),
         ("Notional < min  ", Decimal("172.50"), Decimal("0.01"), False),
         ("Tick inválido   ", Decimal("172.513"), Decimal("0.10"), False),
     ]

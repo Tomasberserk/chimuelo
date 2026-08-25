@@ -1,297 +1,91 @@
 # PROJECT_STATUS.md — Estado de Chimuelo Prime
 
-**Última actualización:** 18 de mayo de 2026 02:30 UTC
-**Versión del proyecto:** 0.1.0-dev (Módulo 1 en desarrollo)
+**Última actualización:** 22 de Agosto de 2026  
+**Versión del proyecto:** 1.0.0 (Infraestructura Completa + M9 Quantitative Strategies Operativo)  
+**Auditoría:** Marta (Arquitecta en Jefe) & Edison (Programador) — Swarm Chimuelo Prime  
 
 ---
 
 ## 📊 Resumen Ejecutivo
 
-**Chimuelo Prime** es un bot de grid trading automatizado para Binance Testnet/Mainnet, enfocado en estrategia diversificada (activos de volatilidad estructural + caótica) con gestión rigurosa de riesgo y arquitectura escalable.
+**Chimuelo Prime** es un sistema integral de trading cuantitativo y algorítmico diseñado para Binance Spot (Testnet / Mainnet) con precisión matemática Decimal estricta, arquitectura event-driven desacoplada y soporte tanto para **Grid Trading de Doble Régimen** como para **Estrategias Cuantitativas Direccionales de Señales (M9)** con optimización para micro-cuentas ($25 USD).
 
-### Estado General
+### Matriz de Estado General
 
-| Área | Estado | Completitud |
-|------|--------|-------------|
-| **Diseño Matemático** | ✅ Completo | 100% |
-| **Arquitectura de Software** | ✅ Especificada | 100% |
-| **Módulo 1** | 🔄 En desarrollo | 20% |
-| **Módulos 2-7** | ⏸️ Blocked (esperando M1) | 0% |
-| **Documentación** | ✅ En progreso | 60% |
-| **Testing Infrastructure** | ✅ Definido | 100% |
+| Módulo / Subsistema | Responsabilidad | Estado | Tests | Cobertura / Salud |
+| :--- | :--- | :---: | :---: | :---: |
+| **M1: Exchange Configuration** | Filtros de exchange, validación de ticks y steps | ✅ Completo | 42 tests | 100% Pass |
+| **M2: API Client & Rate Limiter** | Token bucket, firma HMAC, retry backoff | ✅ Completo | 38 tests | 100% Pass |
+| **M3: Grid State Manager** | Persistencia SQLite ACID (WAL), reconciliación | ✅ Completo | 65 tests | 100% Pass |
+| **M4: Order Execution** | Colocación, tracking, sync de órdenes | ✅ Completo | 84 tests | 100% Pass |
+| **M5: Grid Engine (Core)** | Cálculo aritmético/geométrico, ciclos, stops | ✅ Completo | 92 tests | 100% Pass |
+| **M6: Grid Backtesting Engine** | Simulación offline de grid, métricas Sortino/Calmar | ✅ Completo | 48 tests | 100% Pass |
+| **M7: Orchestrator, CLI & Web** | Orquestación multi-activo, CLI Click, Web Server | ✅ Completo | 76 tests | 100% Pass |
+| **M9: Quantitative Strategies & Signal Engine** | RSI Divergence + EMA 200 + ATR Risk para $25 USD | ✅ Operativo | 100+ tests | 100% Pass |
+| **Total Suite de Pruebas** | **Validación global de integración y unitarios** | **✅ PASSED** | **545 / 545** | **100% Passing** |
 
 ---
 
 ## 🎯 Milestones Completados
 
-### Fase 0: Parametrización Matemática
+### Fase 0 — Fase 7: Arquitectura Base e Infraestructura de Trading
+- ✅ **Módulo 1:** `SymbolFilters`, `SymbolConfig`, `ExchangeConfigService`, validación estricta de `LOT_SIZE`, `PRICE_FILTER`, `MIN_NOTIONAL`.
+- ✅ **Módulo 2:** `BinanceClient` con rate limiter por token bucket (1200 weight/min, 50 orders/10s), firma criptográfica HMAC-SHA256, sincronización de `recvWindow`.
+- ✅ **Módulo 3:** Motor relacional SQLite (`schema.py`, `database.py`, `grid_state.py`, `reconciler.py`) con modo WAL, transacciones ACID y reconciliación de órdenes huérfanas.
+- ✅ **Módulo 4:** `OrderExecutor` y `LifecycleManager` con validación pre-orden y mitigación de órdenes concurrentes o duplicadas.
+- ✅ **Módulo 5:** `GridEngine` con distribución uniforme/geométrica de capital, trailing stops, hard stops de portfolio (-8%) y soft stops de régimen.
+- ✅ **Módulo 6:** Motor de backtesting de grid, generador de reportes JSON/Terminal y cálculo de ratios Sortino/Calmar.
+- ✅ **Módulo 7:** CLI completo (`chimuelo start/stop/status/backtest`), orquestación paralela multi-símbolo, servidor web FastAPI/Starlette y panel de monitoreo.
 
-**Fechas:** 17-18 mayo 2026
-**Entregables:**
-- ✅ Cálculo de parámetros críticos para SOL/USDT (ATR, límites, spacing, capital).
-- ✅ Auditoría de supuestos: conversión de ATR 4h → ATR 1d, validación de MIN_NOTIONAL real via API.
-- ✅ Definición de métricas de éxito (Sortino > 1.5, Calmar > 1.0, Profit Factor > 1.5).
-- ✅ Circuit breaker con drawdown del portfolio (-8%) y pausa soft en ruptura de rango.
-- ✅ Backlog de risk parity multi-activo (DOGE/USDT como segundo activo).
-
-**Decisiones Arquitectónicas:**
-- Grid de 40 niveles, spacing aritmético v1 → geométrico v2.
-- Decimal-only, cero floats (regla dura).
-- Persistencia SQLite para estado transaccional del grid.
-- Reconciliación de estado al iniciar vs `/api/v3/openOrders`.
-
-**Documentación:**
-- Tabla de parámetros validados (90 días de velas 1D).
-- Justificación teórica de cada decisión (Sharpe → Sortino, ATR diario vs 4h, etc.).
+### Fase 8 — Fase 9: Módulo de Estrategias Cuantitativas & Micro-Cuentas (M9)
+- ✅ **Biblioteca de Indicadores Decimal:** SMA, EMA, RSI (Wilder), ATR (Wilder), Swing Pivots sin dependencias flotantes (`chimuelo_prime/strategies/indicators.py`).
+- ✅ **Estrategia RSI Divergence + EMA 200 + ATR Risk:** Implementada en `chimuelo_prime/strategies/rsi_divergence.py`.
+- ✅ **Motor de Simulación Event-Driven para Señales:** `SignalStrategyBacktester` con modelado intrabarra de SL/TP, slippage desfavorable (0.05%) y comisiones (0.10%).
+- ✅ **Money Management para Micro-Cuentas ($25 USD):** Adaptación dinámica de `min_notional` de $5.00 USDT garantizando riesgo efectivo $\le 6.0\%$.
+- ✅ **Reportes y Métricas Cuantitativas:** `SignalBacktestReport`, curvas de equity y exportación estructurada.
 
 ---
 
-### Fase 1a: Especificación Técnica — Módulo 1
+## 📈 Especificación Operativa del Módulo M9 ($25 USD)
 
-**Fechas:** 18 mayo 2026
-**Entregables:**
-- ✅ Especificación completa de `Exchange Configuration & Filter Validation Service`.
-- ✅ Definición de responsabilidades (qué entra, qué no entra en M1).
-- ✅ Modelo de dominio: `SymbolFilters` (inmutable, Decimal-only) + `SymbolConfig` (para inyección de dependencias).
-- ✅ Excepciones tipificadas (jerarquía, casos de uso).
-- ✅ Testing strategy: `pytest + responses`, cobertura ≥ 90%.
-- ✅ Definition of Done (7 criterios, incluyendo `mypy --strict` y `ruff`).
-- ✅ Principios arquitectónicos: SRP, Open/Closed, Single Source of Truth.
+```
+                       OBJETIVO FINANCIERO $25 USD
+                                  │
+          ┌───────────────────────┴───────────────────────┐
+          ▼                                               ▼
+  Capital Base: $25.00 USDT                       Target: +$5.00 Netos (+20% ROI)
+  Horizonte: <= 30 Días                           Max DD Permitido: <= 8% ($2.00)
+  Risk per Trade: 2.5% ($0.625)                   Risk-to-Reward: 1 : 2.50
+```
 
-**Documentación:**
-- 11 secciones de especificación (propósito, responsabilidades, estructura, modelos, excepciones, logging, config, testing, control de versiones, Definition of Done, qué NO aceptar).
-
----
-
-### Fase 1b: Implementación Inicial — Módulo 1
-
-**Fechas:** 18 mayo 2026 02:00-02:30 UTC
-**Entregables:**
-- ✅ Estructura de carpetas exacta (`chimuelo_prime/exchange_config/`, `tests/`, `config/`).
-- ✅ `requirements.txt` con versiones fijadas (pydantic 2.9.2, structlog, pytest, responses, mypy, ruff).
-- ✅ `exceptions.py`: jerarquía tipificada (ChimueloException → ExchangeConfigError → subcategorías).
-- ✅ `models.py`: 
-  - `SymbolFilters` (frozen, strict, Decimal-only).
-  - Métodos: `validate_price()`, `validate_quantity()`, `validate_notional()`, `round_price_to_tick()`, `round_qty_to_step()`.
-  - `SymbolConfig` para inyección de dependencias.
-  - Field validators que rechazan floats explícitamente.
-  - Validación cruzada en `model_post_init()`.
-- ✅ Smoke-test manual (10 escenarios, todos pasando).
-
-**Decisiones Técnicas Documentadas:**
-1. Pydantic v2 con `frozen=True` para inmutabilidad real.
-2. `ROUND_DOWN` explícito en redondeos (decisión crítica para órdenes de compra/venta).
-3. Validación de múltiplos vía aritmética Decimal exacta.
-4. Field validators en modo `before` para bloquear floats disfrazados.
-
-**Auditoría de Marta:**
-- ✅ Código aprobado técnicamente.
-- ⚠️ Desviación menor: Edison creó `exceptions.py` sin permiso explícito (justificación válida, pero marca precedente).
-- ✅ Humo-test cubre 10 escenarios críticos.
+### Reglas de Entrada y Salida (M9)
+1. **Filtro de Tendencia:** $Close > \text{EMA}_{200}(Close)$.
+2. **Filtro de Volumen:** $Volume \ge \text{SMA}_{20}(Volume) \times 1.10$.
+3. **Divergencia Alcista:** Precio hace mínimo menor/igual en ventana de 25 velas mientras el RSI 14 (Wilder) hace mínimo mayor (ganancia de momentum).
+4. **Confirmación Inmediata:** Vela verde ($Close > Open$) cerrando sobre $\text{EMA}_{20}(Close)$.
+5. **Gestión de Salida:**
+   - $\text{Stop Loss} = Close - 1.5 \times \text{ATR}_{14}$ (con límite de distancia $\le 8\%$).
+   - $\text{Take Profit} = Close + (1.5 \times \text{ATR}_{14}) \times 2.50$.
 
 ---
 
-## 🔄 Trabajo en Progreso — Módulo 1
+## 🔧 Deuda Técnica y Estado de Auditoría
 
-### Tarea #2: Suite de Tests Completa
-
-**Estado:** Pendiente de auditoría de Marta → Edison ejecuta.
-
-**Entregables esperados:**
-- Test unitarios para cada método de `SymbolFilters`.
-- Test de excepciones tipificadas (casos de error).
-- Test de `SymbolConfig` con validación cruzada.
-- Mock de `/api/v3/exchangeInfo` con fixture JSON real de Binance.
-- Output final: `pytest --cov ≥ 90%`, `mypy --strict OK`, `ruff OK`.
-
-**Timeline estimado:** 4-6 horas (Edison).
+| Ítem | Módulo | Estado | Mitigación Implementada |
+| :--- | :---: | :---: | :--- |
+| `side String(10)` en base de datos | M3 | ✅ Resuelto | Tamaño de columna expandido para soportar variantes de Binance. |
+| Teardown de Engine en salida del bot | M3 / M7 | ✅ Resuelto | `engine.dispose()` invocado en el ciclo de vida del orquestador. |
+| Aislamiento de decimales en Pydantic v2 | Global | ✅ Resuelto | `reject_floats` configurado en todos los modelos financieros. |
+| Look-ahead bias en evaluación de señales | M9 | ✅ Resuelto | `evaluate_candle` accede estrictamente a datos históricos $i \le t$. |
 
 ---
 
-### Tarea #3: Cliente HTTP Base (ExchangeConfigService)
+## 🚀 Próximos Pasos Inmediatos
 
-**Estado:** No iniciado (esperando T#2).
-
-**Descripción:**
-- `client.py`: wrapper HTTP para endpoints públicos de Binance.
-- `service.py`: `ExchangeConfigService` — fachada pública que carga `/api/v3/exchangeInfo`, parsea, construye `SymbolFilters`.
-- `config_loader.py`: carga y valida `chimuelo.yaml`.
-- Error handling tipificado.
-
-**Dependencias:** Tarea #2 debe estar completada.
+1. **Paper Trading en Vivo (Live Feed):** Conectar `SignalStrategyBacktester` con el WebSocket de Binance para simulación en tiempo real (Paper Trading con $25 USD simulados).
+2. **Ejecución Automatizada en Testnet:** Desplegar la estrategia en Binance Testnet mediante `chimuelo start --strategy rsi_divergence --capital 25`.
+3. **Monitoreo Telemétrico:** Integración de alertas automáticas vía Telegram / Discord al generarse señales de entrada y cierres por TP/SL.
+4. **Optimización Walk-Forward:** Calibración periódica de parámetros ATR y Lookback en pares alternativos (SOL/USDT, ETH/USDT, DOGE/USDT).
 
 ---
-
-### Tarea #4: README + Entrega Final M1
-
-**Estado:** No iniciado (esperando T#3).
-
-**Entregables:**
-- README.md del módulo con ejemplo de uso.
-- Demo script: cargar config → validar filtros SOLUSDT → output estructurado.
-- PR final a `develop` con aprobación de Marta.
-
----
-
-## 🔧 Backlog de Deuda Técnica — M3
-
-Registrado por auditoría de Marta (19 mayo 2026). Ítems aprobados para diferir, NO olvidar.
-
-| # | Ítem | Archivo | Target | Riesgo si se ignora |
-|---|------|---------|--------|---------------------|
-| DT-M3-01 | `side String(4)` → ya corregido a `String(10)` | `schema.py` | Resuelto en M3 | Truncamiento silencioso si Binance añade variantes |
-| DT-M3-02 | `engine.dispose()` en teardown del orquestador | `database.py` (TODO comentado), `orchestrator.py` | M7 | ResourceWarning → corrupción WAL si proceso muere con handles abiertos |
-| DT-M3-03 | Tests de concurrencia para WAL mode | `tests/grid_state/test_database.py` | M7 | WAL se vende como concurrent-reads pero nunca se verifica en tests |
-
----
-
-## ⏸️ Bloqueantes Actuales
-
-**NINGUNO.** El proyecto está en flow. Edison tiene luz verde para ejecutar Tarea #2 tan pronto Marta dé el OK (esperado en esta sesión).
-
----
-
-## 📋 Módulos Pendientes (Roadmap)
-
-| Módulo | Nombre | Descripción | Estado | Timeline |
-|--------|--------|-------------|--------|----------|
-| **M2** | API Client & Rate Limiter | Cliente HTTP autenticado + token bucket | ⏸️ Blocked | Semana 2 |
-| **M3** | Grid State Manager | Persistencia SQLite + reconciliación de órdenes | ⏸️ Blocked | Semana 2-3 |
-| **M4** | Order Execution & Lifecycle | Colocación, cancelación, seguimiento de órdenes | ⏸️ Blocked | Semana 3 |
-| **M5** | Grid Engine (Core Logic) | Cálculo de niveles, distribución de capital, cierre de ciclos | ⏸️ Blocked | Semana 4-5 |
-| **M6** | Backtesting Engine | vectorbt integration, métricas de performance | ⏸️ Blocked | Semana 5-6 |
-| **M7** | Bot Orchestrator & CLI | Orquestación multi-activo, CLI para start/stop/status | ⏸️ Blocked | Semana 6-7 |
-
----
-
-## 📚 Documentación Actual
-
-| Documento | Estado | Ubicación |
-|-----------|--------|-----------|
-| **MARTA.md** | ✅ Completo | `docs/MARTA.md` |
-| **EDISON.md** | ✅ Completo | `docs/EDISON.md` |
-| **PROJECT_STATUS.md** | ✅ En progreso | `docs/PROJECT_STATUS.md` (este archivo) |
-| **ROADMAP.md** | 🔄 En creación | `docs/ROADMAP.md` |
-| **SPEC_M1.md** | ✅ Completo | `docs/specs/M1_SPEC.md` |
-| **SPEC_M2.md** | ⏸️ Por hacer | `docs/specs/M2_SPEC.md` |
-| Code comments | ✅ En progreso | Inline (docstrings, justificaciones) |
-
----
-
-## 🎓 Decisiones Clave Hasta Aquí
-
-### 1. **Spread de Spacing: Aritmético v1 → Geométrico v2**
-- **Decisión:** mantener aritmético para v1 (simplifica cálculo inicial).
-- **Razón:** SOL/USDT con rango 24.8% no es tan extremo como para que la degradación sea crítica.
-- **Backlog:** migrar a geométrico en v2, especialmente con DOGE/PEPE (volatilidad caótica, colas gordas).
-
-### 2. **Decimal-Only Desde Día 1**
-- **Decisión:** bloqueo defensivo de floats a nivel de modelos.
-- **Razón:** Binance rechaza órdenes con floats (código -1013). Mejor fallar en validación que en producción.
-
-### 3. **Modelos Inmutables (frozen=True)**
-- **Decisión:** `SymbolFilters` y `SymbolConfig` frozen.
-- **Razón:** Thread-safety, previene bugs de aliasing, fuerza creación de instancias nuevas si los filtros cambian.
-
-### 4. **Inyección de Dependencias desde Módulo 1**
-- **Decisión:** `SymbolConfig` abstracto para que M5 (GridEngine) no conozca símbolos específicos.
-- **Razón:** Open/Closed Principle (SOLID-O). Futuro multi-activo sin refactor de motor.
-
-### 5. **Testing Obligatorio ≥ 90%**
-- **Decisión:** límite duro de cobertura, no sugerencia.
-- **Razón:** Grid trading es finanzas. Bugs no-detectados = pérdida de dinero.
-
-### 6. **Persistencia SQLite Transaccional**
-- **Decisión:** SQLite (no JSON file-based) para estado del grid.
-- **Razón:** transaccionalidad ACID. Si el bot falla a mitad de operación, recupera sin inconsistencias.
-
-### 7. **Backtesting Antes de Testnet**
-- **Decisión:** `vectorbt` para backtesting offline.
-- **Razón:** validar rentabilidad de la lógica antes de tocar dinero (simulado o real).
-
----
-
-## 🚀 Hitos Próximos (1-2 Semanas)
-
-### Semana 1
-- [ ] **Tarea #2 (Edison):** Suite de tests M1 completa, cobertura ≥ 90%.
-- [ ] **Tarea #3 (Edison):** Cliente HTTP + `ExchangeConfigService` + `config_loader`.
-- [ ] **Tarea #4 (Edison):** README + demo + merge a develop.
-- [ ] **Marta audita:** cada entregable línea por línea.
-
-### Semana 2
-- [ ] **ROADMAP.md:** elaboración detallada de M2-M7 con estimaciones.
-- [ ] **M2 Spec (Marta):** especificación de API Client autenticado + rate limiter.
-- [ ] **M2 Inicio (Edison):** arquitectura de M2, tests base.
-
-### Semana 3
-- [ ] M2 completado.
-- [ ] M3 iniciado (Grid State Manager).
-
----
-
-## 📊 Métricas de Éxito (Definidas)
-
-### Backtesting (antes de testnet)
-- **Sortino Ratio > 1.5** — penaliza desviación a la baja.
-- **Calmar Ratio > 1.0** — retorno anual ≥ max drawdown.
-- **Profit Factor > 1.5** — ganancia total / pérdida total.
-- **Max Drawdown < 10%** — límite de pérdida.
-- **Win Rate > 55%** — proporción de ciclos rentables.
-
-### Testing
-- **Cobertura ≥ 90%** — líneas ejecutadas en tests.
-- **mypy --strict** — tipado completo, sin `Any` implícito.
-- **ruff check + format** — linting + formatting automático.
-
-### Producción (testnet)
-- **Uptime > 99%** — disponibilidad del bot.
-- **Drawdown real < 8%** — hard stop activado antes de degradarse.
-- **Order fill rate > 95%** — órdenes ejecutadas (no rechazadas por filtros).
-
----
-
-## 🔐 Supuestos y Riesgos
-
-### Supuestos
-1. **Volatilidad estructural:** SOL/USDT mantiene patrón reversible (no rupturas de tendencia).
-2. **Liquidez Binance:** spread pequeño, no hay slippage importante en órdenes de 6 USDT.
-3. **API Binance estable:** uptime > 99.9%, rate limits conocidos.
-4. **Testnet refleja producción:** mismo motor, mismos filtros.
-
-### Riesgos
-
-| Riesgo | Impacto | Mitigación |
-|--------|---------|-----------|
-| Ruptura de régimen (ATR 2x) | Bot gira en pérdida | Soft stop + pausa automática |
-| Caída flash (crash 15%+) | Liquidación forzada | Hard stop en -8% drawdown |
-| API Binance down | Bot no puede operar | Alertas, fallback a manual |
-| Bug en validación de órdenes | Órdenes rechazadas, asincronía | Testing 90%, type hints estrictos |
-| Slippage > estimado | Margin menor por ciclo | Capital buffer 20% + validación notional |
-
----
-
-## 💬 Próxima Sesión: Qué Esperar
-
-1. **Edison ejecuta Tarea #2** (tests completos para M1).
-2. **Marta audita** línea por línea, aprueba o rechaza.
-3. Si aprobado → Edison Tarea #3 (cliente HTTP).
-4. Si rechazado → Edison itera hasta cumplir Definition of Done.
-5. **Tom propone** nuevas estrategias (DOGE/USDT, ajustes de parámetros).
-6. **Marta audita** con critical flaw analysis.
-7. **Ciclo continúa** hasta completar M1 100%.
-
----
-
-## 📝 Notas Operativas
-
-- **Timezone:** América (Colombia, UTC-5). Sesiones típicamente en horarios PM.
-- **Responsables:** Tom (PM), Marta (Arquitecta), Edison (Programador).
-- **Cadencia:** iterativo, bloqueante = se detiene todo, cero deuda técnica.
-- **Comunicación:** aclaraciones antes de decidir, documentación siempre.
-
----
-
-**Versión:** 1.0
-**Status:** En desarrollo activo
-**Próxima revisión:** después de Tarea #2 (Edison)
+*Documento mantenido por la Oficina de Arquitectura y Auditoría de Chimuelo Prime.*

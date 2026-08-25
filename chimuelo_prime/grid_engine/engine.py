@@ -31,6 +31,7 @@ from chimuelo_prime.grid_engine.price_fetcher import PriceFetcher
 from chimuelo_prime.grid_state.grid_state import GridState
 from chimuelo_prime.grid_state.reconciler import Reconciler
 from chimuelo_prime.grid_state.schema import GridLevel, OrderStatus, Snapshot
+from chimuelo_prime.orchestrator.monitoring import AlertManager
 from chimuelo_prime.order_execution.exceptions import AggregateCancellationError
 from chimuelo_prime.order_execution.executor import OrderExecutor
 from chimuelo_prime.order_execution.lifecycle import OrderLifecycleManager
@@ -66,6 +67,7 @@ class GridEngine:
         reconciler: Reconciler,
         price_fetcher: PriceFetcher,
         poll_interval: float = 30.0,
+        alert_manager: AlertManager | None = None,
     ) -> None:
         self._config = config
         self._symbol = config.filters.symbol
@@ -75,6 +77,7 @@ class GridEngine:
         self._reconciler = reconciler
         self._price_fetcher = price_fetcher
         self._poll_interval = poll_interval
+        self._alert_manager = alert_manager or AlertManager()
         self._stop_event = threading.Event()
         self._log = get_logger(__name__)
 
@@ -234,6 +237,43 @@ class GridEngine:
         sincronización de las restantes. Los errores se loguean pero no
         se relanza nada: el próximo ciclo reintentará.
         """
+        # Chequeo preventivo de Stop-Loss activo
+        try:
+            current_price = self._price_fetcher.get_current_price(self._symbol)
+            current_price_dec = Decimal(str(current_price))
+            lower_bound_dec = Decimal(str(self._config.lower_bound))
+
+            if current_price_dec < lower_bound_dec:
+                self._log.critical(
+                    "engine.stop_loss_triggered",
+                    symbol=self._symbol,
+                    current_price=str(current_price_dec),
+                    lower_bound=str(lower_bound_dec),
+                )
+                self._alert_manager.trigger_alert(
+                    "GRID_STOP_LOSS",
+                    f"Stop-Loss triggered for {self._symbol}: Current price {current_price_dec} is below lower bound {lower_bound_dec}.",
+                    symbol=self._symbol,
+                    current_price=str(current_price_dec),
+                    lower_bound=str(lower_bound_dec),
+                )
+                try:
+                    self._executor.cancel_all_open_orders(self._symbol)
+                except Exception as exc:
+                    self._log.critical(
+                        "engine.stop_loss_cancel_failed",
+                        symbol=self._symbol,
+                        error=str(exc),
+                    )
+                self.stop()
+                return
+        except Exception as exc:
+            self._log.warning(
+                "engine.stop_loss_check_failed",
+                symbol=self._symbol,
+                error=str(exc),
+            )
+
         open_orders = self._grid_state.get_open_orders(self._symbol)
         errors: list[tuple[int, Exception]] = []
 

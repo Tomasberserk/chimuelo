@@ -34,6 +34,20 @@ symbols:
   - "SOLUSDT"
 
 # -----------------------------------------------------------------------------
+# Estrategias operativas (M7)
+# Parámetros específicos del GridEngine por activo.
+# Cero floats: todos los valores numéricos deben definirse como strings.
+# -----------------------------------------------------------------------------
+strategies:
+  SOLUSDT:
+    upper_bound: "95.00"
+    lower_bound: "75.00"
+    grid_levels: 20
+    capital_per_order: "10.00"
+    capital_weight: "1.00"
+
+
+# -----------------------------------------------------------------------------
 # API Client (M2) — cliente autenticado + rate limiter + retry
 # Todos los campos tienen defaults razonables. La sección es opcional.
 # -----------------------------------------------------------------------------

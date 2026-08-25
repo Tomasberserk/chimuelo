@@ -30,7 +30,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from decimal import Decimal
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -271,19 +271,19 @@ class TestInitializeNewGrid:
         saved_ids = iter(range(1, 1000))
         mock_grid_state.save_grid_level.side_effect = lambda _: next(saved_ids)
 
-        with patch(
-            "chimuelo_prime.grid_engine.engine.GridCalculator.compute_levels",
-            side_effect=GridCalculationError("capital insuficiente"),
+        with (
+            patch(
+                "chimuelo_prime.grid_engine.engine.GridCalculator.compute_levels",
+                side_effect=GridCalculationError("capital insuficiente"),
+            ),
+            pytest.raises(GridCalculationError),
         ):
-            with pytest.raises(GridCalculationError):
-                engine._initialize_new_grid()
+            engine._initialize_new_grid()
 
     def test_price_fetch_error_propagates(
         self, engine: GridEngine, mock_price_fetcher: MagicMock
     ) -> None:
-        mock_price_fetcher.get_current_price.side_effect = PriceFetchError(
-            "endpoint caído"
-        )
+        mock_price_fetcher.get_current_price.side_effect = PriceFetchError("endpoint caído")
 
         with pytest.raises(PriceFetchError):
             engine._initialize_new_grid()
@@ -417,7 +417,7 @@ class TestRunPollCycle:
         # Para que _on_sell_filled → _take_snapshot no falle
         mock_grid_state.get_open_orders.side_effect = [
             [sell_order],  # primer get_open_orders en _run_poll_cycle
-            [],            # segundo en _take_snapshot
+            [],  # segundo en _take_snapshot
         ]
 
         engine._run_poll_cycle()
@@ -441,9 +441,7 @@ class TestOnBuyFilled:
         level = _make_grid_level(level_id, buy_order_id=buy_order_id)
         level.upper_price = upper_price
         mock_grid_state.get_grid_level.return_value = level
-        engine._executor.place_limit_sell.return_value = _make_placed_order(
-            999, side="SELL"
-        )
+        engine._executor.place_limit_sell.return_value = _make_placed_order(999, side="SELL")
 
     def test_places_sell_at_upper_price(
         self, engine: GridEngine, mock_grid_state: MagicMock
@@ -459,7 +457,9 @@ class TestOnBuyFilled:
     def test_places_sell_with_executed_qty(
         self, engine: GridEngine, mock_grid_state: MagicMock
     ) -> None:
-        self._setup_level(engine, mock_grid_state, buy_order_id=10, level_id=1, upper_price=Decimal("102.00"))
+        self._setup_level(
+            engine, mock_grid_state, buy_order_id=10, level_id=1, upper_price=Decimal("102.00")
+        )
         qty = Decimal("0.15")
 
         engine._on_buy_filled(buy_order_id=10, executed_qty=qty)
@@ -667,9 +667,7 @@ class TestDefensivePaths:
 
         engine._place_missing_sells([level])  # no debe propagar
 
-    def test_on_buy_filled_handles_unmapped_order_id(
-        self, engine: GridEngine
-    ) -> None:
+    def test_on_buy_filled_handles_unmapped_order_id(self, engine: GridEngine) -> None:
         """buy_order_id no registrado en _buy_order_to_level → early return."""
         engine._on_buy_filled(buy_order_id=9999, executed_qty=Decimal("0.10"))
 

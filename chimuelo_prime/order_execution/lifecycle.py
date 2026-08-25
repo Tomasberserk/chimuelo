@@ -83,9 +83,7 @@ class OrderLifecycleManager:
                 weight=WEIGHT_QUERY_ORDER,
             )
         except BinanceAPIError as exc:
-            raise StatusSyncError(
-                f"Error al consultar orden {order_id} en Binance: {exc}"
-            ) from exc
+            raise StatusSyncError(f"Error al consultar orden {order_id} en Binance: {exc}") from exc
 
         current_status = OrderStatus(response["status"])
         executed_qty = Decimal(str(response["executedQty"]))

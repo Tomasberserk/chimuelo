@@ -1,0 +1,1414 @@
+/* ============================================================
+   CHIMUELO PRIME — BINANCE PRO QUANTITATIVE TRADING STYLES
+   Theme: Binance Pro Dark Mode (#0b0e11 / #181a20 / #F0B90B)
+   ============================================================ */
+
+:root {
+    /* Paleta Oficial Binance Pro Dark */
+    --bg-root: #0b0e11;
+    --bg-panel: #181a20;
+    --bg-panel-header: #1e2329;
+    --bg-card: #1e2329;
+    --bg-card-alt: #14151a;
+    --bg-hover: #2b313a;
+    --bg-input: #2b313a;
+    
+    /* Bordes y Líneas */
+    --border-color: #2b313a;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-highlight: rgba(240, 185, 11, 0.4);
+
+    /* Colores Financieros Primarios */
+    --binance-yellow: #F0B90B;
+    --binance-yellow-hover: #FCD535;
+    --binance-yellow-glow: rgba(240, 185, 11, 0.2);
+    
+    --binance-green: #0ECB81;
+    --binance-green-hover: #0fb977;
+    --binance-green-bg: rgba(14, 203, 129, 0.12);
+    --binance-green-glow: rgba(14, 203, 129, 0.25);
+    
+    --binance-red: #F6465D;
+    --binance-red-hover: #e03b51;
+    --binance-red-bg: rgba(246, 70, 93, 0.12);
+    --binance-red-glow: rgba(246, 70, 93, 0.25);
+
+    /* Colores de Indicadores Cuánticos */
+    --ema-purple: #a855f7;
+    --ema-yellow: #F0B90B;
+    --rsi-cyan: #00d2ff;
+    --rsi-oversold-bg: rgba(0, 210, 255, 0.08);
+
+    /* Tipografía y Textos */
+    --text-primary: #EAECEF;
+    --text-secondary: #848E9C;
+    --text-muted: #5E6673;
+    --text-gold: #F0B90B;
+
+    /* Sombras y Efectos */
+    --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.6);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-full: 999px;
+    
+    --font-ui: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'Fira Code', 'Roboto Mono', monospace;
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset Global */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+}
+
+body.binance-dark {
+    background-color: var(--bg-root);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.4;
+}
+
+/* Estructura Principal */
+.binance-app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100vw;
+}
+
+/* ============================================================
+   1. TICKER BAR SUPERIOR (ESTILO BINANCE PRO)
+   ============================================================ */
+.ticker-bar {
+    background-color: var(--bg-panel);
+    border-bottom: 1px solid var(--border-color);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.ticker-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon-wrap {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--binance-yellow), #b8860b);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0b0e11;
+    font-size: 20px;
+    box-shadow: 0 0 12px var(--binance-yellow-glow);
+}
+
+.brand-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-title {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.brand-badge {
+    background: var(--binance-yellow);
+    color: #0b0e11;
+    font-size: 9px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    letter-spacing: 1px;
+}
+
+.brand-sub {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+}
+
+.ticker-divider {
+    width: 1px;
+    height: 28px;
+    background-color: var(--border-color);
+}
+
+/* Selector de Par */
+.pair-selector-group, .timeframe-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.selector-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pair-buttons, .tf-buttons {
+    display: flex;
+    gap: 4px;
+    background-color: var(--bg-card-alt);
+    padding: 3px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+}
+
+.pair-btn, .tf-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pair-btn:hover, .tf-btn:hover {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.pair-btn.active, .tf-btn.active {
+    color: var(--binance-yellow);
+    background-color: var(--bg-card);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    font-weight: 800;
+}
+
+.coin-icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.coin-icon.sol { background: #9945FF; }
+.coin-icon.eth { background: #627EEA; }
+.coin-icon.btc { background: #F7931A; }
+
+/* Ticker Center Stats */
+.ticker-center {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: nowrap;
+}
+
+.ticker-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.stat-val {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+}
+
+.main-price-stat .stat-price-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-price {
+    font-size: 18px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--binance-green);
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Animaciones de Flash de Precios */
+.price-flash-up {
+    animation: flash-green 0.8s ease-out;
+}
+
+.price-flash-down {
+    animation: flash-red 0.8s ease-out;
+}
+
+@keyframes flash-green {
+    0% { background-color: rgba(14, 203, 129, 0.4); color: #0ECB81; }
+    100% { background-color: transparent; }
+}
+
+@keyframes flash-red {
+    0% { background-color: rgba(246, 70, 93, 0.4); color: #F6465D; }
+    100% { background-color: transparent; }
+}
+
+.stat-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--binance-green-bg);
+    color: var(--binance-green);
+    font-family: var(--font-mono);
+}
+
+.stat-badge.negative {
+    background: var(--binance-red-bg);
+    color: var(--binance-red);
+}
+
+/* Ticker Right (Status & Buttons) */
+.ticker-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    border: 1px solid transparent;
+}
+
+.status-inactive {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    border-color: var(--border-subtle);
+}
+
+.status-active {
+    background: var(--binance-green-bg);
+    color: var(--binance-green);
+    border-color: rgba(14, 203, 129, 0.3);
+    box-shadow: 0 0 10px var(--binance-green-glow);
+}
+
+.pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: currentColor;
+    display: inline-block;
+}
+
+.status-active .pulse-dot {
+    animation: pulse-glow 1.5s infinite;
+}
+
+@keyframes pulse-glow {
+    0% { transform: scale(0.9); opacity: 1; box-shadow: 0 0 0 0 rgba(14, 203, 129, 0.7); }
+    70% { transform: scale(1.1); opacity: 0.8; box-shadow: 0 0 0 6px rgba(14, 203, 129, 0); }
+    100% { transform: scale(0.9); opacity: 1; box-shadow: 0 0 0 0 rgba(14, 203, 129, 0); }
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+    outline: none;
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-start {
+    background: linear-gradient(135deg, var(--binance-yellow), #d9a506);
+    color: #0b0e11;
+    box-shadow: 0 2px 10px var(--binance-yellow-glow);
+}
+
+.btn-start:hover:not(:disabled) {
+    background: var(--binance-yellow-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px var(--binance-yellow-glow);
+}
+
+.btn-stop {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-stop:hover:not(:disabled) {
+    background: var(--bg-hover);
+    border-color: var(--text-secondary);
+}
+
+.btn-panic {
+    background: var(--binance-red-bg);
+    border: 1px solid rgba(246, 70, 93, 0.4);
+    color: var(--binance-red);
+    padding: 8px 12px;
+}
+
+.btn-panic:hover {
+    background: var(--binance-red);
+    color: white;
+    box-shadow: 0 0 14px var(--binance-red-glow);
+}
+
+/* ============================================================
+   2. TARJETAS KPI FINANCIERAS (6 CARDS)
+   ============================================================ */
+.kpi-banner {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    padding: 16px 20px 8px 20px;
+}
+
+.kpi-box {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: var(--shadow-card);
+    transition: var(--transition);
+}
+
+.kpi-box:hover {
+    border-color: var(--border-highlight);
+    transform: translateY(-2px);
+}
+
+.kpi-box.highlight-box {
+    border-color: rgba(14, 203, 129, 0.3);
+    background: linear-gradient(180deg, rgba(14, 203, 129, 0.04) 0%, var(--bg-panel) 100%);
+}
+
+.kpi-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.kpi-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.kpi-tag {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+}
+
+.tag-neutral {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+}
+
+.tag-success {
+    background: var(--binance-green-bg);
+    color: var(--binance-green);
+}
+
+.tag-gold {
+    background: var(--binance-yellow-glow);
+    color: var(--binance-yellow);
+}
+
+.tag-risk {
+    background: var(--binance-red-bg);
+    color: var(--binance-red);
+}
+
+.kpi-main {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.kpi-figure {
+    font-size: 22px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+}
+
+.kpi-figure.text-green { color: var(--binance-green); }
+.kpi-figure.text-red { color: var(--binance-red); }
+.kpi-figure.text-safe { color: var(--binance-green); }
+
+.kpi-currency, .kpi-percent {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+.kpi-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================
+   3. WORKSPACE PRINCIPAL (GRÁFICOS + SIDEBAR)
+   ============================================================ */
+.trading-workspace {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 14px;
+    padding: 12px 20px 24px 20px;
+    flex-grow: 1;
+}
+
+.workspace-charts-area {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Paneles Pro Generales */
+.pro-panel {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-header {
+    background-color: var(--bg-panel-header);
+    border-bottom: 1px solid var(--border-color);
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.panel-header.compact-header {
+    padding: 6px 16px;
+}
+
+.panel-title-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.panel-title {
+    font-size: 14px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+}
+
+.panel-title i {
+    color: var(--binance-yellow);
+}
+
+.badge-timeframe {
+    background: var(--bg-card-alt);
+    color: var(--binance-yellow);
+    border: 1px solid var(--border-color);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+}
+
+/* Leyendas de Indicadores */
+.indicators-legend {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.legend-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-card-alt);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+}
+
+.legend-line {
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+    display: inline-block;
+}
+
+.line-purple { background-color: var(--ema-purple); }
+.line-yellow { background-color: var(--ema-yellow); }
+
+.legend-buy { color: var(--binance-green); border-color: rgba(14, 203, 129, 0.3); }
+.legend-buy i { font-size: 12px; }
+
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.dot-green { background-color: var(--binance-green); }
+.dot-red { background-color: var(--binance-red); }
+
+.panel-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-icon:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* Contenedores de Gráficos TradingView */
+.tv-chart-wrapper {
+    height: 420px;
+    width: 100%;
+    position: relative;
+    background-color: #0b0e11;
+}
+
+.chart-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background-color: #0b0e11;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 10;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--binance-yellow);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Panel Sub-Gráfico RSI */
+.rsi-panel {
+    border-top: 1px solid var(--border-color);
+}
+
+.panel-title.rsi-title i {
+    color: var(--rsi-cyan);
+}
+
+.rsi-current-value {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--rsi-cyan);
+    margin-left: 4px;
+}
+
+.rsi-zone-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+.rsi-zone-badge.oversold {
+    background: var(--rsi-oversold-bg);
+    color: var(--rsi-cyan);
+    border: 1px solid rgba(0, 210, 255, 0.3);
+}
+
+.rsi-thresholds-legend {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.rsi-thresh-tag {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.line-dot-red { width: 8px; height: 2px; background: var(--binance-red); }
+.line-dot-gold { width: 8px; height: 2px; background: var(--binance-yellow); }
+.line-dot-green { width: 8px; height: 2px; background: var(--binance-green); }
+
+.tv-rsi-wrapper {
+    height: 130px;
+    width: 100%;
+    background-color: #0b0e11;
+}
+
+/* ============================================================
+   4. SECCIÓN DE PESTAÑAS (HISTORIAL, TERMINAL, MÉTRICAS)
+   ============================================================ */
+.tabs-panel {
+    min-height: 240px;
+}
+
+.tabs-header {
+    background-color: var(--bg-panel-header);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tab-triggers {
+    display: flex;
+    gap: 2px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    color: var(--binance-yellow);
+    border-bottom-color: var(--binance-yellow);
+    font-weight: 800;
+}
+
+.tab-count-badge {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: var(--radius-full);
+}
+
+.tab-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--binance-green);
+    display: inline-block;
+    animation: pulse-glow 1.5s infinite;
+}
+
+.btn-micro {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition);
+}
+
+.btn-micro:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.btn-micro.active {
+    color: var(--binance-green);
+    border-color: rgba(14, 203, 129, 0.3);
+}
+
+.tabs-body {
+    padding: 12px 16px;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.tab-content {
+    display: none;
+    height: 100%;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Tabla Pro de Historial */
+.table-scroll-container {
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.pro-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.pro-table th {
+    background-color: var(--bg-card-alt);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 10px 12px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.pro-table td {
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-subtle);
+    font-family: var(--font-mono);
+}
+
+.pro-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.table-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px !important;
+    font-family: var(--font-ui) !important;
+}
+
+.table-empty i {
+    font-size: 24px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.badge-trade {
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 10px;
+    font-weight: 800;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+
+.badge-trade.long { background: var(--binance-green-bg); color: var(--binance-green); }
+.badge-trade.tp { background: rgba(14, 203, 129, 0.2); color: var(--binance-green); border: 1px solid rgba(14, 203, 129, 0.4); }
+.badge-trade.sl { background: rgba(246, 70, 93, 0.2); color: var(--binance-red); border: 1px solid rgba(246, 70, 93, 0.4); }
+.badge-trade.open { background: rgba(0, 210, 255, 0.15); color: var(--rsi-cyan); border: 1px solid rgba(0, 210, 255, 0.3); }
+
+/* Consola de Logs */
+.terminal-console {
+    background-color: #08090c;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #33ff77;
+    height: 190px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.log-entry {
+    line-height: 1.5;
+    word-break: break-all;
+    display: flex;
+    gap: 8px;
+}
+
+.log-ts {
+    color: var(--text-muted);
+    user-select: none;
+}
+
+.log-entry.error { color: var(--binance-red); }
+.log-entry.warn { color: var(--binance-yellow); }
+.log-entry.info { color: var(--rsi-cyan); }
+.log-entry.success { color: var(--binance-green); }
+
+/* Métricas Cuánticas Grid */
+.quant-params-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.param-card {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px;
+}
+
+.param-card h4 {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--binance-yellow);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.param-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.param-card strong {
+    color: var(--text-primary);
+}
+
+.inputs-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-item label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.pro-input {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    outline: none;
+    transition: var(--transition);
+}
+
+.pro-input:focus {
+    border-color: var(--binance-yellow);
+}
+
+/* ============================================================
+   5. SIDEBAR DERECHO (POSICIÓN ACTIVA & ESTRATEGIA)
+   ============================================================ */
+.workspace-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sidebar-card {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.text-gold { color: var(--binance-yellow); }
+.text-green { color: var(--binance-green); }
+.text-red { color: var(--binance-red); }
+
+.pos-status-badge, .eval-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.5px;
+    font-family: var(--font-mono);
+}
+
+.badge-idle {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+}
+
+.badge-active-pos {
+    background: var(--binance-green-bg);
+    color: var(--binance-green);
+    border: 1px solid rgba(14, 203, 129, 0.3);
+}
+
+.eval-badge {
+    background: var(--binance-green-bg);
+    color: var(--binance-green);
+}
+
+/* Estado sin posición */
+.no-position-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 12px;
+    text-align: center;
+    background: var(--bg-card-alt);
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-color);
+}
+
+.radar-scan {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    color: var(--binance-yellow);
+    font-size: 20px;
+}
+
+.scan-circle {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--binance-yellow);
+    border-radius: 50%;
+    animation: radar-pulse 2s infinite ease-out;
+}
+
+@keyframes radar-pulse {
+    0% { transform: scale(0.6); opacity: 1; }
+    100% { transform: scale(1.4); opacity: 0; }
+}
+
+.no-position-state h5 {
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.no-position-state p {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* Estado CON Posición Activa */
+.active-position-details {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.pos-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pos-pair-side {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pos-pair {
+    font-size: 16px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+}
+
+.pos-side-tag {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+}
+.pos-side-tag.long { background: var(--binance-green-bg); color: var(--binance-green); }
+
+.pos-pnl-live {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.pos-pnl-val {
+    font-size: 16px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--binance-green);
+}
+
+.pos-pnl-pct {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--binance-green);
+}
+
+/* Barra de Progreso Dinámica SL - Entrada - TP */
+.pos-progress-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--bg-card-alt);
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+
+.lbl-sl { color: var(--binance-red); }
+.lbl-entry { color: var(--text-secondary); }
+.lbl-tp { color: var(--binance-green); }
+
+.progress-track {
+    position: relative;
+    height: 6px;
+    background: #101217;
+    border-radius: 3px;
+    display: flex;
+    overflow: visible;
+}
+
+.progress-zone-loss {
+    width: 40%;
+    height: 100%;
+    background: rgba(246, 70, 93, 0.4);
+    border-radius: 3px 0 0 3px;
+}
+
+.progress-zone-profit {
+    width: 60%;
+    height: 100%;
+    background: rgba(14, 203, 129, 0.4);
+    border-radius: 0 3px 3px 0;
+}
+
+.progress-cursor {
+    position: absolute;
+    top: -4px;
+    width: 14px;
+    height: 14px;
+    background: var(--binance-yellow);
+    border: 2px solid #0b0e11;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 6px var(--binance-yellow);
+    transition: left 0.3s ease;
+}
+
+.progress-current-price {
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+.progress-current-price strong {
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.pos-metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.pos-metric-item {
+    background: var(--bg-card-alt);
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.m-lbl {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.m-val {
+    font-size: 12px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+}
+
+/* Indicadores de Estrategia */
+.strategy-indicators-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.indicator-row {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ind-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ind-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ind-name i { font-size: 11px; }
+
+.ind-detail {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+.ind-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.5px;
+    font-family: var(--font-mono);
+}
+
+.badge-bullish { background: var(--binance-green-bg); color: var(--binance-green); }
+.badge-bearish { background: var(--binance-red-bg); color: var(--binance-red); }
+.badge-neutral { background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); }
+.badge-oversold { background: var(--rsi-oversold-bg); color: var(--rsi-cyan); border: 1px solid rgba(0, 210, 255, 0.3); }
+.badge-waiting { background: rgba(240, 185, 11, 0.1); color: var(--binance-yellow); }
+.badge-confirmed { background: var(--binance-green-bg); color: var(--binance-green); border: 1px solid rgba(14, 203, 129, 0.4); }
+
+/* Control Operativo Card */
+.audit-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.control-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-secondary);
+}
+
+.clock-display {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--binance-yellow);
+    background: var(--bg-card-alt);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+}
+
+/* ============================================================
+   6. SCROLLBARS Y RESPONSIVE
+   ============================================================ */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0b0e11;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2b313a;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3b424e;
+}
+
+@media (max-width: 1400px) {
+    .kpi-banner {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1100px) {
+    .trading-workspace {
+        grid-template-columns: 1fr;
+    }
+    .ticker-center {
+        display: none;
+    }
+    .kpi-banner {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

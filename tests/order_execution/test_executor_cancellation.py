@@ -12,7 +12,6 @@ Cubre:
 from __future__ import annotations
 
 from decimal import Decimal
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -48,9 +47,7 @@ class TestCancelOrderSuccess:
         assert result.status == OrderStatus.CANCELED
         assert result.order_id == 12345
 
-    def test_m3_status_updated_to_canceled(
-        self, executor, mock_client, mock_grid_state
-    ) -> None:
+    def test_m3_status_updated_to_canceled(self, executor, mock_client, mock_grid_state) -> None:
         mock_client.delete.return_value = _make_cancel_response()
         executor.cancel_order(order_id=12345, symbol="SOLUSDT")
         mock_grid_state.update_order_status.assert_called_once_with(
@@ -80,9 +77,7 @@ class TestCancelOrderFilledInTransit:
         mock_client.get.return_value = make_binance_order_response(status="FILLED")
         with pytest.raises(OrderNotCancelableError):
             executor.cancel_order(order_id=12345, symbol="SOLUSDT")
-        mock_grid_state.update_order_status.assert_called_once_with(
-            12345, OrderStatus.FILLED.value
-        )
+        mock_grid_state.update_order_status.assert_called_once_with(12345, OrderStatus.FILLED.value)
 
     def test_actual_status_none_when_get_also_fails(
         self, executor, mock_client, mock_grid_state
@@ -94,18 +89,14 @@ class TestCancelOrderFilledInTransit:
         assert exc_info.value.actual_status is None
         mock_grid_state.update_order_status.assert_not_called()
 
-    def test_other_binance_error_raises_cancellation_error(
-        self, executor, mock_client
-    ) -> None:
+    def test_other_binance_error_raises_cancellation_error(self, executor, mock_client) -> None:
         mock_client.delete.side_effect = BinanceAPIError(500, -1000, "Internal error")
         with pytest.raises(OrderCancellationError):
             executor.cancel_order(order_id=12345, symbol="SOLUSDT")
 
 
 class TestCancelAllOpenOrders:
-    def test_cancels_all_open_orders(
-        self, executor, mock_client, mock_grid_state
-    ) -> None:
+    def test_cancels_all_open_orders(self, executor, mock_client, mock_grid_state) -> None:
         open_orders = [make_order_orm(order_id=1), make_order_orm(order_id=2)]
         mock_grid_state.get_open_orders.return_value = open_orders
         mock_client.delete.side_effect = [

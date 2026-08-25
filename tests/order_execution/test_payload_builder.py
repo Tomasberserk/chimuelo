@@ -71,27 +71,29 @@ class TestBuildLimitOrderPayload:
         assert "newClientOrderId" not in payload
 
     def test_side_is_preserved(self, symbol_config) -> None:
-        buy = build_limit_order_payload(symbol_config, "BUY", Decimal("150.00"), Decimal("0.10"), None)
-        sell = build_limit_order_payload(symbol_config, "SELL", Decimal("150.00"), Decimal("0.10"), None)
+        buy = build_limit_order_payload(
+            symbol_config, "BUY", Decimal("150.00"), Decimal("0.10"), None
+        )
+        sell = build_limit_order_payload(
+            symbol_config, "SELL", Decimal("150.00"), Decimal("0.10"), None
+        )
         assert buy["side"] == "BUY"
         assert sell["side"] == "SELL"
 
     def test_symbol_from_config(self, symbol_config) -> None:
-        payload = build_limit_order_payload(symbol_config, "BUY", Decimal("150.00"), Decimal("0.10"), None)
+        payload = build_limit_order_payload(
+            symbol_config, "BUY", Decimal("150.00"), Decimal("0.10"), None
+        )
         assert payload["symbol"] == "SOLUSDT"
 
     def test_raises_filter_validation_if_price_below_min(self, symbol_config) -> None:
         with pytest.raises(FilterValidationError):
-            build_limit_order_payload(
-                symbol_config, "BUY", Decimal("0.001"), Decimal("0.10"), None
-            )
+            build_limit_order_payload(symbol_config, "BUY", Decimal("0.001"), Decimal("0.10"), None)
 
     def test_raises_filter_validation_if_notional_below_min(self, symbol_config) -> None:
         # min_notional = 5.00; price=0.01, qty=0.01 → notional=0.0001
         with pytest.raises(FilterValidationError):
-            build_limit_order_payload(
-                symbol_config, "BUY", Decimal("0.01"), Decimal("0.01"), None
-            )
+            build_limit_order_payload(symbol_config, "BUY", Decimal("0.01"), Decimal("0.01"), None)
 
 
 class TestBuildCancelPayload:

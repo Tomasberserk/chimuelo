@@ -58,8 +58,11 @@ logs/
 
 # --- SQLite (datos de estado del bot — nunca al repo) ---
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite3
+data/cache/
 
 # --- Archivos temporales y prototipos ---
 scratch/

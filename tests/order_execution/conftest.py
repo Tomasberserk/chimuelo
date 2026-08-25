@@ -11,7 +11,7 @@ import pytest
 from chimuelo_prime.api_client.client import BinanceAuthenticatedClient
 from chimuelo_prime.exchange_config.models import SymbolConfig, SymbolFilters
 from chimuelo_prime.grid_state.grid_state import GridState
-from chimuelo_prime.grid_state.schema import Order, OrderStatus
+from chimuelo_prime.grid_state.schema import Order
 from chimuelo_prime.order_execution.executor import OrderExecutor
 from chimuelo_prime.order_execution.lifecycle import OrderLifecycleManager
 

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chimuelo Prime — Binance Pro Algorithmic Trading</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐉</text></svg>">
+    
+    <!-- Google Fonts: Outfit & Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Pro Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Estilos Binance Pro -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- TradingView Lightweight Charts v4 -->
+    <script src="lightweight-charts.js"></script>
+</head>
+<body class="binance-dark">
+    <!-- Contenedor Principal de la App -->
+    <div class="binance-app">
+        
+        <!-- ============================================================
+             1. TICKER BAR SUPERIOR (ESTILO BINANCE PRO)
+             ============================================================ -->
+        <header class="ticker-bar">
+            <div class="ticker-left">
+                <div class="brand-logo">
+                    <div class="logo-icon-wrap">
+                        <i class="fa-solid fa-dragon"></i>
+                    </div>
+                    <div class="brand-info">
+                        <span class="brand-title">CHIMUELO <span class="brand-badge">PRIME</span></span>
+                        <span class="brand-sub">QUANT ENGINE PRO</span>
+                    </div>
+                </div>
+
+                <div class="ticker-divider"></div>
+
+                <!-- Selector de Par de Trading -->
+                <div class="pair-selector-group">
+                    <span class="selector-label"><i class="fa-solid fa-coins"></i> PAR:</span>
+                    <div class="pair-buttons" id="pair-buttons">
+                        <button class="pair-btn active" data-symbol="SOLUSDT">
+                            <span class="coin-icon sol"></span>SOL/USDT
+                        </button>
+                        <button class="pair-btn" data-symbol="ETHUSDT">
+                            <span class="coin-icon eth"></span>ETH/USDT
+                        </button>
+                        <button class="pair-btn" data-symbol="BTCUSDT">
+                            <span class="coin-icon btc"></span>BTC/USDT
+                        </button>
+                    </div>
+                    <select id="select-symbol-hidden" style="display:none;">
+                        <option value="SOLUSDT" selected>SOLUSDT</option>
+                        <option value="ETHUSDT">ETHUSDT</option>
+                        <option value="BTCUSDT">BTCUSDT</option>
+                    </select>
+                </div>
+
+                <div class="ticker-divider"></div>
+
+                <!-- Selector de Temporalidad (Timeframe) -->
+                <div class="timeframe-group">
+                    <span class="selector-label"><i class="fa-solid fa-chart-simple"></i> TF:</span>
+                    <div class="tf-buttons" id="tf-buttons">
+                        <button class="tf-btn active" data-interval="15m">15m</button>
+                        <button class="tf-btn" data-interval="1h">1h</button>
+                        <button class="tf-btn" data-interval="4h">4h</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ticker Stats en Vivo -->
+            <div class="ticker-center">
+                <div class="ticker-stat main-price-stat">
+                    <span class="stat-label">Precio en Vivo</span>
+                    <div class="stat-price-wrap">
+                        <span class="stat-price" id="ticker-price">$0.00</span>
+                        <span class="stat-badge" id="ticker-change-badge">0.00%</span>
+                    </div>
+                </div>
+
+                <div class="ticker-stat">
+                    <span class="stat-label">Cambio 24h</span>
+                    <span class="stat-val" id="ticker-change-24h">$0.00 (0.00%)</span>
+                </div>
+
+                <div class="ticker-stat">
+                    <span class="stat-label">24h Alto</span>
+                    <span class="stat-val" id="ticker-high-24h">$0.00</span>
+                </div>
+
+                <div class="ticker-stat">
+                    <span class="stat-label">24h Bajo</span>
+                    <span class="stat-val" id="ticker-low-24h">$0.00</span>
+                </div>
+
+                <div class="ticker-stat">
+                    <span class="stat-label">24h Volumen</span>
+                    <span class="stat-val" id="ticker-vol-24h">0.00</span>
+                </div>
+            </div>
+
+            <!-- Estado del Bot y Botones de Acción -->
+            <div class="ticker-right">
+                <div class="status-indicator status-inactive" id="bot-status-badge">
+                    <span class="pulse-dot"></span>
+                    <span id="bot-status-text">PAPER TRADING PAUSADO</span>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-start" id="btn-start" title="Iniciar simulación de Paper Trading">
+                        <i class="fa-solid fa-play"></i> Iniciar Paper Trading
+                    </button>
+                    <button class="btn btn-stop" id="btn-stop" title="Detener bot de forma segura" disabled>
+                        <i class="fa-solid fa-pause"></i> Detener
+                    </button>
+                    <button class="btn btn-panic" id="btn-panic-stop" title="Cierre de emergencia y cancelación masiva">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ============================================================
+             2. TARJETAS KPI FINANCIERAS (6 CARDS)
+             ============================================================ -->
+        <section class="kpi-banner">
+            <!-- Card 1: Saldo Inicial -->
+            <div class="kpi-box">
+                <div class="kpi-top">
+                    <span class="kpi-name"><i class="fa-solid fa-piggy-bank"></i> Saldo Inicial</span>
+                    <span class="kpi-tag tag-neutral">MICRO-CUENTA</span>
+                </div>
+                <div class="kpi-main">
+                    <span class="kpi-figure" id="kpi-initial">$25.00</span>
+                    <span class="kpi-currency">USDT</span>
+                </div>
+                <div class="kpi-sub">
+                    <span>Base de capital fija</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Equity Actual -->
+            <div class="kpi-box highlight-box">
+                <div class="kpi-top">
+                    <span class="kpi-name"><i class="fa-solid fa-wallet"></i> Equity Actual</span>
+                    <span class="kpi-tag tag-success" id="kpi-equity-roi">+0.00%</span>
+                </div>
+                <div class="kpi-main">
+                    <span class="kpi-figure text-green" id="kpi-equity">$25.00</span>
+                    <span class="kpi-currency">USDT</span>
+                </div>
+                <div class="kpi-sub">
+                    <span id="kpi-cash-detail">Cash: $25.00 | Posición: $0.00</span>
+                </div>
+            </div>
+
+            <!-- Card 3: PnL Flotante / Realizado -->
+            <div class="kpi-box">
+                <div class="kpi-top">
+                    <span class="kpi-name"><i class="fa-solid fa-chart-line-up"></i> PnL Total</span>
+                    <span class="kpi-tag" id="kpi-pnl-tag">Flot. + Real.</span>
+                </div>
+                <div class="kpi-main">
+                    <span class="kpi-figure" id="kpi-total-pnl">+$0.00</span>
+                    <span class="kpi-percent" id="kpi-total-pnl-pct">(+0.00%)</span>
+                </div>
+                <div class="kpi-sub">
+                    <span id="kpi-pnl-split">Real: $0.00 | Flot: $0.00</span>
+                </div>
+            </div>
+
+            <!-- Card 4: Win Rate -->
+            <div class="kpi-box">
+                <div class="kpi-top">
+                    <span class="kpi-name"><i class="fa-solid fa-bullseye"></i> Win Rate</span>
+                    <span class="kpi-tag tag-neutral" id="kpi-trades-count">0 Trades</span>
+                </div>
+                <div class="kpi-main">
+                    <span class="kpi-figure" id="kpi-winrate">0.0%</span>
+                </div>
+                <div class="kpi-sub">
+                    <span id="kpi-winloss-detail">0 Ganadas / 0 Perdidas</span>
+                </div>
+            </div>
+
+            <!-- Card 5: Profit Factor -->
+            <div class="kpi-box">
+                <div class="kpi-top">
+                    <span class="kpi-name"><i class="fa-solid fa-scale-balanced"></i> Profit Factor</span>
+                    <span class="kpi-tag tag-gold">R:R >= 2.5</span>
+                </div>
+                <div class="kpi-main">
+                    <span class="kpi-figure" id="kpi-profit-factor">0.00</span>
+                </div>
+                <div class="kpi-sub">
+                    <span>Ratio Ganancia / Pérdida</span>
+                </div>
+            </div>
+
+            <!-- Card 6: Max Drawdown -->
+            <div class="kpi-box">
+                <div class="kpi-top">
+                    <span class="kpi-name"><i class="fa-solid fa-shield-halved"></i> Max Drawdown</span>
+                    <span class="kpi-tag tag-risk">LÍMITE &lt; 5%</span>
+                </div>
+                <div class="kpi-main">
+                    <span class="kpi-figure text-safe" id="kpi-drawdown">0.00%</span>
+                </div>
+                <div class="kpi-sub">
+                    <span>Preservación de capital</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             3. WORKSPACE PRINCIPAL (GRÁFICOS + PANEL LATERAL)
+             ============================================================ -->
+        <main class="trading-workspace">
+            
+            <!-- COLUMNA CENTRAL: GRÁFICO PRINCIPAL + RSI + TABS -->
+            <div class="workspace-charts-area">
+                
+                <!-- Panel de Gráfico de Velas + EMAs -->
+                <div class="pro-panel chart-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <span class="panel-title">
+                                <i class="fa-solid fa-chart-candlestick"></i>
+                                <span id="chart-symbol-title">SOL / USDT</span>
+                                <span class="badge-timeframe" id="chart-tf-title">15m</span>
+                            </span>
+                            
+                            <!-- Leyendas de Indicadores -->
+                            <div class="indicators-legend">
+                                <span class="legend-badge legend-ema-trend">
+                                    <span class="legend-line line-purple"></span> EMA 200 (Tendencia)
+                                </span>
+                                <span class="legend-badge legend-ema-fast">
+                                    <span class="legend-line line-yellow"></span> EMA 20 (Pullback)
+                                </span>
+                                <span class="legend-badge legend-buy">
+                                    <i class="fa-solid fa-arrow-up-long"></i> BUY Signal
+                                </span>
+                                <span class="legend-badge legend-tp">
+                                    <span class="dot dot-green"></span> Take Profit (TP)
+                                </span>
+                                <span class="legend-badge legend-sl">
+                                    <span class="dot dot-red"></span> Stop Loss (SL)
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="panel-actions">
+                            <button class="btn-icon" id="btn-fit-chart" title="Reajustar Escala">
+                                <i class="fa-solid fa-expand"></i>
+                            </button>
+                            <button class="btn-icon" id="btn-refresh-candles" title="Refrescar Velas">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contenedor del Gráfico TradingView Velas -->
+                    <div class="tv-chart-wrapper" id="tv-main-chart">
+                        <div class="chart-loading">
+                            <div class="spinner"></div>
+                            <span>Cargando datos OHLCV desde Binance...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Gráfico: RSI (14) con Zona de Sobreventa (38) -->
+                <div class="pro-panel rsi-panel">
+                    <div class="panel-header compact-header">
+                        <div class="panel-title-group">
+                            <span class="panel-title rsi-title">
+                                <i class="fa-solid fa-wave-pulse"></i> RSI (14)
+                                <span class="rsi-current-value" id="rsi-live-value">--.--</span>
+                            </span>
+                            <span class="rsi-zone-badge" id="rsi-zone-badge">ANALIZANDO</span>
+                        </div>
+                        <div class="rsi-thresholds-legend">
+                            <span class="rsi-thresh-tag overbought"><span class="line-dot-red"></span> Sobrecompra (70)</span>
+                            <span class="rsi-thresh-tag oversold-chimuelo"><span class="line-dot-gold"></span> Umbral Chimuelo (38)</span>
+                            <span class="rsi-thresh-tag oversold"><span class="line-dot-green"></span> Sobreventa (30)</span>
+                        </div>
+                    </div>
+
+                    <!-- Contenedor del Sub-gráfico TradingView RSI -->
+                    <div class="tv-rsi-wrapper" id="tv-rsi-chart"></div>
+                </div>
+
+                <!-- SECCIÓN INFERIOR CON TABS (HISTORIAL, TERMINAL, GRID) -->
+                <div class="pro-panel tabs-panel">
+                    <div class="tabs-header">
+                        <div class="tab-triggers">
+                            <button class="tab-btn active" data-tab="tab-history">
+                                <i class="fa-solid fa-clock-rotate-left"></i> Historial de Operaciones
+                                <span class="tab-count-badge" id="trades-count-badge">0</span>
+                            </button>
+                            <button class="tab-btn" data-tab="tab-terminal">
+                                <i class="fa-solid fa-terminal"></i> Terminal Logs (WebSocket)
+                                <span class="tab-live-dot"></span>
+                            </button>
+                            <button class="tab-btn" data-tab="tab-strategy-info">
+                                <i class="fa-solid fa-brain"></i> Métricas Cuánticas & Parámetros
+                            </button>
+                        </div>
+                        <div class="tabs-actions">
+                            <div id="terminal-actions" style="display: none;">
+                                <button class="btn-micro" id="btn-clear-console" title="Limpiar Consola">
+                                    <i class="fa-solid fa-trash-can"></i> Limpiar
+                                </button>
+                                <button class="btn-micro active" id="btn-autoscroll" title="Auto-scroll">
+                                    <i class="fa-solid fa-angles-down"></i> Auto-Scroll
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tabs-body">
+                        <!-- TAB 1: HISTORIAL DE OPERACIONES -->
+                        <div class="tab-content active" id="tab-history">
+                            <div class="table-scroll-container">
+                                <table class="pro-table" id="table-trades-history">
+                                    <thead>
+                                        <tr>
+                                            <th>SÍMBOLO</th>
+                                            <th>LADO</th>
+                                            <th>ENTRADA</th>
+                                            <th>SALIDA / ACTUAL</th>
+                                            <th>STOP LOSS</th>
+                                            <th>TAKE PROFIT</th>
+                                            <th>PnL ($)</th>
+                                            <th>PnL (%)</th>
+                                            <th>ESTADO / MOTIVO</th>
+                                            <th>HORA UTC</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="trades-tbody">
+                                        <tr>
+                                            <td colspan="10" class="table-empty">
+                                                <i class="fa-solid fa-inbox"></i>
+                                                <p>No hay operaciones registradas aún. El bot está buscando una divergencia RSI válida.</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TAB 2: TERMINAL LOGS EN VIVO -->
+                        <div class="tab-content" id="tab-terminal">
+                            <div class="terminal-console" id="console-logs">
+                                <div class="log-entry info">
+                                    <span class="log-ts">[SISTEMA]</span>
+                                    <span class="log-msg">Chimuelo Prime Pro Dashboard inicializado. Conectando con orquestador...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 3: MÉTRICAS Y PARÁMETROS -->
+                        <div class="tab-content" id="tab-strategy-info">
+                            <div class="quant-params-grid">
+                                <div class="param-card">
+                                    <h4><i class="fa-solid fa-crosshairs"></i> Reglas de Entrada</h4>
+                                    <ul>
+                                        <li><strong>Tendencia Macro:</strong> Precio de cierre &gt; EMA 200</li>
+                                        <li><strong>Gatillo RSI:</strong> Divergencia Alcista en RSI(14) con mínimo &le; 38.0</li>
+                                        <li><strong>Filtro de Volumen:</strong> Volumen &gt; 1.1x SMA(20)</li>
+                                        <li><strong>Ratio Riesgo/Beneficio:</strong> R:R fijo de 1:2.5</li>
+                                    </ul>
+                                </div>
+                                <div class="param-card">
+                                    <h4><i class="fa-solid fa-shield-virus"></i> Gestión de Riesgo</h4>
+                                    <ul>
+                                        <li><strong>Stop Loss:</strong> Precio Entrada &minus; 1.5 &times; ATR(14)</li>
+                                        <li><strong>Take Profit:</strong> Precio Entrada &plus; 2.5 &times; Distancia SL</li>
+                                        <li><strong>Posicionamiento:</strong> 100% de la micro-cuenta ($25 USDT)</li>
+                                        <li><strong>Ejecución:</strong> Intrabarra tick por tick con detección de SL/TP</li>
+                                    </ul>
+                                </div>
+                                <div class="param-card">
+                                    <h4><i class="fa-solid fa-server"></i> Conexión & Orquestación</h4>
+                                    <div class="inputs-inline">
+                                        <div class="input-item">
+                                            <label>Configuración:</label>
+                                            <input type="text" id="input-config" value="config/chimuelo.yaml" class="pro-input">
+                                        </div>
+                                        <div class="input-item">
+                                            <label>Database URI:</label>
+                                            <input type="text" id="input-db" value="sqlite:///chimuelo.db" class="pro-input">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- COLUMNA LATERAL DERECHA: POSICIÓN ACTIVA & ESTRATEGIA -->
+            <aside class="workspace-sidebar">
+                
+                <!-- CARD 1: POSICIÓN ACTIVA -->
+                <div class="sidebar-card active-position-card">
+                    <div class="card-top">
+                        <div class="card-title-wrap">
+                            <i class="fa-solid fa-compass-drafting text-gold"></i>
+                            <span class="card-title">Posición Activa</span>
+                        </div>
+                        <span class="pos-status-badge badge-idle" id="pos-status-badge">SIN POSICIÓN</span>
+                    </div>
+
+                    <!-- Estado cuando NO hay posición activa -->
+                    <div class="no-position-state" id="no-position-view">
+                        <div class="radar-scan">
+                            <div class="scan-circle"></div>
+                            <i class="fa-solid fa-satellite-dish"></i>
+                        </div>
+                        <h5>Escaneando Mercado</h5>
+                        <p id="scan-subtext">Buscando divergencia alcista en RSI(14) por encima de la EMA 200...</p>
+                    </div>
+
+                    <!-- Estado cuando SÍ hay posición activa -->
+                    <div class="active-position-details" id="has-position-view" style="display: none;">
+                        <div class="pos-header-info">
+                            <div class="pos-pair-side">
+                                <span class="pos-pair" id="pos-pair">SOLUSDT</span>
+                                <span class="pos-side-tag long" id="pos-side">LONG 🟢</span>
+                            </div>
+                            <div class="pos-pnl-live">
+                                <span class="pos-pnl-val" id="pos-pnl-val">+$0.00</span>
+                                <span class="pos-pnl-pct" id="pos-pnl-pct">(+0.00%)</span>
+                            </div>
+                        </div>
+
+                        <!-- Barra de Progreso Dinámica SL <-> Entrada <-> TP -->
+                        <div class="pos-progress-wrap">
+                            <div class="progress-labels">
+                                <span class="lbl-sl" id="lbl-sl-price">SL $0.00</span>
+                                <span class="lbl-entry" id="lbl-entry-price">Entrada $0.00</span>
+                                <span class="lbl-tp" id="lbl-tp-price">TP $0.00</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-zone-loss"></div>
+                                <div class="progress-zone-profit"></div>
+                                <div class="progress-cursor" id="pos-price-cursor" style="left: 50%;"></div>
+                            </div>
+                            <div class="progress-current-price">
+                                <span>Precio Actual: <strong id="pos-current-price">$0.00</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Grid de Detalles de la Orden -->
+                        <div class="pos-metrics-grid">
+                            <div class="pos-metric-item">
+                                <span class="m-lbl">Precio de Entrada</span>
+                                <span class="m-val" id="pos-entry-price">$0.00</span>
+                            </div>
+                            <div class="pos-metric-item">
+                                <span class="m-lbl">Stop Loss (-1.5 ATR)</span>
+                                <span class="m-val text-red" id="pos-sl-price">$0.00</span>
+                            </div>
+                            <div class="pos-metric-item">
+                                <span class="m-lbl">Take Profit (1:2.5)</span>
+                                <span class="m-val text-green" id="pos-tp-price">$0.00</span>
+                            </div>
+                            <div class="pos-metric-item">
+                                <span class="m-lbl">Tamaño / Inventario</span>
+                                <span class="m-val" id="pos-size">0.0000 SOL</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: ESTADO DE LA ESTRATEGIA (MERCADO & INDICADORES) -->
+                <div class="sidebar-card strategy-status-card">
+                    <div class="card-top">
+                        <div class="card-title-wrap">
+                            <i class="fa-solid fa-microchip text-green"></i>
+                            <span class="card-title">Estado de la Estrategia</span>
+                        </div>
+                        <span class="eval-badge" id="eval-status-badge">ACTIVO</span>
+                    </div>
+
+                    <div class="strategy-indicators-list">
+                        <!-- Indicador 1: Tendencia Macro EMA 200 -->
+                        <div class="indicator-row">
+                            <div class="ind-info">
+                                <span class="ind-name"><i class="fa-solid fa-arrow-trend-up"></i> Macro Tendencia (EMA 200)</span>
+                                <span class="ind-detail" id="ind-ema-trend-val">EMA: $0.00 | Precio: $0.00</span>
+                            </div>
+                            <span class="ind-badge badge-bullish" id="ind-trend-badge">BULLISH</span>
+                        </div>
+
+                        <!-- Indicador 2: EMA 20 Rápida -->
+                        <div class="indicator-row">
+                            <div class="ind-info">
+                                <span class="ind-name"><i class="fa-solid fa-gauge-high"></i> EMA 20 Rápida</span>
+                                <span class="ind-detail" id="ind-ema-fast-val">EMA 20: $0.00</span>
+                            </div>
+                            <span class="ind-badge badge-neutral" id="ind-fast-badge">NEUTRAL</span>
+                        </div>
+
+                        <!-- Indicador 3: RSI 14 -->
+                        <div class="indicator-row">
+                            <div class="ind-info">
+                                <span class="ind-name"><i class="fa-solid fa-wave-pulse"></i> RSI (14)</span>
+                                <span class="ind-detail" id="ind-rsi-val">Valor actual: --.--</span>
+                            </div>
+                            <span class="ind-badge badge-oversold" id="ind-rsi-badge">SOBREVENTA &lt; 38</span>
+                        </div>
+
+                        <!-- Indicador 4: Divergencia RSI -->
+                        <div class="indicator-row">
+                            <div class="ind-info">
+                                <span class="ind-name"><i class="fa-solid fa-code-compare"></i> Divergencia RSI</span>
+                                <span class="ind-detail" id="ind-div-val">Valles de precio vs RSI</span>
+                            </div>
+                            <span class="ind-badge badge-waiting" id="ind-div-badge">BUSCANDO</span>
+                        </div>
+
+                        <!-- Indicador 5: Volatilidad ATR -->
+                        <div class="indicator-row">
+                            <div class="ind-info">
+                                <span class="ind-name"><i class="fa-solid fa-chart-line"></i> Volatilidad ATR (14)</span>
+                                <span class="ind-detail" id="ind-atr-val">ATR: $0.00 (SL Dist: $0.00)</span>
+                            </div>
+                            <span class="ind-badge badge-neutral" id="ind-atr-badge">NORMAL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: AUDITORÍA Y CONTROL RÁPIDO -->
+                <div class="sidebar-card audit-card">
+                    <div class="card-top">
+                        <div class="card-title-wrap">
+                            <i class="fa-solid fa-bolt-lightning text-yellow"></i>
+                            <span class="card-title">Control Operativo</span>
+                        </div>
+                        <span class="clock-display" id="live-utc-clock">00:00:00 UTC</span>
+                    </div>
+
+                    <div class="audit-controls">
+                        <div class="control-toggle-row">
+                            <span>Modo de Operación:</span>
+                            <strong class="text-gold">Paper Trading ($25)</strong>
+                        </div>
+                        <div class="control-toggle-row">
+                            <span>Sincronización Binance:</span>
+                            <span class="text-green"><i class="fa-solid fa-circle-check"></i> Conectado</span>
+                        </div>
+                        <div class="control-toggle-row">
+                            <span>Latencia WebSocket:</span>
+                            <span id="ws-latency-val" class="text-green">&lt; 15 ms</span>
+                        </div>
+                    </div>
+                </div>
+
+            </aside>
+        </main>
+    </div>
+
+    <!-- Script de lógica Frontend y TradingView Lightweight Charts -->
+    <script src="app.js"></script>
+</body>
+</html>

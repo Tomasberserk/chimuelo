@@ -114,9 +114,7 @@ class GridCalculator:
         return levels
 
     @staticmethod
-    def levels_below_price(
-        levels: list[LevelSpec], current_price: Decimal
-    ) -> list[LevelSpec]:
+    def levels_below_price(levels: list[LevelSpec], current_price: Decimal) -> list[LevelSpec]:
         """Retorna los niveles cuyo lower_price < current_price.
 
         Estos son los candidatos a BUY inicial cuando el grid arranca por primera vez.
