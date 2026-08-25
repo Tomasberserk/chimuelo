@@ -18,6 +18,7 @@ from chimuelo_prime.strategies.indicators import (
     calculate_sma,
 )
 from chimuelo_prime.strategies.models import SignalType, TradeSignal
+from chimuelo_prime.strategies.sentiment_service import MacroSentimentService
 
 
 class RSIDivergenceStrategy(BaseStrategy):
@@ -36,6 +37,7 @@ class RSIDivergenceStrategy(BaseStrategy):
         volume_sma_period: int = 20,
         volume_multiplier: Decimal = Decimal("1.1"),
         lookback_bars: int = 25,
+        macro_sentiment_service: MacroSentimentService | None = None,
     ) -> None:
         self._symbol = symbol
         self._rsi_period = rsi_period
@@ -48,6 +50,7 @@ class RSIDivergenceStrategy(BaseStrategy):
         self._vol_period = volume_sma_period
         self._vol_mult = volume_multiplier
         self._lookback = lookback_bars
+        self._macro_sentiment_service = macro_sentiment_service
 
         # Cachés de series temporales para evitar recomputar O(N^2)
         self._cached_closes: list[Decimal] = []
@@ -56,6 +59,15 @@ class RSIDivergenceStrategy(BaseStrategy):
         self._cached_rsi: list[Decimal | None] = []
         self._cached_atr: list[Decimal | None] = []
         self._cached_vol_sma: list[Decimal | None] = []
+
+    @property
+    def macro_sentiment_service(self) -> MacroSentimentService | None:
+        """Servicio de análisis y gestión de régimen de sentimiento macroeconómico."""
+        return self._macro_sentiment_service
+
+    @macro_sentiment_service.setter
+    def macro_sentiment_service(self, service: MacroSentimentService | None) -> None:
+        self._macro_sentiment_service = service
 
     @property
     def name(self) -> str:
@@ -106,6 +118,11 @@ class RSIDivergenceStrategy(BaseStrategy):
 
         candle = candles[current_index]
 
+        # 0. Filtro Macroeconómico de Sentimiento (M10): Veto de compras si can_open_longs es False
+        if self._macro_sentiment_service is not None:
+            if not self._macro_sentiment_service.can_open_longs():
+                return None
+
         # 1. Filtro de Tendencia: Precio actual por encima de la EMA 200
         if candle.close <= ema_trend:
             return None
@@ -148,6 +165,11 @@ class RSIDivergenceStrategy(BaseStrategy):
             ),
             "rr_ratio": str(self._rr_ratio),
         }
+        if self._macro_sentiment_service is not None:
+            sentiment_report = self._macro_sentiment_service.get_sentiment_report()
+            metadata["macro_sentiment_score"] = str(sentiment_report.score)
+            metadata["macro_sentiment_regime"] = sentiment_report.macro_regime.value
+            metadata["macro_sentiment_category"] = sentiment_report.category.value
 
         return TradeSignal(
             timestamp=candle.timestamp,

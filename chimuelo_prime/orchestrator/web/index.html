@@ -540,7 +540,40 @@
                     </div>
                 </div>
 
-                <!-- CARD 3: AUDITORÍA Y CONTROL RÁPIDO -->
+                <!-- CARD 3: INTELIGENCIA MACRO & SENTIMIENTO CRIPTO (M10) -->
+                <div class="sidebar-card macro-sentiment-card">
+                    <div class="card-top">
+                        <div class="card-title-wrap">
+                            <i class="fa-solid fa-earth-americas text-cyan" style="color:#00F0FF;"></i>
+                            <span class="card-title">Sentimiento Macro (M10)</span>
+                        </div>
+                        <span class="ind-badge badge-bullish" id="macro-regime-badge">RISK-ON</span>
+                    </div>
+
+                    <div class="macro-sentiment-body" style="padding:10px 0 4px 0;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-size:12px; color:var(--text-secondary);"><i class="fa-solid fa-gauge"></i> Fear & Greed Index:</span>
+                            <span id="fng-score-badge" style="font-weight:700; font-size:13px; color:#0ECB81;">50 / 100 (NEUTRAL)</span>
+                        </div>
+                        
+                        <!-- Barra visual de Fear & Greed -->
+                        <div style="background:rgba(255,255,255,0.08); height:6px; border-radius:3px; overflow:hidden; position:relative; margin-bottom:10px;">
+                            <div id="fng-progress-bar" style="width:50%; height:100%; background:linear-gradient(90deg, #F6465D 0%, #F0B90B 50%, #0ECB81 100%); transition: width 0.5s ease;"></div>
+                        </div>
+
+                        <div class="indicator-row" style="margin-bottom:6px;">
+                            <div class="ind-info">
+                                <span class="ind-name"><i class="fa-solid fa-shield-halved"></i> Filtro de Veto Macro</span>
+                                <span class="ind-detail" id="macro-veto-detail">Compras autorizadas</span>
+                            </div>
+                            <span class="ind-badge badge-bullish" id="macro-veto-badge">LIVRE 🟢</span>
+                        </div>
+
+                        <p id="macro-summary-text" style="font-size:11px; color:var(--text-secondary); margin:0; line-height:1.4;">Monitoreando índice global de miedo y codicia para prevenir compras en pánico extremo.</p>
+                    </div>
+                </div>
+
+                <!-- CARD 4: AUDITORÍA Y CONTROL RÁPIDO -->
                 <div class="sidebar-card audit-card">
                     <div class="card-top">
                         <div class="card-title-wrap">
@@ -553,7 +586,7 @@
                     <div class="audit-controls">
                         <div class="control-toggle-row">
                             <span>Modo de Operación:</span>
-                            <strong class="text-gold">Paper Trading ($25)</strong>
+                            <strong class="text-gold">Paper Trading ($100)</strong>
                         </div>
                         <div class="control-toggle-row">
                             <span>Sincronización Binance:</span>

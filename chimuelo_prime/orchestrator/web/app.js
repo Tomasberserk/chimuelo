@@ -118,6 +118,14 @@ document.addEventListener('DOMContentLoaded', () => {
         indAtrVal: document.getElementById('ind-atr-val'),
         indAtrBadge: document.getElementById('ind-atr-badge'),
 
+        // M10: Sentimiento Macro
+        macroRegimeBadge: document.getElementById('macro-regime-badge'),
+        fngScoreBadge: document.getElementById('fng-score-badge'),
+        fngProgressBar: document.getElementById('fng-progress-bar'),
+        macroVetoDetail: document.getElementById('macro-veto-detail'),
+        macroVetoBadge: document.getElementById('macro-veto-badge'),
+        macroSummaryText: document.getElementById('macro-summary-text'),
+
         // Parámetros y Auditoría
         liveUtcClock: document.getElementById('live-utc-clock'),
         wsLatencyVal: document.getElementById('ws-latency-val'),
@@ -751,6 +759,72 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ============================================================
+    // 7.1 ACTUALIZACIÓN DEL SENTIMIENTO MACRO (M10)
+    // ============================================================
+    function updateSentimentUI(data) {
+        if (!data) return;
+        const score = typeof data.score === 'number' ? data.score : parseFloat(data.score) || 50;
+        const category = data.category || 'NEUTRAL';
+        const regime = data.macro_regime || 'NEUTRAL';
+        const canOpen = data.can_open_longs !== false;
+        const summary = data.macro_summary || data.summary || 'Sentimiento de mercado neutral.';
+
+        if (dom.fngScoreBadge) {
+            let color = '#0ECB81';
+            if (score <= 25) color = '#F6465D';
+            else if (score <= 45) color = '#F0B90B';
+            else if (score >= 75) color = '#00F0FF';
+            dom.fngScoreBadge.textContent = `${Math.round(score)} / 100 (${category.replace('_', ' ')})`;
+            dom.fngScoreBadge.style.color = color;
+        }
+
+        if (dom.fngProgressBar) {
+            dom.fngProgressBar.style.width = `${Math.max(5, Math.min(100, score))}%`;
+        }
+
+        if (dom.macroRegimeBadge) {
+            dom.macroRegimeBadge.textContent = regime.replace('_', ' ');
+            if (regime === 'RISK_ON') {
+                dom.macroRegimeBadge.className = 'ind-badge badge-bullish';
+            } else if (regime === 'BLACK_SWAN_VETO') {
+                dom.macroRegimeBadge.className = 'ind-badge badge-bearish';
+            } else if (regime === 'RISK_OFF') {
+                dom.macroRegimeBadge.className = 'ind-badge badge-neutral';
+            } else {
+                dom.macroRegimeBadge.className = 'ind-badge badge-bullish';
+            }
+        }
+
+        if (dom.macroVetoBadge && dom.macroVetoDetail) {
+            if (canOpen) {
+                dom.macroVetoBadge.textContent = 'LIBRE 🟢';
+                dom.macroVetoBadge.className = 'ind-badge badge-bullish';
+                dom.macroVetoDetail.textContent = 'Compras autorizadas';
+            } else {
+                dom.macroVetoBadge.textContent = 'VETO 🚫';
+                dom.macroVetoBadge.className = 'ind-badge badge-bearish';
+                dom.macroVetoDetail.textContent = data.veto_reason || 'Compras bloqueadas por pánico';
+            }
+        }
+
+        if (dom.macroSummaryText) {
+            dom.macroSummaryText.textContent = summary;
+        }
+    }
+
+    async function fetchSentimentAndRender() {
+        try {
+            const res = await fetch('/api/sentiment');
+            if (res.ok) {
+                const data = await res.json();
+                updateSentimentUI(data);
+            }
+        } catch (e) {
+            console.warn('[Chimuelo] Error cargando sentimiento:', e);
+        }
+    }
+
+    // ============================================================
     // 8. PANEL DE POSICIÓN ACTIVA Y SEGUIMIENTO EN VIVO
     // ============================================================
     function updateActivePositionUI(currentPrice) {
@@ -996,6 +1070,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (data.account.balance) state.initialBalance = Number(data.account.balance);
                             if (data.account.equity) state.equity = Number(data.account.equity);
                         }
+                        if (data.sentiment) {
+                            updateSentimentUI(data.sentiment);
+                        }
                     } else if (data.type === 'status') {
                         updateBotStatusUI(data.is_running);
                     }
@@ -1218,9 +1295,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initCharts();
     syncInitialStatus();
+    fetchSentimentAndRender();
     fetchCandlesAndRender();
     connectWebSocket();
 
     // Actualización de estado y velas cada 8 segundos
     setInterval(fetchCandlesAndRender, 8000);
+    // Actualización de sentimiento macro cada 60 segundos
+    setInterval(fetchSentimentAndRender, 60000);
 });

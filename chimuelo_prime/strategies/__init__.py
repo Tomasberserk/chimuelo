@@ -9,6 +9,12 @@ from chimuelo_prime.strategies.optimizer import (
     StrategyParameterOptimizer,
 )
 from chimuelo_prime.strategies.rsi_divergence import RSIDivergenceStrategy
+from chimuelo_prime.strategies.sentiment_models import (
+    MacroRegime,
+    MarketSentimentReport,
+    SentimentCategory,
+)
+from chimuelo_prime.strategies.sentiment_service import MacroSentimentService
 
 __all__ = [
     "BaseStrategy",
@@ -20,4 +26,8 @@ __all__ = [
     "OptimizationTrialResult",
     "OptimizationSummary",
     "StrategyParameterOptimizer",
+    "MacroRegime",
+    "MarketSentimentReport",
+    "SentimentCategory",
+    "MacroSentimentService",
 ]

@@ -46,8 +46,10 @@ from chimuelo_prime.strategies.indicators import (
     calculate_rsi,
 )
 from chimuelo_prime.strategies.rsi_divergence import RSIDivergenceStrategy
+from chimuelo_prime.strategies.sentiment_service import MacroSentimentService
 
 logger = get_logger(__name__)
+sentiment_service = MacroSentimentService()
 
 # ==============================================================================
 # MODELOS PYDANTIC PARA REQUESTS Y RESPONSES DE LA API
@@ -139,6 +141,7 @@ class PaperTradingManager:
             volume_multiplier=Decimal("1.1"),
             atr_sl_multiplier=Decimal("1.2"),
             risk_reward_ratio=Decimal("2.0"),
+            macro_sentiment_service=sentiment_service,
         )
         self._engine: PaperTradingEngine | None = None
         self._thread: threading.Thread | None = None
@@ -224,6 +227,7 @@ class PaperTradingManager:
                 volume_multiplier=Decimal("1.1"),
                 atr_sl_multiplier=Decimal("1.2"),
                 risk_reward_ratio=Decimal("2.0"),
+                macro_sentiment_service=sentiment_service,
             )
 
             self._engine = PaperTradingEngine(
@@ -646,6 +650,23 @@ def get_paper_trades() -> dict[str, Any]:
     }
 
 
+@app.get("/api/sentiment")
+@app.get("/api/market/sentiment")
+def get_market_sentiment() -> dict[str, Any]:
+    """Retorna el reporte en vivo de sentimiento macro (Crypto Fear & Greed Index + Régimen Macro)."""
+    report = sentiment_service.get_sentiment_report()
+    return {
+        "score": float(report.score),
+        "category": report.category.value,
+        "macro_regime": report.macro_regime.value,
+        "can_open_longs": report.can_open_longs,
+        "veto_reason": report.veto_reason,
+        "source": report.source,
+        "timestamp": report.timestamp.isoformat(),
+        "macro_summary": report.macro_summary,
+    }
+
+
 @app.websocket("/ws")
 @app.websocket("/api/ws")
 @app.websocket("/ws/live")
@@ -700,6 +721,19 @@ async def live_websocket_endpoint(websocket: WebSocket) -> None:
                         },
                         "position": status["open_position"],
                     }
+
+                    try:
+                        sent_rep = sentiment_service.get_sentiment_report()
+                        update_payload["sentiment"] = {
+                            "score": float(sent_rep.score),
+                            "category": sent_rep.category.value,
+                            "macro_regime": sent_rep.macro_regime.value,
+                            "can_open_longs": sent_rep.can_open_longs,
+                            "veto_reason": sent_rep.veto_reason,
+                            "summary": sent_rep.macro_summary,
+                        }
+                    except Exception:
+                        pass
 
                     if last_result is not None:
                         update_payload["last_price"] = float(last_result.current_price)
