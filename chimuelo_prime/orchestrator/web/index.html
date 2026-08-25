@@ -68,8 +68,8 @@
                 <div class="timeframe-group">
                     <span class="selector-label"><i class="fa-solid fa-chart-simple"></i> TF:</span>
                     <div class="tf-buttons" id="tf-buttons">
-                        <button class="tf-btn active" data-interval="15m">15m</button>
-                        <button class="tf-btn" data-interval="1h">1h</button>
+                        <button class="tf-btn" data-interval="15m">15m</button>
+                        <button class="tf-btn active" data-interval="1h">1h</button>
                         <button class="tf-btn" data-interval="4h">4h</button>
                     </div>
                 </div>
@@ -108,16 +108,16 @@
 
             <!-- Estado del Bot y Botones de Acción -->
             <div class="ticker-right">
-                <div class="status-indicator status-inactive" id="bot-status-badge">
+                <div class="status-indicator status-active" id="bot-status-badge">
                     <span class="pulse-dot"></span>
-                    <span id="bot-status-text">PAPER TRADING PAUSADO</span>
+                    <span id="bot-status-text">PAPER TRADING ACTIVO</span>
                 </div>
 
                 <div class="action-buttons">
-                    <button class="btn btn-start" id="btn-start" title="Iniciar simulación de Paper Trading">
+                    <button class="btn btn-start" id="btn-start" title="Iniciar simulación de Paper Trading" disabled>
                         <i class="fa-solid fa-play"></i> Iniciar Paper Trading
                     </button>
-                    <button class="btn btn-stop" id="btn-stop" title="Detener bot de forma segura" disabled>
+                    <button class="btn btn-stop" id="btn-stop" title="Detener bot de forma segura">
                         <i class="fa-solid fa-pause"></i> Detener
                     </button>
                     <button class="btn btn-panic" id="btn-panic-stop" title="Cierre de emergencia y cancelación masiva">
@@ -135,10 +135,10 @@
             <div class="kpi-box">
                 <div class="kpi-top">
                     <span class="kpi-name"><i class="fa-solid fa-piggy-bank"></i> Saldo Inicial</span>
-                    <span class="kpi-tag tag-neutral">MICRO-CUENTA</span>
+                    <span class="kpi-tag tag-neutral">PORTAFOLIO</span>
                 </div>
                 <div class="kpi-main">
-                    <span class="kpi-figure" id="kpi-initial">$25.00</span>
+                    <span class="kpi-figure" id="kpi-initial">$100.00</span>
                     <span class="kpi-currency">USDT</span>
                 </div>
                 <div class="kpi-sub">
@@ -153,11 +153,11 @@
                     <span class="kpi-tag tag-success" id="kpi-equity-roi">+0.00%</span>
                 </div>
                 <div class="kpi-main">
-                    <span class="kpi-figure text-green" id="kpi-equity">$25.00</span>
+                    <span class="kpi-figure text-green" id="kpi-equity">$100.00</span>
                     <span class="kpi-currency">USDT</span>
                 </div>
                 <div class="kpi-sub">
-                    <span id="kpi-cash-detail">Cash: $25.00 | Posición: $0.00</span>
+                    <span id="kpi-cash-detail">Cash: $100.00 | Posición: $0.00</span>
                 </div>
             </div>
 

@@ -7,10 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ESTADO GLOBAL DE LA APLICACIÓN ---
     const state = {
         symbol: 'SOLUSDT',
-        interval: '15m',
-        initialBalance: 25.00,
-        equity: 25.00,
-        cash: 25.00,
+        interval: '1h',
+        initialBalance: 100.00,
+        equity: 100.00,
+        cash: 100.00,
         floatingPnl: 0.00,
         realizedPnl: 0.00,
         lastPrice: null,
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         low24h: 0,
         change24h: 0,
         volume24h: 0,
-        isRunning: false,
+        isRunning: true,
         activePosition: null,
         trades: [],
         candles: [],
@@ -988,6 +988,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         else if (lower.includes('warn') || lower.includes('alert')) level = 'warn';
                         else if (lower.includes('success') || lower.includes('filled') || lower.includes('iniciado')) level = 'success';
                         appendLog(data.message, level);
+                    } else if (data.type === 'live_update') {
+                        if (typeof data.is_running === 'boolean') {
+                            updateBotStatusUI(data.is_running);
+                        }
+                        if (data.account) {
+                            if (data.account.balance) state.initialBalance = Number(data.account.balance);
+                            if (data.account.equity) state.equity = Number(data.account.equity);
+                        }
                     } else if (data.type === 'status') {
                         updateBotStatusUI(data.is_running);
                     }
@@ -1189,7 +1197,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================
     // 13. ARRANQUE INICIAL
     // ============================================================
+    async function syncInitialStatus() {
+        try {
+            const res = await fetch('/api/paper/status');
+            if (res.ok) {
+                const data = await res.json();
+                if (typeof data.is_running === 'boolean') {
+                    updateBotStatusUI(data.is_running);
+                }
+                if (data.balance) state.initialBalance = Number(data.balance);
+                if (data.equity) state.equity = Number(data.equity);
+                if (data.symbol) state.symbol = data.symbol;
+                if (data.interval) state.interval = data.interval;
+                updateFinancialKPIs();
+            }
+        } catch (e) {
+            console.warn('[Chimuelo] Error sincronizando estado:', e);
+        }
+    }
+
     initCharts();
+    syncInitialStatus();
     fetchCandlesAndRender();
     connectWebSocket();
 
