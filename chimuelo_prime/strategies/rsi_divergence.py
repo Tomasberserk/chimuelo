@@ -143,7 +143,7 @@ class RSIDivergenceStrategy(BaseStrategy):
         if candle.close <= candle.open or candle.close <= ema_fast:
             return None
 
-        # 5. Cálculo Dinámico de Stop Loss y Take Profit basado en ATR
+        # 5. Cálculo Dinámico de Stop Loss y Take Profit Estructural (75% Techo Local)
         entry_price = candle.close
         sl_distance = atr_val * self._atr_sl_mult
         stop_loss = entry_price - sl_distance
@@ -152,7 +152,22 @@ class RSIDivergenceStrategy(BaseStrategy):
         if stop_loss <= Decimal("0") or (sl_distance / entry_price) > Decimal("0.08"):
             return None
 
-        take_profit = entry_price + (sl_distance * self._rr_ratio)
+        # Take Profit Matemático ATR
+        math_tp = entry_price + (sl_distance * self._rr_ratio)
+
+        # Techo Estructural (Máximo de las últimas velas de lookback)
+        lookback_window = candles[max(0, current_index - self._lookback) : current_index + 1]
+        local_swing_high = max((c.high for c in lookback_window), default=entry_price)
+
+        if local_swing_high > entry_price:
+            # 75% del camino hacia el techo local para garantizar alta probabilidad de toque
+            structural_tp = entry_price + ((local_swing_high - entry_price) * Decimal("0.75"))
+            # Limitar el TP para nunca superar la resistencia sin confirmación
+            take_profit = min(math_tp, structural_tp)
+            if take_profit <= entry_price + sl_distance:
+                take_profit = math_tp  # Preservar ratio mínimo
+        else:
+            take_profit = math_tp
 
         metadata: dict[str, Any] = {
             "rsi_current": str(rsi_val),

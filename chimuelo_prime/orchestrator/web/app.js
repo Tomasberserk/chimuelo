@@ -445,7 +445,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     const entryPrice = currentCandle.close;
                     const slDist = Math.max(atrVal * 1.5, entryPrice * 0.015);
                     const slPrice = entryPrice - slDist;
-                    const tpPrice = entryPrice + (slDist * 2.5); // R:R = 1:2.5
+                    
+                    // 1. Target Matemático ATR (R:R = 1:2.0)
+                    let mathTp = entryPrice + (slDist * 2.0);
+
+                    // 2. Techo Estructural (Máximo de las últimas 48 velas)
+                    const lookbackHighWindow = candles.slice(Math.max(0, i - 48), i + 1);
+                    const localSwingHigh = Math.max(...lookbackHighWindow.map(c => c.high));
+
+                    // 3. Take Profit Realista: 75% del recorrido hacia el techo local para garantizar alta probabilidad
+                    let tpPrice = mathTp;
+                    if (localSwingHigh > entryPrice) {
+                        const structuralTp = entryPrice + ((localSwingHigh - entryPrice) * 0.75);
+                        // Limitar el TP para nunca proyectar por encima de la resistencia sin confirmación
+                        tpPrice = Math.min(mathTp, structuralTp);
+                        if (tpPrice <= entryPrice + slDist) {
+                            tpPrice = mathTp; // Mantener objetivo mínimo saludable
+                        }
+                    }
 
                     // Marker de Compra
                     markers.push({
@@ -587,10 +604,8 @@ document.addEventListener('DOMContentLoaded', () => {
             state.emaFastSeries.setData(ema20);
             state.rsiSeries.setData(rsi14);
 
-            // Marcadores en Velas
-            if (analysis.markers.length > 0) {
-                state.candleSeries.setMarkers(analysis.markers);
-            }
+            // Marcadores en Velas (Limpiar siempre para evitar que queden rastros de otros pares)
+            state.candleSeries.setMarkers(analysis.markers || []);
 
             state.mainChart.timeScale().fitContent();
 
