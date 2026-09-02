@@ -1403,9 +1403,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success) {
                     appendLog(`✅ [AUDIT OK] Reporte ${data.week_identifier} generado exitosamente.`, 'success');
                     appendLog(`   • SHA-256: ${data.sha256}`, 'info');
-                    appendLog(`   • Descargas: <a href="/api/audit/download?week=${data.week_identifier}&format=md" target="_blank" style="color:#00d2ff;">[Markdown]</a> | <a href="/api/audit/download?week=${data.week_identifier}&format=json" target="_blank" style="color:#F0B90B;">[JSON]</a> | <a href="/api/audit/download?week=${data.week_identifier}&format=xlsx" target="_blank" style="color:#0ECB81;">[Excel XLSX]</a>`, 'info');
+                    appendLog(`   • Descargas directas: <a href="/api/audit/download?week=${data.week_identifier}&format=md" target="_blank" style="color:#00d2ff; font-weight:600; text-decoration:underline;">[Descargar Markdown]</a> | <a href="/api/audit/download?week=${data.week_identifier}&format=json" target="_blank" style="color:#F0B90B; font-weight:600; text-decoration:underline;">[Descargar JSON]</a> | <a href="/api/audit/download?week=${data.week_identifier}&format=xlsx" target="_blank" style="color:#0ECB81; font-weight:600; text-decoration:underline;">[Descargar Excel]</a>`, 'info');
+                    
+                    // Disparar descarga automática en el navegador
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = `/api/audit/download?week=${data.week_identifier}&format=md`;
+                    downloadLink.download = `chimuelo_weekly_audit_${data.week_identifier}.md`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
                 } else {
-                    appendLog(`[!] Error generando reporte: ${data.message || 'Error desconocido'}`, 'error');
+                    appendLog(`[!] Error generando reporte: ${data.message || data.detail || 'Error desconocido'}`, 'error');
                 }
             } catch (err) {
                 appendLog(`[!] Error en solicitud de auditoría: ${err.message}`, 'error');

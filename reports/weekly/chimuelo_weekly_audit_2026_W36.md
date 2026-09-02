@@ -1,9 +1,9 @@
 # Chimuelo Prime — Reporte de Auditoría Semanal (2026_W36)
 
-> **ID de Reporte:** `audit_2026_W36_1788383112` | **Schema:** `v1.0.0`  
-> **Generado:** `2026-09-02T21:05:12.866664+00:00` | **Git Commit SHA:** `4040a27adfed`  
+> **ID de Reporte:** `audit_2026_W36_1788383381` | **Schema:** `v1.0.0`  
+> **Generado:** `2026-09-02T21:09:41.227731+00:00` | **Git Commit SHA:** `559091327652`  
 > **Estrategia:** `v1.0.0-frozen` | **Config Hash:** `12c68c1a40b27329...`  
-> **Hash de Integridad (SHA-256):** `1946a275f4cef1491170eabd43b43dac15eecd72c871a5e16b88b979ce94221a`  
+> **Hash de Integridad (SHA-256):** `c432259023db59602206a2c011ec2679fa10ae370117e6f8671b3f41d86d6347`  
 > **Data Quality Reconciliation:** `PASS / 0 inconsistencies`  
 
 ---

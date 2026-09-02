@@ -517,10 +517,10 @@ class WeeklyAuditReportGenerator:
             "sha256": report_data["data_integrity_sha256"],
             "reconciliation": report_data["data_quality_reconciliation"],
             "files": {
-                "json": str(json_file_named),
-                "markdown": str(md_file_named),
-                "excel": str(xlsx_file_named),
+                "json": json_file_named.as_posix(),
+                "markdown": md_file_named.as_posix(),
+                "excel": xlsx_file_named.as_posix(),
             },
-            "archive_dir": str(archive_dir),
+            "archive_dir": archive_dir.as_posix(),
             "data": report_data,
         }

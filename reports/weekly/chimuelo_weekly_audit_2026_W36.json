@@ -1,16 +1,16 @@
 {
   "identity": {
-    "report_id": "audit_2026_W36_1788383112",
+    "report_id": "audit_2026_W36_1788383381",
     "report_schema_version": "1.0.0",
     "week_identifier": "2026_W36",
     "week_number": 36,
     "year": 2026,
-    "period_start": "2026-08-26T21:05:12.866664+00:00",
-    "period_end": "2026-09-02T21:05:12.866664+00:00",
-    "generated_at": "2026-09-02T21:05:12.866664+00:00",
+    "period_start": "2026-08-26T21:09:41.227731+00:00",
+    "period_end": "2026-09-02T21:09:41.227731+00:00",
+    "generated_at": "2026-09-02T21:09:41.227731+00:00",
     "strategy_version": "v1.0.0-frozen",
     "config_hash": "12c68c1a40b27329cb63cea9a38dcd9904875780ab5d4fae605308633eeb6a83",
-    "code_version_git_sha": "4040a27adfed0cb696c79cfb1e42b4e9c9c9c5b2",
+    "code_version_git_sha": "5590913276524a1a5a404b42719358fd1daf9aca",
     "initial_capital_usd": "100.00",
     "current_equity_usd": "100.00",
     "high_water_mark_usd": "100.00"
@@ -187,7 +187,7 @@
   },
   "weekly_equity_series": [
     {
-      "timestamp": "2026-08-26T21:05:12.866664+00:00",
+      "timestamp": "2026-08-26T21:09:41.227731+00:00",
       "equity": "100.00",
       "daily_drawdown_pct": 0.0,
       "peak_drawdown_pct": 0.0,
@@ -195,7 +195,7 @@
       "sol_price": "140.00"
     },
     {
-      "timestamp": "2026-09-02T21:05:12.866664+00:00",
+      "timestamp": "2026-09-02T21:09:41.227731+00:00",
       "equity": "100.00",
       "daily_drawdown_pct": 0.0,
       "peak_drawdown_pct": 0.0,
@@ -203,5 +203,5 @@
       "sol_price": "145.00"
     }
   ],
-  "data_integrity_sha256": "1946a275f4cef1491170eabd43b43dac15eecd72c871a5e16b88b979ce94221a"
+  "data_integrity_sha256": "c432259023db59602206a2c011ec2679fa10ae370117e6f8671b3f41d86d6347"
 }
