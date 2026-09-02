@@ -270,6 +270,9 @@ class VirtualBroker:
             Decimal("0"),
         ) + sum((p.cost for p in self._positions.values()), Decimal("0"))
 
+    def get_total_exposure(self) -> Decimal:
+        return self.get_total_exposure_usd()
+
     def get_equity(self, current_prices: dict[str, Decimal] | None = None) -> Decimal:
         """Calcula el patrimonio neto total a precio de mercado (Mark-to-Market)."""
         prices = current_prices or {}
@@ -314,11 +317,12 @@ class VirtualBroker:
         quantity: Decimal,
         risk_pct_used: Decimal,
     ) -> tuple[PaperOrder, PaperFill, PaperPosition]:
-        """Ejecuta una orden virtual canónica para Strategy C."""
+        """Ejecuta una orden virtual canónica para Strategy C con atomicidad transaccional."""
         utc_ts = ensure_utc_aware(timestamp)
+        sym = symbol.upper()
 
-        if symbol in self._open_positions or symbol in self._positions:
-            raise ValueError(f"Ya existe una posición abierta en {symbol}. Imposible abrir nueva posición.")
+        if sym in self._open_positions or sym in self._positions:
+            raise ValueError(f"Ya existe una posición abierta en {sym}. Imposible abrir nueva posición.")
 
         notional_signal = signal_price * quantity
         if notional_signal < self._min_notional:
@@ -328,7 +332,7 @@ class VirtualBroker:
         order = PaperOrder(
             order_id=order_id,
             decision_id=decision_id,
-            symbol=symbol,
+            symbol=sym,
             side="BUY",
             timestamp=utc_ts,
             requested_price=signal_price,
@@ -337,8 +341,6 @@ class VirtualBroker:
             quantity=quantity,
             risk_pct_used=risk_pct_used,
         )
-        if self._persistence:
-            self._persistence.save_paper_order(order)
 
         fill_price = signal_price * (Decimal("1.0") + self._slippage_pct)
         notional_fill = fill_price * quantity
@@ -349,7 +351,7 @@ class VirtualBroker:
             fill_id=fill_id,
             order_id=order_id,
             decision_id=decision_id,
-            symbol=symbol,
+            symbol=sym,
             timestamp=utc_ts,
             signal_price=signal_price,
             fill_price=fill_price,
@@ -358,13 +360,11 @@ class VirtualBroker:
             fee_usd=fee_entry,
             fee_rate=self._fee_rate,
         )
-        if self._persistence:
-            self._persistence.save_paper_fill(fill)
 
         position_id = f"pos_{uuid.uuid4().hex[:12]}"
         position = PaperPosition(
             position_id=position_id,
-            symbol=symbol,
+            symbol=sym,
             status="OPEN",
             entry_time=utc_ts,
             entry_signal_price=signal_price,
@@ -375,60 +375,55 @@ class VirtualBroker:
             take_profit=take_profit,
             fee_entry=fee_entry,
         )
-        if self._persistence:
-            self._persistence.save_paper_position(position)
-        self._open_positions[symbol] = position
 
+        if self._persistence:
+            self._persistence.atomic_save_order_fill_position(order, fill, position)
+
+        self._open_positions[sym] = position
         self._cash -= (notional_fill + fee_entry)
         return order, fill, position
 
     def process_candle_for_exits(
-        self, candle: HistoricalCandle
+        self, symbol: str, candle: HistoricalCandle
     ) -> PaperPosition | None:
-        """Evalúa si una vela horaria activa el Take Profit o Stop Loss de una posición abierta."""
-        symbol = None
-        for sym in list(self._open_positions.keys()):
-            symbol = sym
-            break
-
-        if not symbol or symbol not in self._open_positions:
+        """Evalúa si una vela horaria activa el Take Profit o Stop Loss de la posición abierta del símbolo."""
+        sym = symbol.upper()
+        if sym not in self._open_positions:
             return None
 
-        pos = self._open_positions[symbol]
-        if candle.timestamp <= pos.entry_time:
-            return None
-
+        pos = self._open_positions[sym]
         exit_price: Decimal | None = None
         exit_reason: str | None = None
 
-        hit_sl = candle.low <= pos.stop_loss
-        hit_tp = candle.high >= pos.take_profit
-
-        if hit_sl and hit_tp:
-            exit_price = pos.stop_loss * (Decimal("1.0") - self._slippage_pct)
+        # Prioridad absoluta a Stop Loss en caso de brecha intrabarra
+        if candle.low <= pos.stop_loss:
+            exit_price = pos.stop_loss
             exit_reason = "STOP_LOSS"
-        elif hit_sl:
-            exit_price = pos.stop_loss * (Decimal("1.0") - self._slippage_pct)
-            exit_reason = "STOP_LOSS"
-        elif hit_tp:
-            exit_price = pos.take_profit * (Decimal("1.0") - self._slippage_pct)
+        elif candle.high >= pos.take_profit:
+            exit_price = pos.take_profit
             exit_reason = "TAKE_PROFIT"
 
-        if exit_price and exit_reason:
-            exit_time = ensure_utc_aware(candle.timestamp)
-            notional_exit = exit_price * pos.quantity
-            fee_exit = notional_exit * self._fee_rate
+        if exit_price is not None and exit_reason is not None:
+            exec_exit_price = exit_price * (Decimal("1.0") - self._slippage_pct)
+            gross_revenue = pos.quantity * exec_exit_price
+            fee_exit = gross_revenue * self._fee_rate
+            net_revenue = gross_revenue - fee_exit
 
-            notional_entry = pos.fill_price * pos.quantity
-            gross_pnl = notional_exit - notional_entry
-            net_pnl = gross_pnl - pos.fee_entry - fee_exit
+            entry_notional = pos.quantity * pos.fill_price
+            gross_pnl = gross_revenue - entry_notional
+            total_fees = pos.fee_entry + fee_exit
+            net_pnl = gross_pnl - total_fees
 
-            risk_dist = abs(pos.fill_price - pos.stop_loss)
-            r_mult = (exit_price - pos.fill_price) / risk_dist if risk_dist > Decimal("0") else Decimal("0")
+            r_multiple = Decimal("0")
+            initial_risk = abs(pos.fill_price - pos.stop_loss) * pos.quantity
+            if initial_risk > Decimal("0"):
+                r_multiple = net_pnl / initial_risk
 
-            duration = int((exit_time - pos.entry_time).total_seconds() / 3600)
+            duration_hours = max(
+                1, int((candle.timestamp - pos.entry_time).total_seconds() // 3600)
+            )
 
-            closed_position = PaperPosition(
+            closed_pos = PaperPosition(
                 position_id=pos.position_id,
                 symbol=pos.symbol,
                 status="CLOSED",
@@ -440,21 +435,21 @@ class VirtualBroker:
                 stop_loss=pos.stop_loss,
                 take_profit=pos.take_profit,
                 fee_entry=pos.fee_entry,
-                exit_time=exit_time,
-                exit_price=exit_price,
+                exit_time=ensure_utc_aware(candle.timestamp),
+                exit_price=exec_exit_price,
                 exit_reason=exit_reason,
                 fee_exit=fee_exit,
                 gross_pnl=gross_pnl,
                 net_pnl=net_pnl,
-                r_multiple=r_mult.quantize(Decimal("0.0001")),
-                duration_hours=duration,
+                r_multiple=r_multiple.quantize(Decimal("0.0001")),
+                duration_hours=duration_hours,
             )
 
             if self._persistence:
-                self._persistence.update_paper_position(closed_position)
-            del self._open_positions[symbol]
-            self._cash += (notional_exit - fee_exit)
-            return closed_position
+                self._persistence.update_paper_position(closed_pos)
+            del self._open_positions[sym]
+            self._cash += net_revenue
+            return closed_pos
 
         return None
 

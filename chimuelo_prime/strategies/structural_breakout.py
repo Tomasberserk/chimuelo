@@ -59,18 +59,21 @@ class StructuralBreakoutStrategy(BaseStrategy):
 
     @classmethod
     def get_config_hash(cls) -> str:
-        """Retorna el hash SHA-256 inmutable de las reglas congeladas."""
+        """Retorna el hash SHA-256 inmutable de TODOS los parámetros congelados de Strategy C."""
         config_dict = {
             "version": cls.VERSION,
-            "lookback": cls.LOOKBACK_RESISTANCE,
-            "ema_trend": cls.EMA_TREND_PERIOD,
+            "lookback_resistance": cls.LOOKBACK_RESISTANCE,
+            "ema_trend_period": cls.EMA_TREND_PERIOD,
             "atr_period": cls.ATR_PERIOD,
-            "vol_sma_mult": str(cls.VOLUME_SMA_MULT),
-            "vol_p70_window": cls.VOLUME_P70_WINDOW,
-            "vol_p70_pct": cls.VOLUME_P70_PERCENTILE,
-            "range_atr_mult": str(cls.RANGE_SPAN_ATR_MULT),
-            "close_pos_ratio": str(cls.CLOSE_POSITION_RATIO),
-            "tp_ratio": str(cls.TAKE_PROFIT_RATIO),
+            "volume_sma_period": cls.VOLUME_SMA_PERIOD,
+            "volume_sma_mult": str(cls.VOLUME_SMA_MULT),
+            "volume_p70_window": cls.VOLUME_P70_WINDOW,
+            "volume_p70_percentile": cls.VOLUME_P70_PERCENTILE,
+            "range_span_atr_mult": str(cls.RANGE_SPAN_ATR_MULT),
+            "close_position_ratio": str(cls.CLOSE_POSITION_RATIO),
+            "take_profit_ratio": str(cls.TAKE_PROFIT_RATIO),
+            "stop_loss_atr_mult": str(cls.STOP_LOSS_ATR_MULT),
+            "stop_loss_res_mult": str(cls.STOP_LOSS_RES_MULT),
             "max_sl_pct": str(cls.MAX_SL_PCT),
         }
         raw_bytes = json.dumps(config_dict, sort_keys=True).encode("utf-8")
@@ -137,34 +140,23 @@ class StructuralBreakoutStrategy(BaseStrategy):
         atr_val = self._cached_atr[idx] or Decimal("0")
         vol_sma = self._cached_vol_sma[idx] or Decimal("0")
 
-        # -------------------------------------------------------------
         # Gate 1: Trend base (Close > EMA100)
-        # -------------------------------------------------------------
         gate1_passed = bool(ema_trend > Decimal("0") and candle.close > ema_trend)
 
-        # -------------------------------------------------------------
         # Gate 2: Breakout 20-bar resistance (excluyendo vela actual)
-        # -------------------------------------------------------------
         past_res_window = candles[idx - self.LOOKBACK_RESISTANCE : idx]
         past_resistance = max(c.high for c in past_res_window)
         gate2_passed = bool(candle.close > past_resistance)
 
-        # -------------------------------------------------------------
         # Gate 3: Close in upper 35% of candle range (ratio >= 0.65)
-        # -------------------------------------------------------------
         candle_range = candle.high - candle.low
         close_pos_ratio = (candle.close - candle.low) / candle_range if candle_range > Decimal("0") else Decimal("0")
         gate3_passed = bool(candle_range > Decimal("0") and close_pos_ratio >= self.CLOSE_POSITION_RATIO)
 
-        # -------------------------------------------------------------
         # Gate 4: Volume expansion immediate (Volume >= 1.20x SMA20)
-        # -------------------------------------------------------------
         gate4_passed = bool(vol_sma > Decimal("0") and candle.volume >= (vol_sma * self.VOLUME_SMA_MULT))
 
-        # -------------------------------------------------------------
         # Gate 5: BTC Daily macro regime (BTC Close[D-1] > BTC EMA50[D-1])
-        # -------------------------------------------------------------
-        # Estrictamente el día anterior D-1
         prev_day_date = candle.timestamp.date() - timedelta(days=1)
         btc_daily_info = self._btc_daily_map.get(prev_day_date)
         if btc_daily_info:
@@ -173,16 +165,12 @@ class StructuralBreakoutStrategy(BaseStrategy):
             btc_close_prev, btc_ema50_prev, btc_macro_bullish = Decimal("0"), Decimal("0"), False
         gate5_passed = bool(btc_macro_bullish)
 
-        # -------------------------------------------------------------
         # Gate 6: Extreme Relative Volume (Volume >= P70 of last 100 bars)
-        # -------------------------------------------------------------
         past_100_vols = sorted([c.volume for c in candles[idx - self.VOLUME_P70_WINDOW : idx]])
         vol_p70_threshold = past_100_vols[int(len(past_100_vols) * self.VOLUME_P70_PERCENTILE)]
         gate6_passed = bool(candle.volume >= vol_p70_threshold)
 
-        # -------------------------------------------------------------
         # Gate 7: Range maturity (Range 20 bars >= 4.0x ATR14)
-        # -------------------------------------------------------------
         past_min_low = min(c.low for c in past_res_window)
         range_span = past_resistance - past_min_low
         range_atr_ratio = range_span / atr_val if atr_val > Decimal("0") else Decimal("0")

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
+from typing import Any
 
 from chimuelo_prime.paper_trading.decision_models import (
-    PaperOrder,
     RiskStateEnum,
     RiskStateSnapshot,
     ensure_utc_aware,
@@ -52,8 +52,20 @@ class PortfolioRiskEngine:
         return self._high_water_mark
 
     @property
+    def daily_start_equity(self) -> Decimal:
+        return self._daily_start_equity
+
+    @property
+    def current_day(self) -> date | None:
+        return self._current_day
+
+    @property
     def consecutive_losses(self) -> int:
         return self._consecutive_losses
+
+    @property
+    def cooldown_until(self) -> datetime | None:
+        return self._cooldown_until
 
     def update_equity_and_day(self, equity: Decimal, current_time: datetime) -> None:
         """Actualiza el capital, HWM y resetea el drawdown diario a las 00:00 UTC."""
@@ -134,8 +146,9 @@ class PortfolioRiskEngine:
         current_time: datetime,
         open_positions_count: int = 0,
         total_exposure_usd: Decimal = Decimal("0"),
+        proposed_trade_notional: Decimal = Decimal("0"),
     ) -> RiskStateSnapshot:
-        """Genera el snapshot inmutable del estado de riesgo en el momento de la decisión."""
+        """Genera el snapshot inmutable del estado de riesgo con verificación de exposición proyectada."""
         utc_dt = ensure_utc_aware(current_time)
         self.update_equity_and_day(self._current_equity, utc_dt)
 
@@ -147,22 +160,30 @@ class PortfolioRiskEngine:
         if self._daily_start_equity > Decimal("0"):
             daily_dd_pct = ((self._daily_start_equity - self._current_equity) / self._daily_start_equity) * Decimal("100")
 
-        exposure_pct = Decimal("0")
+        # Exposición actual y proyectada
+        current_exposure_pct = Decimal("0")
+        projected_exposure_usd = total_exposure_usd + proposed_trade_notional
+        projected_exposure_pct = Decimal("0")
+
         if self._current_equity > Decimal("0"):
-            exposure_pct = (total_exposure_usd / self._current_equity) * Decimal("100")
+            current_exposure_pct = (total_exposure_usd / self._current_equity) * Decimal("100")
+            projected_exposure_pct = (projected_exposure_usd / self._current_equity) * Decimal("100")
 
         risk_allowed = True
         rejection_reason = None
 
         if self._current_state in (RiskStateEnum.CIRCUIT_BREAKER_DAILY, RiskStateEnum.CIRCUIT_BREAKER_MAX_DD):
             risk_allowed = False
-            rejection_reason = f"Circuit Breaker activo ({self._current_state})"
+            rejection_reason = f"Circuit Breaker activo ({self._current_state.value})"
         elif open_positions_count >= self.MAX_SIMULTANEOUS_POSITIONS:
             risk_allowed = False
             rejection_reason = f"Límite de posiciones simultáneas alcanzado ({open_positions_count}/{self.MAX_SIMULTANEOUS_POSITIONS})"
-        elif exposure_pct >= self.MAX_TOTAL_EXPOSURE_PCT:
+        elif projected_exposure_pct > self.MAX_TOTAL_EXPOSURE_PCT:
             risk_allowed = False
-            rejection_reason = f"Límite de exposición total alcanzado ({exposure_pct:.1f}%/{self.MAX_TOTAL_EXPOSURE_PCT}%)"
+            rejection_reason = (
+                f"Límite de exposición total proyectada excedido "
+                f"({projected_exposure_pct:.1f}% > {self.MAX_TOTAL_EXPOSURE_PCT}%)"
+            )
 
         return RiskStateSnapshot(
             current_state=self._current_state,
@@ -172,7 +193,7 @@ class PortfolioRiskEngine:
             peak_to_trough_drawdown_pct=peak_dd_pct.quantize(Decimal("0.01")),
             consecutive_losses_count=self._consecutive_losses,
             open_positions_count=open_positions_count,
-            total_exposure_pct=exposure_pct.quantize(Decimal("0.01")),
+            total_exposure_pct=projected_exposure_pct.quantize(Decimal("0.01")),
             risk_allowed=risk_allowed,
             rejection_reason=rejection_reason,
         )
@@ -190,7 +211,8 @@ class PortfolioRiskEngine:
         daily_start_equity: Decimal,
         consecutive_losses: int,
         current_state: RiskStateEnum,
-        last_day: date,
+        last_day: date | None = None,
+        cooldown_until: datetime | None = None,
     ) -> None:
         """Restaura el estado exacto persistido tras reinicio."""
         self._current_equity = equity
@@ -199,3 +221,4 @@ class PortfolioRiskEngine:
         self._consecutive_losses = consecutive_losses
         self._current_state = current_state
         self._current_day = last_day
+        self._cooldown_until = ensure_utc_aware(cooldown_until) if cooldown_until else None

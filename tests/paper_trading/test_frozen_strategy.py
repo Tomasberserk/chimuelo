@@ -98,3 +98,25 @@ def test_gate_rejection_when_btc_bearish():
     filters, signal = strat.evaluate_gates(candles, len(candles) - 1)
     assert not filters.btc_macro_bullish
     assert signal is None
+
+
+def test_config_hash_mutation_detection(monkeypatch):
+    """Verifica que modificar cualquier parámetro de Strategy C altere el config_hash."""
+    original_hash = StructuralBreakoutStrategy.get_config_hash()
+
+    # Mutar LOOKBACK_RESISTANCE
+    monkeypatch.setattr(StructuralBreakoutStrategy, "LOOKBACK_RESISTANCE", 21)
+    mutated_hash_1 = StructuralBreakoutStrategy.get_config_hash()
+    assert mutated_hash_1 != original_hash
+
+    # Mutar VOLUME_SMA_MULT
+    monkeypatch.setattr(StructuralBreakoutStrategy, "LOOKBACK_RESISTANCE", 20)
+    monkeypatch.setattr(StructuralBreakoutStrategy, "VOLUME_SMA_MULT", Decimal("1.25"))
+    mutated_hash_2 = StructuralBreakoutStrategy.get_config_hash()
+    assert mutated_hash_2 != original_hash
+
+    # Mutar TAKE_PROFIT_RATIO
+    monkeypatch.setattr(StructuralBreakoutStrategy, "VOLUME_SMA_MULT", Decimal("1.20"))
+    monkeypatch.setattr(StructuralBreakoutStrategy, "TAKE_PROFIT_RATIO", Decimal("2.50"))
+    mutated_hash_3 = StructuralBreakoutStrategy.get_config_hash()
+    assert mutated_hash_3 != original_hash

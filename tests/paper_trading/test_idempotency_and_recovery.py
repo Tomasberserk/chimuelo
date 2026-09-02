@@ -6,9 +6,16 @@ import pytest
 
 from chimuelo_prime.backtesting.data_loader import HistoricalCandle
 from chimuelo_prime.paper_trading.decision_engine import SingleDecisionEngine
-from chimuelo_prime.paper_trading.decision_models import DecisionAction, ensure_utc_aware
+from chimuelo_prime.paper_trading.decision_models import (
+    DecisionAction,
+    PaperFill,
+    PaperOrder,
+    PaperPosition,
+    ensure_utc_aware,
+)
 from chimuelo_prime.paper_trading.persistence import (
     DuplicateDecisionError,
+    DuplicateOrderError,
     SQLitePersistenceBackend,
 )
 from chimuelo_prime.paper_trading.risk_engine import PortfolioRiskEngine, RiskStateEnum
@@ -35,21 +42,56 @@ def test_idempotent_decision_execution(tmp_path):
     risk_engine = PortfolioRiskEngine()
     strat = StructuralBreakoutStrategy(symbol="SOLUSDT")
     broker = VirtualBroker(persistence=persistence)
-    engine = SingleDecisionEngine(strategy=strat, risk_engine=risk_engine, persistence=persistence, broker=broker)
+    engine = SingleDecisionEngine(
+        symbol="SOLUSDT",
+        strategy=strat,
+        risk_engine=risk_engine,
+        persistence=persistence,
+        virtual_broker=broker,
+    )
 
     base_time = datetime(2026, 9, 1, 0, 0, 0, tzinfo=UTC)
     candles = [create_candle(base_time + timedelta(hours=i)) for i in range(110)]
     btc_daily = [create_candle(base_time + timedelta(days=i), close="60000.0") for i in range(10)]
+    strat.set_btc_daily_context(btc_daily)
 
     # Primera evaluación
-    d1, _ = engine.evaluate_bar(candles, len(candles) - 1, btc_daily)
+    d1 = engine.evaluate_bar(candles, len(candles) - 1)
     assert d1 is not None
 
     # Segunda evaluación con exactamente la misma vela y timestamp
-    d2, _ = engine.evaluate_bar(candles, len(candles) - 1, btc_daily)
+    d2 = engine.evaluate_bar(candles, len(candles) - 1)
     assert d2 is not None
     assert d1.decision_id == d2.decision_id
     assert d1.timestamp == d2.timestamp
+    assert d1.model_dump() == d2.model_dump()
+
+
+def test_atomic_order_fill_position_execution(tmp_path):
+    """Verifica que la ejecución de una orden virtual cree atómicamente orden, fill y posición."""
+    db_path = str(tmp_path / "atomic.db")
+    persistence = SQLitePersistenceBackend(db_path)
+    broker = VirtualBroker(persistence=persistence, initial_cash=Decimal("100.00"))
+
+    order, fill, pos = broker.execute_paper_order(
+        decision_id="dec_atomic_1",
+        symbol="SOLUSDT",
+        timestamp=datetime(2026, 9, 1, 10, 0, 0, tzinfo=UTC),
+        signal_price=Decimal("150.00"),
+        stop_loss=Decimal("140.00"),
+        take_profit=Decimal("172.00"),
+        quantity=Decimal("0.25"),
+        risk_pct_used=Decimal("0.025"),
+    )
+
+    assert order.order_id.startswith("ord_")
+    assert fill.order_id == order.order_id
+    assert pos.status == "OPEN"
+    assert broker.get_open_positions_count() == 1
+
+    # Intentar guardar una orden duplicada directamente en persistencia debe arrojar DuplicateOrderError
+    with pytest.raises(DuplicateOrderError):
+        persistence.save_paper_order(order)
 
 
 def test_crash_recovery_restores_open_positions_and_hwm(tmp_path):
@@ -77,7 +119,7 @@ def test_crash_recovery_restores_open_positions_and_hwm(tmp_path):
 
     # Debe haber restaurado la posición automáticamente
     assert broker2.get_open_positions_count() == 1
-    restored_pos = broker2.get_open_position("SOLUSDT")
+    restored_pos = broker2._open_positions.get("SOLUSDT")
     assert restored_pos is not None
     assert restored_pos.position_id == pos.position_id
     assert restored_pos.quantity == Decimal("0.25")

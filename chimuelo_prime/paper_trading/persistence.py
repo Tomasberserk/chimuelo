@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -50,6 +50,12 @@ class BasePersistenceBackend(ABC):
         pass
 
     @abstractmethod
+    def atomic_save_order_fill_position(
+        self, order: PaperOrder, fill: PaperFill, position: PaperPosition
+    ) -> None:
+        pass
+
+    @abstractmethod
     def update_paper_position(self, position: PaperPosition) -> None:
         pass
 
@@ -65,9 +71,24 @@ class BasePersistenceBackend(ABC):
     def get_decision_by_timestamp(self, symbol: str, timestamp: datetime) -> DecisionObject | None:
         pass
 
+    @abstractmethod
+    def save_risk_state(
+        self,
+        snapshot: RiskStateSnapshot,
+        timestamp: datetime,
+        daily_start_equity: Decimal,
+        current_day: date | None = None,
+        cooldown_until: datetime | None = None,
+    ) -> None:
+        pass
+
+    @abstractmethod
+    def get_latest_risk_state(self) -> dict[str, Any] | None:
+        pass
+
 
 class SQLitePersistenceBackend(BasePersistenceBackend):
-    """Backend SQLite local idempotente para desarrollo, replay y testing."""
+    """Backend SQLite local idempotente y transaccional para desarrollo, replay y testing."""
 
     def __init__(self, db_path: str = "data/paper_trading.db") -> None:
         self._db_path = Path(db_path)
@@ -167,9 +188,12 @@ class SQLitePersistenceBackend(BasePersistenceBackend):
                     current_state TEXT NOT NULL,
                     equity TEXT NOT NULL,
                     high_water_mark TEXT NOT NULL,
+                    daily_start_equity TEXT NOT NULL,
                     daily_dd_pct TEXT NOT NULL,
                     peak_dd_pct TEXT NOT NULL,
                     consecutive_losses INTEGER NOT NULL,
+                    current_day TEXT,
+                    cooldown_until TEXT,
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP
                 )
             """)
@@ -301,6 +325,92 @@ class SQLitePersistenceBackend(BasePersistenceBackend):
             )
             conn.commit()
 
+    def atomic_save_order_fill_position(
+        self, order: PaperOrder, fill: PaperFill, position: PaperPosition
+    ) -> None:
+        """Guarda orden, fill y posición en una única transacción atómica ACID."""
+        with self._get_connection() as conn:
+            try:
+                conn.execute("BEGIN TRANSACTION")
+                conn.execute(
+                    """
+                    INSERT INTO paper_orders (
+                        order_id, decision_id, symbol, side, timestamp, requested_price,
+                        stop_loss, take_profit, quantity, risk_pct_used
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        order.order_id,
+                        order.decision_id,
+                        order.symbol,
+                        order.side,
+                        order.timestamp.isoformat(),
+                        str(order.requested_price),
+                        str(order.stop_loss),
+                        str(order.take_profit),
+                        str(order.quantity),
+                        str(order.risk_pct_used),
+                    ),
+                )
+                conn.execute(
+                    """
+                    INSERT INTO paper_fills (
+                        fill_id, order_id, decision_id, symbol, timestamp, signal_price,
+                        fill_price, slippage_pct, quantity, fee_usd, fee_rate
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        fill.fill_id,
+                        fill.order_id,
+                        fill.decision_id,
+                        fill.symbol,
+                        fill.timestamp.isoformat(),
+                        str(fill.signal_price),
+                        str(fill.fill_price),
+                        str(fill.slippage_pct),
+                        str(fill.quantity),
+                        str(fill.fee_usd),
+                        str(fill.fee_rate),
+                    ),
+                )
+                conn.execute(
+                    """
+                    INSERT INTO paper_positions (
+                        position_id, symbol, status, entry_time, entry_signal_price, fill_price,
+                        slippage_pct, quantity, stop_loss, take_profit, fee_entry, exit_time,
+                        exit_price, exit_reason, fee_exit, gross_pnl, net_pnl, r_multiple, duration_hours
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        position.position_id,
+                        position.symbol,
+                        position.status,
+                        position.entry_time.isoformat(),
+                        str(position.entry_signal_price),
+                        str(position.fill_price),
+                        str(position.slippage_pct),
+                        str(position.quantity),
+                        str(position.stop_loss),
+                        str(position.take_profit),
+                        str(position.fee_entry),
+                        position.exit_time.isoformat() if position.exit_time else None,
+                        str(position.exit_price) if position.exit_price else None,
+                        position.exit_reason,
+                        str(position.fee_exit) if position.fee_exit else None,
+                        str(position.gross_pnl) if position.gross_pnl else None,
+                        str(position.net_pnl) if position.net_pnl else None,
+                        str(position.r_multiple) if position.r_multiple else None,
+                        position.duration_hours,
+                    ),
+                )
+                conn.commit()
+            except sqlite3.IntegrityError as err:
+                conn.rollback()
+                raise DuplicateOrderError(f"Transacción atómica fallida por duplicidad: {err}") from err
+            except Exception:
+                conn.rollback()
+                raise
+
     def update_paper_position(self, position: PaperPosition) -> None:
         with self._get_connection() as conn:
             conn.execute(
@@ -377,3 +487,54 @@ class SQLitePersistenceBackend(BasePersistenceBackend):
             if row:
                 return DecisionObject.model_validate_json(row["raw_payload_json"])
             return None
+
+    def save_risk_state(
+        self,
+        snapshot: RiskStateSnapshot,
+        timestamp: datetime,
+        daily_start_equity: Decimal,
+        current_day: date | None = None,
+        cooldown_until: datetime | None = None,
+    ) -> None:
+        ts_str = ensure_utc_aware(timestamp).isoformat()
+        with self._get_connection() as conn:
+            conn.execute(
+                """
+                INSERT INTO risk_state_history (
+                    timestamp, current_state, equity, high_water_mark, daily_start_equity,
+                    daily_dd_pct, peak_dd_pct, consecutive_losses, current_day, cooldown_until
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    ts_str,
+                    snapshot.current_state.value,
+                    str(snapshot.current_equity),
+                    str(snapshot.high_water_mark),
+                    str(daily_start_equity),
+                    str(snapshot.daily_drawdown_pct),
+                    str(snapshot.peak_to_trough_drawdown_pct),
+                    snapshot.consecutive_losses_count,
+                    current_day.isoformat() if current_day else None,
+                    cooldown_until.isoformat() if cooldown_until else None,
+                ),
+            )
+            conn.commit()
+
+    def get_latest_risk_state(self) -> dict[str, Any] | None:
+        with self._get_connection() as conn:
+            cur = conn.execute("SELECT * FROM risk_state_history ORDER BY id DESC LIMIT 1")
+            row = cur.fetchone()
+            if not row:
+                return None
+            return {
+                "timestamp": datetime.fromisoformat(row["timestamp"]),
+                "current_state": RiskStateEnum(row["current_state"]),
+                "equity": Decimal(row["equity"]),
+                "high_water_mark": Decimal(row["high_water_mark"]),
+                "daily_start_equity": Decimal(row["daily_start_equity"]),
+                "daily_dd_pct": Decimal(row["daily_dd_pct"]),
+                "peak_dd_pct": Decimal(row["peak_dd_pct"]),
+                "consecutive_losses": int(row["consecutive_losses"]),
+                "current_day": date.fromisoformat(row["current_day"]) if row["current_day"] else None,
+                "cooldown_until": datetime.fromisoformat(row["cooldown_until"]) if row["cooldown_until"] else None,
+            }
