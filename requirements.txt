@@ -21,10 +21,11 @@ mypy==1.11.2             # Type checking estricto
 ruff==0.6.9              # Linter + formatter
 types-PyYAML==6.0.12.20260510  # Stubs para mypy --strict con PyYAML
 
-# --- Web GUI (M8) ---
+# --- Web GUI & Reporting (M8) ---
 fastapi==0.136.3
 uvicorn==0.47.0
 websockets==16.0
 httpx==0.28.1
+openpyxl==3.1.5
 
 

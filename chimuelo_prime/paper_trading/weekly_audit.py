@@ -376,10 +376,14 @@ class WeeklyAuditReportGenerator:
         md += "\n---\n_Reporte generado automáticamente por el Weekly Audit Reporting System de Chimuelo Prime. Inmutable y reproducible._\n"
         return md
 
-    def export_excel(self, data: dict[str, Any], filepath: Path) -> None:
+    def export_excel(self, data: dict[str, Any], filepath: Path) -> bool:
         """Genera el libro Excel (.xlsx) estructurado derivado estrictamente del JSON canónico."""
-        import openpyxl
-        from openpyxl.styles import Alignment, Font, PatternFill
+        try:
+            import openpyxl
+            from openpyxl.styles import Alignment, Font, PatternFill
+        except (ImportError, ModuleNotFoundError) as exc:
+            self._log.warning("weekly_audit.openpyxl_missing", error=str(exc))
+            return False
 
         wb = openpyxl.Workbook()
 
