@@ -656,6 +656,94 @@ def get_paper_trades() -> dict[str, Any]:
     }
 
 
+@app.post("/api/audit/generate-weekly")
+def generate_weekly_audit(
+    week_number: int | None = Query(None, description="Número de semana ISO opcional"),
+    year: int | None = Query(None, description="Año opcional"),
+) -> dict[str, Any]:
+    """Genera el paquete de auditoría semanal reproducible (Markdown, JSON, XLSX)."""
+    from chimuelo_prime.paper_trading.persistence import SQLitePersistenceBackend
+    from chimuelo_prime.paper_trading.weekly_audit import WeeklyAuditReportGenerator
+
+    manager = PaperTradingManager.get_instance()
+    persistence = SQLitePersistenceBackend("data/live_paper.db")
+    generator = WeeklyAuditReportGenerator(
+        persistence=persistence,
+        broker=manager._broker,
+        output_base_dir="reports/weekly",
+    )
+    result = generator.generate_and_save_package(
+        week_number=week_number,
+        year=year,
+        initial_capital=manager._initial_balance,
+    )
+    return {
+        "success": True,
+        "message": f"Reporte de auditoría semanal {result['week_identifier']} generado exitosamente.",
+        "week_identifier": result["week_identifier"],
+        "report_id": result["report_id"],
+        "sha256": result["sha256"],
+        "files": result["files"],
+        "archive_dir": result["archive_dir"],
+    }
+
+
+@app.get("/api/audit/download")
+def download_audit_file(
+    week: str = Query(..., description="Identificador de semana, ej. 2026_W36"),
+    format: str = Query("md", regex="^(md|json|xlsx)$", description="Formato del archivo: md, json o xlsx"),
+) -> FileResponse:
+    """Descarga el archivo de reporte semanal en formato Markdown, JSON o XLSX."""
+    base_dir = Path("reports/weekly")
+    filename = f"chimuelo_weekly_audit_{week}.{format}"
+    file_path = base_dir / filename
+
+    if not file_path.exists():
+        # Buscar en carpeta de archivo
+        arch_path = base_dir / week / f"report.{format}"
+        if arch_path.exists():
+            file_path = arch_path
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Reporte de auditoría no encontrado para la semana {week} en formato {format}.",
+            )
+
+    media_types = {
+        "md": "text/markdown",
+        "json": "application/json",
+        "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }
+    return FileResponse(
+        path=str(file_path),
+        media_type=media_types.get(format, "application/octet-stream"),
+        filename=filename,
+    )
+
+
+@app.get("/api/audit/list")
+def list_audit_reports() -> dict[str, Any]:
+    """Lista todos los reportes de auditoría semanales generados y archivados."""
+    base_dir = Path("reports/weekly")
+    reports: list[dict[str, Any]] = []
+
+    if base_dir.exists():
+        for item in sorted(base_dir.iterdir()):
+            if item.is_dir() and item.name.startswith("20"):
+                reports.append({
+                    "week_identifier": item.name,
+                    "has_json": (item / "report.json").exists(),
+                    "has_md": (item / "report.md").exists(),
+                    "has_xlsx": (item / "report.xlsx").exists(),
+                    "archive_dir": str(item),
+                })
+
+    return {
+        "reports": reports,
+        "count": len(reports),
+    }
+
+
 @app.get("/api/sentiment")
 @app.get("/api/market/sentiment")
 def get_market_sentiment() -> dict[str, Any]:

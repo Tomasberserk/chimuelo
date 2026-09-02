@@ -1,0 +1,169 @@
+{
+  "identity": {
+    "report_id": "audit_2026_W36_1788381382",
+    "week_identifier": "2026_W36",
+    "week_number": 36,
+    "year": 2026,
+    "period_start": "2026-08-26T20:36:22.678146+00:00",
+    "period_end": "2026-09-02T20:36:22.678146+00:00",
+    "generated_at": "2026-09-02T20:36:22.678146+00:00",
+    "strategy_version": "v1.0.0-frozen",
+    "config_hash": "12c68c1a40b27329cb63cea9a38dcd9904875780ab5d4fae605308633eeb6a83",
+    "code_version_git_sha": "1ad3f3fb4b813984961349a5b587b84642c46ae9",
+    "initial_capital_usd": "100.00",
+    "current_equity_usd": "25.00",
+    "high_water_mark_usd": "100.00"
+  },
+  "performance": {
+    "total_signals_evaluated": 0,
+    "signals_approved": 0,
+    "blocked_by_strategy": 0,
+    "blocked_by_risk": 0,
+    "trades_closed_count": 0,
+    "winning_trades_count": 0,
+    "losing_trades_count": 0,
+    "win_rate_pct": 0.0,
+    "profit_factor": 0.0,
+    "expectancy_usd": 0.0,
+    "average_r": 0.0,
+    "median_r": 0.0,
+    "average_winner_usd": 0.0,
+    "average_loser_usd": 0.0,
+    "largest_winner_usd": 0.0,
+    "largest_loser_usd": 0.0,
+    "total_net_pnl_usd": "0",
+    "max_drawdown_pct": 75.0,
+    "open_positions_count": 0
+  },
+  "trade_ledger": [],
+  "market_context": {
+    "btc_regimes_at_entry": [],
+    "performance_by_symbol": {
+      "BTCUSDT": {
+        "trades": 0,
+        "win_rate_pct": 0.0,
+        "profit_factor": 0.0,
+        "net_pnl": "0.00",
+        "avg_r": 0.0
+      },
+      "SOLUSDT": {
+        "trades": 0,
+        "win_rate_pct": 0.0,
+        "profit_factor": 0.0,
+        "net_pnl": "0.00",
+        "avg_r": 0.0
+      }
+    }
+  },
+  "execution_quality": {
+    "total_slippage_usd": "0",
+    "total_fees_usd": "0",
+    "average_latency_ms": 0.0
+  },
+  "infrastructure": {
+    "ws_reconnects": 0,
+    "rest_fallbacks": 0,
+    "stale_candles": 0,
+    "duplicate_events": 0,
+    "avg_latency_ms": 0.0
+  },
+  "backtest_drift": {
+    "strategy_version": "v1.0.0-frozen",
+    "live_observed": {
+      "trades_closed": 0,
+      "monthly_frequency": 0.0,
+      "win_rate_pct": 0.0,
+      "profit_factor": 0.0,
+      "average_r": 0.0,
+      "expectancy_usd": 0.0,
+      "max_drawdown_pct": 75.0
+    },
+    "comparison_vs_historical_full_sample_2024_2026": {
+      "metadata": {
+        "strategy_version": "v1.0.0-frozen",
+        "dataset": "Binance Spot Klines 1h",
+        "period": "2024-09-01 a 2026-08-31 (24 meses)",
+        "assets": [
+          "BTCUSDT",
+          "SOLUSDT"
+        ],
+        "timeframe": "1h",
+        "costs": "Fee 0.10% + Slippage 0.05% por lado",
+        "trade_count": 135,
+        "artifact_source": "data/reports/frozen_validation_results.json"
+      },
+      "drift_metrics": {
+        "monthly_frequency": {
+          "historical": 5.63,
+          "live": 0.0,
+          "drift_delta": -5.63
+        },
+        "win_rate_pct": {
+          "historical": 37.04,
+          "live": 0.0,
+          "drift_delta": -37.04
+        },
+        "profit_factor": {
+          "historical": 1.03,
+          "live": 0.0,
+          "drift_delta": -1.03
+        },
+        "average_r": {
+          "historical": 0.1,
+          "live": 0.0,
+          "drift_delta": -0.1
+        },
+        "max_drawdown_pct": {
+          "historical": 17.13,
+          "live": 75.0,
+          "drift_delta": 57.87
+        }
+      }
+    },
+    "comparison_vs_historical_oos_2022_2024": {
+      "metadata": {
+        "strategy_version": "v1.0.0-frozen",
+        "dataset": "Binance Spot Klines 1h (Completely Unseen Holdout)",
+        "period": "2022-09-01 a 2024-08-31 (24 meses)",
+        "assets": [
+          "BTCUSDT",
+          "SOLUSDT"
+        ],
+        "timeframe": "1h",
+        "costs": "Fee 0.10% + Slippage 0.05% por lado",
+        "trade_count": 173,
+        "artifact_source": "data/reports/holdout_unseen_results.json"
+      },
+      "drift_metrics": {
+        "monthly_frequency": {
+          "historical": 7.21,
+          "live": 0.0,
+          "drift_delta": -7.21
+        },
+        "win_rate_pct": {
+          "historical": 41.62,
+          "live": 0.0,
+          "drift_delta": -41.62
+        },
+        "profit_factor": {
+          "historical": 1.16,
+          "live": 0.0,
+          "drift_delta": -1.16
+        },
+        "average_r": {
+          "historical": 0.26,
+          "live": 0.0,
+          "drift_delta": -0.26
+        },
+        "max_drawdown_pct": {
+          "historical": 20.66,
+          "live": 75.0,
+          "drift_delta": 54.34
+        }
+      }
+    },
+    "audit_status": "DESCRIPTIVE_MONITORING_NO_RULES_MUTATION",
+    "governance_rule": "No se modifican parámetros estratégicos en vivo independientemente de la magnitud de la desviación. Toda diferencia empírica se registra para la auditoría final de 60 días."
+  },
+  "data_integrity_sha256": "646523772613458a016d6c1b1345a4ddf77ae1c08b1795b6115cc7271c594721"
+}

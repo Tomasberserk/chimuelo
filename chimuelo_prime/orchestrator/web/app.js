@@ -1389,6 +1389,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 12.6.1 Generación de Auditoría Semanal Reproducible
+    const btnGenerateAudit = document.getElementById('btn-generate-audit');
+    if (btnGenerateAudit) {
+        btnGenerateAudit.addEventListener('click', async () => {
+            btnGenerateAudit.disabled = true;
+            btnGenerateAudit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> GENERATING...';
+            appendLog('📋 [*] Generando paquete de auditoría semanal reproducible...', 'info');
+
+            try {
+                const res = await fetch('/api/audit/generate-weekly', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    appendLog(`✅ [AUDIT OK] Reporte ${data.week_identifier} generado exitosamente.`, 'success');
+                    appendLog(`   • SHA-256: ${data.sha256}`, 'info');
+                    appendLog(`   • Descargas: <a href="/api/audit/download?week=${data.week_identifier}&format=md" target="_blank" style="color:#00d2ff;">[Markdown]</a> | <a href="/api/audit/download?week=${data.week_identifier}&format=json" target="_blank" style="color:#F0B90B;">[JSON]</a> | <a href="/api/audit/download?week=${data.week_identifier}&format=xlsx" target="_blank" style="color:#0ECB81;">[Excel XLSX]</a>`, 'info');
+                } else {
+                    appendLog(`[!] Error generando reporte: ${data.message || 'Error desconocido'}`, 'error');
+                }
+            } catch (err) {
+                appendLog(`[!] Error en solicitud de auditoría: ${err.message}`, 'error');
+            } finally {
+                btnGenerateAudit.disabled = false;
+                btnGenerateAudit.innerHTML = '<i class="fa-solid fa-file-shield"></i> GENERATE WEEKLY AUDIT';
+            }
+        });
+    }
+
     // 12.7 Acciones de Gráficos & Terminal
     if (dom.btnFitChart) {
         dom.btnFitChart.addEventListener('click', () => {
