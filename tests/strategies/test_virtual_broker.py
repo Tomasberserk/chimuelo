@@ -391,3 +391,47 @@ class TestVirtualBrokerStateAndReset:
         assert broker.cash == Decimal("50.00")
         assert broker.positions == {}
         assert broker.trade_history == []
+
+
+class TestVirtualBrokerDatabasePersistence:
+    """Valida la persistencia y carga de operaciones en SQLite."""
+
+    def test_persists_trade_to_db_and_reloads_on_new_instance(self) -> None:
+        from chimuelo_prime.grid_state.database import build_engine
+
+        engine = build_engine("sqlite:///:memory:")
+
+        broker1 = VirtualBroker(
+            initial_balance=Decimal("100.00"),
+            db_engine=engine,
+        )
+
+        broker1.open_position(
+            symbol="SOLUSDT",
+            side="BUY",
+            entry_price=Decimal("100.00"),
+            qty=Decimal("0.5"),
+            stop_loss=Decimal("90.00"),
+            take_profit=Decimal("120.00"),
+        )
+
+        broker1.close_position(
+            symbol="SOLUSDT",
+            exit_price=Decimal("120.00"),
+            exit_reason="TAKE_PROFIT",
+        )
+
+        assert len(broker1.trade_history) == 1
+
+        # Crear una nueva instancia de broker conectada a la misma BD
+        broker2 = VirtualBroker(
+            initial_balance=Decimal("100.00"),
+            db_engine=engine,
+        )
+
+        assert len(broker2.trade_history) == 1
+        reloaded_trade = broker2.trade_history[0]
+        assert reloaded_trade.symbol == "SOLUSDT"
+        assert reloaded_trade.exit_reason == "TAKE_PROFIT"
+        assert broker2.cash == broker1.cash
+

@@ -130,9 +130,11 @@ class PaperTradingManager:
         self._interval: str = "1h"
         self._initial_balance: Decimal = Decimal("100.00")
         self._alert_manager = AlertManager()
+        self._db_url: str = "sqlite:///chimuelo.db"
         self._broker = VirtualBroker(
             initial_balance=self._initial_balance,
             alert_manager=self._alert_manager,
+            db_url=self._db_url,
         )
         self._strategy = RSIDivergenceStrategy(
             symbol=self._symbol,
@@ -218,6 +220,7 @@ class PaperTradingManager:
                 slippage_pct=config.slippage_pct,
                 min_notional=config.min_notional,
                 alert_manager=self._alert_manager,
+                db_url=self._db_url,
             )
 
             self._strategy = RSIDivergenceStrategy(

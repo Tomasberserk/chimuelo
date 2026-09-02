@@ -38,6 +38,11 @@ class RSIDivergenceStrategy(BaseStrategy):
         volume_multiplier: Decimal = Decimal("1.1"),
         lookback_bars: int = 25,
         macro_sentiment_service: MacroSentimentService | None = None,
+        use_structural_tp: bool = True,
+        structural_tp_ratio: Decimal = Decimal("0.75"),
+        rsi_overbought_exit: Decimal | None = Decimal("70.0"),
+        enable_oversold_bounce: bool = True,
+        oversold_bounce_rsi_threshold: Decimal = Decimal("30.0"),
     ) -> None:
         self._symbol = symbol
         self._rsi_period = rsi_period
@@ -51,6 +56,11 @@ class RSIDivergenceStrategy(BaseStrategy):
         self._vol_mult = volume_multiplier
         self._lookback = lookback_bars
         self._macro_sentiment_service = macro_sentiment_service
+        self._use_structural_tp = use_structural_tp
+        self._structural_tp_ratio = structural_tp_ratio
+        self._rsi_overbought_exit = rsi_overbought_exit
+        self._enable_oversold_bounce = enable_oversold_bounce
+        self._oversold_bounce_rsi = Decimal(str(oversold_bounce_rsi_threshold))
 
         # Cachés de series temporales para evitar recomputar O(N^2)
         self._cached_closes: list[Decimal] = []
@@ -123,27 +133,44 @@ class RSIDivergenceStrategy(BaseStrategy):
             if not self._macro_sentiment_service.can_open_longs():
                 return None
 
-        # 1. Filtro de Tendencia: Precio actual por encima de la EMA 200
-        if candle.close <= ema_trend:
+        signal_type_matched: str | None = None
+        prev_rsi_val = Decimal("0")
+
+        # --- SETUP A: Divergencia Alcista en RSI a favor de la macro-tendencia (Precio > EMA 200) ---
+        if candle.close > ema_trend and candle.volume >= (vol_sma * self._vol_mult):
+            div_found, prev_price, prev_rsi = self._check_bullish_divergence(
+                candles, current_index
+            )
+            if div_found and candle.close > candle.open and candle.close > ema_fast:
+                signal_type_matched = "DIVERGENCE"
+                prev_rsi_val = prev_rsi
+
+        # --- SETUP B: Rebote en Sobreventa Extrema (Oversold Bounce / Mean Reversion) ---
+        if signal_type_matched is None and self._enable_oversold_bounce:
+            recent_min_rsi = min(
+                (r for r in self._cached_rsi[max(0, current_index - 3) : current_index + 1] if r is not None),
+                default=Decimal("100"),
+            )
+            prev_candle_rsi = self._cached_rsi[current_index - 1] or Decimal("0")
+
+            # RSI en zona extrema de sobreventa y comenzando a girar al alza
+            if recent_min_rsi <= self._oversold_bounce_rsi and rsi_val > prev_candle_rsi:
+                # Confirmación de vela: Cierre alcista o mecha inferior de rechazo (Hammer)
+                candle_range = candle.high - candle.low
+                lower_wick = min(candle.open, candle.close) - candle.low
+                is_bullish_candle = candle.close > candle.open
+                is_hammer = candle_range > Decimal("0") and (lower_wick / candle_range) >= Decimal("0.35")
+
+                # Volumen con absorción mínima respetable
+                has_volume = candle.volume >= (vol_sma * Decimal("0.80"))
+
+                if (is_bullish_candle or is_hammer) and has_volume:
+                    signal_type_matched = "OVERSOLD_BOUNCE"
+
+        if signal_type_matched is None:
             return None
 
-        # 2. Filtro de Volumen: Volumen reciente debe ser respetable
-        if candle.volume < (vol_sma * self._vol_mult):
-            return None
-
-        # 3. Detección de Divergencia Alcista en RSI dentro de la ventana de lookback
-        # Buscamos un mínimo previo en precio y RSI
-        divergence_found, prev_price, prev_rsi = self._check_bullish_divergence(
-            candles, current_index
-        )
-        if not divergence_found:
-            return None
-
-        # 4. Gatillo de Confirmación: Cierre alcista (close > open) y superando EMA rápida
-        if candle.close <= candle.open or candle.close <= ema_fast:
-            return None
-
-        # 5. Cálculo Dinámico de Stop Loss y Take Profit Estructural (75% Techo Local)
+        # 5. Cálculo Dinámico de Stop Loss y Take Profit
         entry_price = candle.close
         sl_distance = atr_val * self._atr_sl_mult
         stop_loss = entry_price - sl_distance
@@ -155,23 +182,33 @@ class RSIDivergenceStrategy(BaseStrategy):
         # Take Profit Matemático ATR
         math_tp = entry_price + (sl_distance * self._rr_ratio)
 
-        # Techo Estructural (Máximo de las últimas velas de lookback)
-        lookback_window = candles[max(0, current_index - self._lookback) : current_index + 1]
-        local_swing_high = max((c.high for c in lookback_window), default=entry_price)
-
-        if local_swing_high > entry_price:
-            # 75% del camino hacia el techo local para garantizar alta probabilidad de toque
-            structural_tp = entry_price + ((local_swing_high - entry_price) * Decimal("0.75"))
-            # Limitar el TP para nunca superar la resistencia sin confirmación
-            take_profit = min(math_tp, structural_tp)
-            if take_profit <= entry_price + sl_distance:
-                take_profit = math_tp  # Preservar ratio mínimo
+        if signal_type_matched == "OVERSOLD_BOUNCE":
+            # Para rebote en sobreventa, proyectar hacia la EMA rápida o ratio R:R objetivo
+            target_tp = math_tp
+            if ema_fast > entry_price + sl_distance:
+                target_tp = min(math_tp, ema_fast)
+            take_profit = target_tp
+            reason_text = f"Oversold Bounce (RSI: {rsi_val:.1f} <= {self._oversold_bounce_rsi}) - Mean Reversion"
         else:
-            take_profit = math_tp
+            if self._use_structural_tp:
+                # Techo Estructural (Máximo de las últimas velas de lookback)
+                lookback_window = candles[max(0, current_index - self._lookback) : current_index + 1]
+                local_swing_high = max((c.high for c in lookback_window), default=entry_price)
+
+                if local_swing_high > entry_price:
+                    structural_tp = entry_price + ((local_swing_high - entry_price) * self._structural_tp_ratio)
+                    take_profit = min(math_tp, structural_tp)
+                    if take_profit <= entry_price + sl_distance:
+                        take_profit = math_tp
+                else:
+                    take_profit = math_tp
+            else:
+                take_profit = math_tp
+            reason_text = f"Bullish RSI Divergence (RSI: {rsi_val:.1f} vs {prev_rsi_val:.1f}) + Trend > EMA{self._ema_trend_period}"
 
         metadata: dict[str, Any] = {
             "rsi_current": str(rsi_val),
-            "rsi_prev": str(prev_rsi),
+            "rsi_prev": str(prev_rsi_val),
             "ema_trend": str(ema_trend),
             "ema_fast": str(ema_fast),
             "atr": str(atr_val),
@@ -179,6 +216,7 @@ class RSIDivergenceStrategy(BaseStrategy):
                 ((sl_distance / entry_price) * Decimal("100")).quantize(Decimal("0.01"))
             ),
             "rr_ratio": str(self._rr_ratio),
+            "signal_mode": signal_type_matched,
         }
         if self._macro_sentiment_service is not None:
             sentiment_report = self._macro_sentiment_service.get_sentiment_report()
@@ -193,7 +231,7 @@ class RSIDivergenceStrategy(BaseStrategy):
             price=entry_price,
             stop_loss=stop_loss,
             take_profit=take_profit,
-            reason=f"Bullish RSI Divergence (RSI: {rsi_val:.1f} vs {prev_rsi:.1f}) + Trend > EMA{self._ema_trend_period}",
+            reason=reason_text,
             metadata=metadata,
         )
 
@@ -236,3 +274,24 @@ class RSIDivergenceStrategy(BaseStrategy):
                     return True, past_low, past_rsi
 
         return False, Decimal("0"), Decimal("0")
+
+    def should_exit_position(
+        self,
+        candles: list[HistoricalCandle],
+        current_index: int,
+    ) -> tuple[bool, str]:
+        """Evalúa si la posición activa debe cerrarse dinámicamente (ej. sobrecompra de RSI)."""
+        if self._rsi_overbought_exit is None:
+            return False, ""
+
+        if len(self._cached_rsi) != len(candles):
+            self.prepare_indicators(candles)
+
+        if current_index >= len(self._cached_rsi):
+            return False, ""
+
+        rsi_val = self._cached_rsi[current_index]
+        if rsi_val is not None and rsi_val >= self._rsi_overbought_exit:
+            return True, f"RSI Overbought (RSI {rsi_val:.1f} >= {self._rsi_overbought_exit:.1f})"
+
+        return False, ""

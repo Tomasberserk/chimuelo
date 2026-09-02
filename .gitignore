@@ -63,6 +63,8 @@ logs/
 *.sqlite
 *.sqlite3
 data/cache/
+data/cache_extended/
+data/cache_holdout_unseen/
 
 # --- Archivos temporales y prototipos ---
 scratch/

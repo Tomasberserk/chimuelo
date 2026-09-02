@@ -167,10 +167,13 @@ class SignalStrategyBacktester:
         trade_id_seq = 1
 
         for i, candle in enumerate(self._candles):
-            # 1. Monitoreo Intrabarra de Posición Abierta (Stop Loss / Take Profit)
+            # 1. Monitoreo Intrabarra de Posición Abierta (Stop Loss / Take Profit / Salida Dinámica)
             if in_position:
                 sl_hit = candle.low <= stop_loss
                 tp_hit = candle.high >= take_profit
+
+                exit_price_raw: Decimal | None = None
+                exit_reason = ""
 
                 if sl_hit or tp_hit:
                     # Determinar precio de salida y motivo
@@ -184,12 +187,15 @@ class SignalStrategyBacktester:
                     else:
                         exit_price_raw = take_profit
                         exit_reason = "TAKE_PROFIT"
+                elif hasattr(self._strategy, "should_exit_position"):
+                    should_exit, exit_cause = self._strategy.should_exit_position(self._candles, i)
+                    if should_exit:
+                        exit_price_raw = candle.close
+                        exit_reason = "RSI_OVERBOUGHT" if "RSI" in exit_cause else "DYNAMIC_EXIT"
 
+                if exit_price_raw is not None:
                     # Aplicar slippage de salida desfavorable
-                    if exit_reason == "STOP_LOSS":
-                        exec_exit_price = exit_price_raw * (Decimal("1.0") - self._slippage_pct)
-                    else:
-                        exec_exit_price = exit_price_raw * (Decimal("1.0") - self._slippage_pct)
+                    exec_exit_price = exit_price_raw * (Decimal("1.0") - self._slippage_pct)
 
                     gross_revenue = position_qty * exec_exit_price
                     exit_fee = gross_revenue * self._fee_rate

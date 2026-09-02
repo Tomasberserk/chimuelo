@@ -61,7 +61,8 @@ class TestBuildEngineMemory:
         from chimuelo_prime.grid_state.schema import Base
 
         Base.metadata.create_all(engine)
-        assert len(inspect(engine).get_table_names()) == 3
+        assert len(inspect(engine).get_table_names()) == 4
+        assert "paper_trades" in inspect(engine).get_table_names()
 
     def test_foreign_keys_enabled(self) -> None:
         engine = build_engine("sqlite:///:memory:")

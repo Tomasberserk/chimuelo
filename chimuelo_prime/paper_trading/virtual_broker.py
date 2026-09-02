@@ -8,6 +8,7 @@ estructuradas a través de `AlertManager`.
 
 from __future__ import annotations
 
+import uuid
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
@@ -17,7 +18,18 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from chimuelo_prime.backtesting.data_loader import HistoricalCandle
 from chimuelo_prime.exchange_config.logger import get_logger
 from chimuelo_prime.orchestrator.monitoring import AlertManager
+from chimuelo_prime.paper_trading.decision_models import (
+    PaperFill,
+    PaperOrder,
+    PaperPosition,
+    ensure_utc_aware,
+)
+from chimuelo_prime.paper_trading.persistence import BasePersistenceBackend
 from chimuelo_prime.strategies.models import Position, SignalType, TradeSignal
+
+
+class RealCredentialsDetectedError(Exception):
+    """Lanzada cuando se intenta inicializar el VirtualBroker con claves de API reales."""
 
 
 class PaperTradeExecution(BaseModel):
@@ -99,14 +111,27 @@ class VirtualBroker:
     def __init__(
         self,
         initial_balance: Decimal = Decimal("25.00"),
+        initial_cash: Decimal | None = None,
         fee_rate: Decimal = Decimal("0.001"),
         slippage_pct: Decimal = Decimal("0.0005"),
         min_notional: Decimal = Decimal("5.00"),
         alert_manager: AlertManager | None = None,
+        persistence: BasePersistenceBackend | None = None,
+        db_engine: Any = None,
+        api_key: str | None = None,
+        api_secret: str | None = None,
     ) -> None:
+        # HARD KILL SWITCH
+        if api_key is not None or api_secret is not None:
+            raise RealCredentialsDetectedError(
+                "SEGURIDAD CRÍTICA: VirtualBroker no acepta credenciales de exchange reales. "
+                "El modo Paper Trading opera exclusivamente en un sandbox simulado."
+            )
+
+        start_bal = initial_cash if initial_cash is not None else initial_balance
         # Validación estricta contra floats en inicialización
         for name, val in [
-            ("initial_balance", initial_balance),
+            ("initial_balance", start_bal),
             ("fee_rate", fee_rate),
             ("slippage_pct", slippage_pct),
             ("min_notional", min_notional),
@@ -116,21 +141,94 @@ class VirtualBroker:
                     f"Floats no permitidos en configuración de VirtualBroker: {name}={val!r}"
                 )
 
-        self._initial_balance = Decimal(str(initial_balance))
+        self._initial_balance = Decimal(str(start_bal))
         self._fee_rate = Decimal(str(fee_rate))
         self._slippage_pct = Decimal(str(slippage_pct))
         self._min_notional = Decimal(str(min_notional))
         self._alert_manager = alert_manager or AlertManager()
+        self._persistence = persistence
+        self._db_engine = db_engine
         self._log = get_logger(__name__)
 
         self._cash = self._initial_balance
         self._positions: dict[str, Position] = {}
+        self._open_positions: dict[str, PaperPosition] = {}
         self._trade_history: list[PaperTradeExecution] = []
         self._trade_id_seq = 1
+
+        if self._db_engine:
+            self._init_db_engine()
+
+        if self._persistence:
+            self._restore_open_positions()
+
+    def _init_db_engine(self) -> None:
+        from sqlalchemy import text
+        with self._db_engine.connect() as conn:
+            conn.execute(
+                text(
+                    """
+                    CREATE TABLE IF NOT EXISTS paper_trades (
+                        trade_id INTEGER PRIMARY KEY,
+                        symbol VARCHAR(20),
+                        side VARCHAR(10),
+                        entry_time DATETIME,
+                        exit_time DATETIME,
+                        entry_price NUMERIC(20,8),
+                        exit_price NUMERIC(20,8),
+                        qty NUMERIC(20,8),
+                        notional NUMERIC(20,8),
+                        stop_loss NUMERIC(20,8),
+                        take_profit NUMERIC(20,8),
+                        gross_pnl NUMERIC(20,8),
+                        total_fees NUMERIC(20,8),
+                        net_pnl NUMERIC(20,8),
+                        net_pnl_pct NUMERIC(20,8),
+                        exit_reason VARCHAR(30),
+                        reason TEXT
+                    )
+                    """
+                )
+            )
+            conn.commit()
+            res = conn.execute(text("SELECT * FROM paper_trades ORDER BY trade_id"))
+            for r in res.mappings():
+                e_time = datetime.fromisoformat(r["entry_time"]) if isinstance(r["entry_time"], str) else r["entry_time"]
+                x_time = datetime.fromisoformat(r["exit_time"]) if isinstance(r["exit_time"], str) else r["exit_time"]
+                t = PaperTradeExecution(
+                    trade_id=r["trade_id"],
+                    symbol=r["symbol"],
+                    side=r["side"],
+                    entry_time=e_time,
+                    exit_time=x_time,
+                    entry_price=Decimal(str(r["entry_price"])),
+                    exit_price=Decimal(str(r["exit_price"])),
+                    qty=Decimal(str(r["qty"])),
+                    notional=Decimal(str(r["notional"])),
+                    stop_loss=Decimal(str(r["stop_loss"])),
+                    take_profit=Decimal(str(r["take_profit"])),
+                    gross_pnl=Decimal(str(r["gross_pnl"])),
+                    total_fees=Decimal(str(r["total_fees"])),
+                    net_pnl=Decimal(str(r["net_pnl"])),
+                    net_pnl_pct=Decimal(str(r["net_pnl_pct"])),
+                    exit_reason=r["exit_reason"],
+                    reason=r["reason"] or "",
+                )
+                self._trade_history.append(t)
+                self._trade_id_seq = max(self._trade_id_seq, r["trade_id"] + 1)
+            self._cash += sum((t.net_pnl for t in self._trade_history), Decimal("0"))
+
+    def is_in_position(self, symbol: str) -> bool:
+        """Indica si el broker mantiene una posición activa para el par dado."""
+        return symbol.upper() in self._positions or symbol.upper() in self._open_positions
 
     @property
     def cash(self) -> Decimal:
         """Efectivo disponible en quote currency (USDT)."""
+        return self._cash
+
+    @property
+    def current_cash(self) -> Decimal:
         return self._cash
 
     @property
@@ -148,40 +246,221 @@ class VirtualBroker:
         """Historial de operaciones completadas."""
         return list(self._trade_history)
 
-    def is_in_position(self, symbol: str) -> bool:
-        """Verifica si existe una posición activa para el símbolo."""
-        return symbol.upper() in self._positions
+    def _restore_open_positions(self) -> None:
+        if not self._persistence:
+            return
+        persisted_open = self._persistence.get_open_positions()
+        for p in persisted_open:
+            self._open_positions[p.symbol] = p
 
-    def get_position(self, symbol: str) -> Position | None:
-        """Obtiene la posición activa para un símbolo, o None."""
-        return self._positions.get(symbol.upper())
+    def get_open_position(self, symbol: str) -> PaperPosition | None:
+        return self._open_positions.get(symbol)
+
+    def get_open_positions_count(self) -> int:
+        return len(self._open_positions) + len(self._positions)
+
+    def get_total_exposure_usd(self) -> Decimal:
+        return sum(
+            (p.fill_price * p.quantity for p in self._open_positions.values()),
+            Decimal("0"),
+        ) + sum((p.cost for p in self._positions.values()), Decimal("0"))
 
     def get_equity(self, current_prices: dict[str, Decimal] | None = None) -> Decimal:
-        """Calcula el patrimonio total (cash + valor de mercado de posiciones activas)."""
+        """Calcula el patrimonio neto total a precio de mercado (Mark-to-Market)."""
         prices = current_prices or {}
-        positions_value = Decimal("0")
+        equity = self._cash
+
         for sym, pos in self._positions.items():
-            mark_price = prices.get(sym, pos.entry_price)
-            if isinstance(mark_price, float):
-                raise TypeError(f"Floats no permitidos en precios de mercado: {mark_price!r}")
-            positions_value += pos.qty * Decimal(str(mark_price))
-        return self._cash + positions_value
+            price = prices.get(sym, pos.entry_price)
+            if isinstance(price, float):
+                raise TypeError(f"Floats no permitidos en precios de valuación: {price!r}")
+            price_dec = Decimal(str(price))
+            pos_value = pos.qty * price_dec
+            equity += pos_value
+
+        for sym, p_pos in self._open_positions.items():
+            price = prices.get(sym, p_pos.fill_price)
+            price_dec = Decimal(str(price))
+            pos_value = p_pos.quantity * price_dec
+            equity += pos_value
+
+        return equity
 
     def get_state(self, current_prices: dict[str, Decimal] | None = None) -> VirtualBrokerState:
-        """Retorna un snapshot inmutable del estado del broker."""
+        """Retorna un snapshot inmutable del estado del VirtualBroker."""
+        equity = self.get_equity(current_prices)
         total_pnl = sum((t.net_pnl for t in self._trade_history), Decimal("0"))
         return VirtualBrokerState(
             cash=self._cash,
-            equity=self.get_equity(current_prices),
-            open_positions_count=len(self._positions),
+            equity=equity,
+            open_positions_count=self.get_open_positions_count(),
             total_trades_count=len(self._trade_history),
             total_realized_pnl=total_pnl,
         )
 
+    def execute_paper_order(
+        self,
+        decision_id: str,
+        symbol: str,
+        timestamp: datetime,
+        signal_price: Decimal,
+        stop_loss: Decimal,
+        take_profit: Decimal,
+        quantity: Decimal,
+        risk_pct_used: Decimal,
+    ) -> tuple[PaperOrder, PaperFill, PaperPosition]:
+        """Ejecuta una orden virtual canónica para Strategy C."""
+        utc_ts = ensure_utc_aware(timestamp)
+
+        if symbol in self._open_positions or symbol in self._positions:
+            raise ValueError(f"Ya existe una posición abierta en {symbol}. Imposible abrir nueva posición.")
+
+        notional_signal = signal_price * quantity
+        if notional_signal < self._min_notional:
+            raise ValueError(f"Orden por debajo del mínimo notional (${self._min_notional}): ${notional_signal}")
+
+        order_id = f"ord_{uuid.uuid4().hex[:12]}"
+        order = PaperOrder(
+            order_id=order_id,
+            decision_id=decision_id,
+            symbol=symbol,
+            side="BUY",
+            timestamp=utc_ts,
+            requested_price=signal_price,
+            stop_loss=stop_loss,
+            take_profit=take_profit,
+            quantity=quantity,
+            risk_pct_used=risk_pct_used,
+        )
+        if self._persistence:
+            self._persistence.save_paper_order(order)
+
+        fill_price = signal_price * (Decimal("1.0") + self._slippage_pct)
+        notional_fill = fill_price * quantity
+        fee_entry = notional_fill * self._fee_rate
+
+        fill_id = f"fill_{uuid.uuid4().hex[:12]}"
+        fill = PaperFill(
+            fill_id=fill_id,
+            order_id=order_id,
+            decision_id=decision_id,
+            symbol=symbol,
+            timestamp=utc_ts,
+            signal_price=signal_price,
+            fill_price=fill_price,
+            slippage_pct=self._slippage_pct,
+            quantity=quantity,
+            fee_usd=fee_entry,
+            fee_rate=self._fee_rate,
+        )
+        if self._persistence:
+            self._persistence.save_paper_fill(fill)
+
+        position_id = f"pos_{uuid.uuid4().hex[:12]}"
+        position = PaperPosition(
+            position_id=position_id,
+            symbol=symbol,
+            status="OPEN",
+            entry_time=utc_ts,
+            entry_signal_price=signal_price,
+            fill_price=fill_price,
+            slippage_pct=self._slippage_pct,
+            quantity=quantity,
+            stop_loss=stop_loss,
+            take_profit=take_profit,
+            fee_entry=fee_entry,
+        )
+        if self._persistence:
+            self._persistence.save_paper_position(position)
+        self._open_positions[symbol] = position
+
+        self._cash -= (notional_fill + fee_entry)
+        return order, fill, position
+
+    def process_candle_for_exits(
+        self, candle: HistoricalCandle
+    ) -> PaperPosition | None:
+        """Evalúa si una vela horaria activa el Take Profit o Stop Loss de una posición abierta."""
+        symbol = None
+        for sym in list(self._open_positions.keys()):
+            symbol = sym
+            break
+
+        if not symbol or symbol not in self._open_positions:
+            return None
+
+        pos = self._open_positions[symbol]
+        if candle.timestamp <= pos.entry_time:
+            return None
+
+        exit_price: Decimal | None = None
+        exit_reason: str | None = None
+
+        hit_sl = candle.low <= pos.stop_loss
+        hit_tp = candle.high >= pos.take_profit
+
+        if hit_sl and hit_tp:
+            exit_price = pos.stop_loss * (Decimal("1.0") - self._slippage_pct)
+            exit_reason = "STOP_LOSS"
+        elif hit_sl:
+            exit_price = pos.stop_loss * (Decimal("1.0") - self._slippage_pct)
+            exit_reason = "STOP_LOSS"
+        elif hit_tp:
+            exit_price = pos.take_profit * (Decimal("1.0") - self._slippage_pct)
+            exit_reason = "TAKE_PROFIT"
+
+        if exit_price and exit_reason:
+            exit_time = ensure_utc_aware(candle.timestamp)
+            notional_exit = exit_price * pos.quantity
+            fee_exit = notional_exit * self._fee_rate
+
+            notional_entry = pos.fill_price * pos.quantity
+            gross_pnl = notional_exit - notional_entry
+            net_pnl = gross_pnl - pos.fee_entry - fee_exit
+
+            risk_dist = abs(pos.fill_price - pos.stop_loss)
+            r_mult = (exit_price - pos.fill_price) / risk_dist if risk_dist > Decimal("0") else Decimal("0")
+
+            duration = int((exit_time - pos.entry_time).total_seconds() / 3600)
+
+            closed_position = PaperPosition(
+                position_id=pos.position_id,
+                symbol=pos.symbol,
+                status="CLOSED",
+                entry_time=pos.entry_time,
+                entry_signal_price=pos.entry_signal_price,
+                fill_price=pos.fill_price,
+                slippage_pct=pos.slippage_pct,
+                quantity=pos.quantity,
+                stop_loss=pos.stop_loss,
+                take_profit=pos.take_profit,
+                fee_entry=pos.fee_entry,
+                exit_time=exit_time,
+                exit_price=exit_price,
+                exit_reason=exit_reason,
+                fee_exit=fee_exit,
+                gross_pnl=gross_pnl,
+                net_pnl=net_pnl,
+                r_multiple=r_mult.quantize(Decimal("0.0001")),
+                duration_hours=duration,
+            )
+
+            if self._persistence:
+                self._persistence.update_paper_position(closed_position)
+            del self._open_positions[symbol]
+            self._cash += (notional_exit - fee_exit)
+            return closed_position
+
+        return None
+
+    def get_position(self, symbol: str) -> Position | None:
+        """Retorna la posición activa del par dado o None si está flat."""
+        return self._positions.get(symbol.upper())
+
     def open_position(
         self,
         symbol: str,
-        side: SignalType | str,
+        side: SignalType,
         entry_price: Decimal,
         qty: Decimal,
         stop_loss: Decimal,
@@ -189,59 +468,46 @@ class VirtualBroker:
         timestamp: datetime | None = None,
         reason: str = "",
     ) -> Position:
-        """Abre una posición simulada con validación de fondos, slippage y fees."""
-        # Validación de tipos
-        for name, val in [
-            ("entry_price", entry_price),
-            ("qty", qty),
-            ("stop_loss", stop_loss),
-            ("take_profit", take_profit),
-        ]:
-            if isinstance(val, float):
-                raise TypeError(f"Floats no permitidos en open_position: {name}={val!r}")
-
+        """Abre una posición virtual con cálculo de slippage y comisiones (Legacy)."""
         sym = symbol.upper()
-        if sym in self._positions:
-            raise ValueError(
-                f"Ya existe una posición abierta para {sym}. Ciérrela antes de abrir una nueva."
-            )
+        if sym in self._positions or sym in self._open_positions:
+            raise ValueError(f"Ya existe una posición abierta en {sym}")
 
-        price_dec = Decimal(str(entry_price))
+        if any(
+            isinstance(v, float)
+            for v in [entry_price, qty, stop_loss, take_profit]
+        ):
+            raise TypeError("Floats no permitidos en open_position")
+
+        entry_dec = Decimal(str(entry_price))
         qty_dec = Decimal(str(qty))
         sl_dec = Decimal(str(stop_loss))
         tp_dec = Decimal(str(take_profit))
         ts = timestamp or datetime.now(UTC).replace(tzinfo=None)
 
-        if qty_dec <= Decimal("0") or price_dec <= Decimal("0"):
-            raise ValueError("El precio y la cantidad deben ser estrictamente positivos.")
-
-        # Slippage de entrada desfavorable
-        exec_entry_price = price_dec * (Decimal("1.0") + self._slippage_pct)
+        exec_entry_price = entry_dec * (Decimal("1.0") + self._slippage_pct)
         notional = qty_dec * exec_entry_price
+        fee = notional * self._fee_rate
+        total_required = notional + fee
+
+        if total_required > self._cash:
+            self._alert_manager.trigger_alert(
+                event="PAPER_TRADE_INSUFFICIENT_FUNDS",
+                message=f"Saldo insuficiente para abrir {sym}",
+                symbol=sym,
+                required=str(total_required),
+                available=str(self._cash),
+            )
+            raise ValueError(
+                f"Fondos insuficientes: requerido=${total_required:.4f}, disponible=${self._cash:.4f}"
+            )
 
         if notional < self._min_notional:
             raise ValueError(
-                f"El notional ${notional:.2f} es inferior al mínimo requerido ${self._min_notional:.2f}"
+                f"Notional inferior al mínimo requerido (${self._min_notional:.2f}): ${notional:.4f}"
             )
 
-        entry_fee = notional * self._fee_rate
-        total_cost = notional + entry_fee
-
-        if self._cash < total_cost:
-            self._alert_manager.trigger_alert(
-                event="PAPER_TRADE_INSUFFICIENT_FUNDS",
-                message=f"Fondos insuficientes para {sym}: requerido ${total_cost:.2f}, disponible ${self._cash:.2f}",
-                symbol=sym,
-                required_usd=str(total_cost),
-                available_usd=str(self._cash),
-            )
-            raise ValueError(
-                f"Fondos insuficientes: requerido ${total_cost:.4f}, disponible ${self._cash:.4f}"
-            )
-
-        # Deducción de fondos
-        self._cash -= total_cost
-        initial_risk = qty_dec * abs(exec_entry_price - sl_dec)
+        self._cash -= total_required
 
         pos = Position(
             symbol=sym,
@@ -250,56 +516,41 @@ class VirtualBroker:
             stop_loss=sl_dec,
             take_profit=tp_dec,
             entry_time=ts,
-            initial_risk_usd=initial_risk,
+            initial_risk_usd=abs(exec_entry_price - sl_dec) * qty_dec,
         )
         self._positions[sym] = pos
 
-        self._log.info(
-            "paper_trading.position_opened",
-            symbol=sym,
-            entry_price=str(exec_entry_price),
-            qty=str(qty_dec),
-            notional=str(notional),
-            stop_loss=str(sl_dec),
-            take_profit=str(tp_dec),
-        )
-
         self._alert_manager.trigger_alert(
             event="PAPER_TRADE_ENTRY",
-            message=f"🟢 Apertura simulada {sym}: {qty_dec} @ ${exec_entry_price:.4f} USDT (Notional: ${notional:.2f}, SL: ${sl_dec:.4f}, TP: ${tp_dec:.4f})",
+            message=f"Apertura simulada {sym}: {qty_dec} @ ${exec_entry_price:.4f} USDT",
             symbol=sym,
-            price=str(exec_entry_price),
+            side="BUY",
+            entry_price=str(exec_entry_price),
             qty=str(qty_dec),
-            notional=str(notional),
             stop_loss=str(sl_dec),
             take_profit=str(tp_dec),
-            reason=reason,
+            notional=str(notional),
+            remaining_balance=str(self._cash),
         )
-
         return pos
 
     def close_position(
         self,
         symbol: str,
         exit_price: Decimal,
-        exit_reason: str = "MANUAL_CLOSE",
+        exit_reason: str = "MANUAL",
         timestamp: datetime | None = None,
         reason: str = "",
     ) -> PaperTradeExecution | None:
-        """Cierra una posición activa, liquida PnL, aplica slippage/fees y notifica."""
-        if isinstance(exit_price, float):
-            raise TypeError(f"Floats no permitidos en close_position: exit_price={exit_price!r}")
-
+        """Cierra una posición abierta, calcula comisiones de salida y registra el trade (Legacy)."""
         sym = symbol.upper()
         pos = self._positions.pop(sym, None)
         if pos is None:
-            self._log.warning("paper_trading.close_nonexistent", symbol=sym)
             return None
 
         raw_exit_price = Decimal(str(exit_price))
         ts = timestamp or datetime.now(UTC).replace(tzinfo=None)
 
-        # Slippage de salida desfavorable
         exec_exit_price = raw_exit_price * (Decimal("1.0") - self._slippage_pct)
 
         gross_revenue = pos.qty * exec_exit_price
@@ -317,7 +568,6 @@ class VirtualBroker:
             else Decimal("0")
         )
 
-        # Retornar capital y PnL neto al saldo
         self._cash += net_revenue
 
         trade = PaperTradeExecution(
@@ -330,8 +580,8 @@ class VirtualBroker:
             exit_price=exec_exit_price,
             qty=pos.qty,
             notional=entry_notional,
-            stop_loss=pos.stop_loss,
-            take_profit=pos.take_profit,
+            stop_loss=pos.stop_loss or Decimal("0"),
+            take_profit=pos.take_profit or Decimal("0"),
             gross_pnl=gross_pnl,
             total_fees=total_fees,
             net_pnl=net_pnl,
@@ -342,14 +592,44 @@ class VirtualBroker:
         self._trade_id_seq += 1
         self._trade_history.append(trade)
 
-        self._log.info(
-            "paper_trading.position_closed",
-            symbol=sym,
-            exit_price=str(exec_exit_price),
-            exit_reason=exit_reason,
-            net_pnl=str(net_pnl),
-            net_pnl_pct=str(net_pnl_pct),
-        )
+        if self._db_engine:
+            from sqlalchemy import text
+            with self._db_engine.connect() as conn:
+                conn.execute(
+                    text(
+                        """
+                        INSERT INTO paper_trades (
+                            trade_id, symbol, side, entry_time, exit_time, entry_price, exit_price,
+                            qty, notional, stop_loss, take_profit, gross_pnl, total_fees, net_pnl,
+                            net_pnl_pct, exit_reason, reason
+                        ) VALUES (
+                            :trade_id, :symbol, :side, :entry_time, :exit_time, :entry_price, :exit_price,
+                            :qty, :notional, :stop_loss, :take_profit, :gross_pnl, :total_fees, :net_pnl,
+                            :net_pnl_pct, :exit_reason, :reason
+                        )
+                        """
+                    ),
+                    {
+                        "trade_id": trade.trade_id,
+                        "symbol": trade.symbol,
+                        "side": trade.side,
+                        "entry_time": trade.entry_time,
+                        "exit_time": trade.exit_time,
+                        "entry_price": float(trade.entry_price),
+                        "exit_price": float(trade.exit_price),
+                        "qty": float(trade.qty),
+                        "notional": float(trade.notional),
+                        "stop_loss": float(trade.stop_loss),
+                        "take_profit": float(trade.take_profit),
+                        "gross_pnl": float(trade.gross_pnl),
+                        "total_fees": float(trade.total_fees),
+                        "net_pnl": float(trade.net_pnl),
+                        "net_pnl_pct": float(trade.net_pnl_pct),
+                        "exit_reason": trade.exit_reason,
+                        "reason": trade.reason,
+                    },
+                )
+                conn.commit()
 
         alert_event = (
             "PAPER_TRADE_STOP_LOSS"
@@ -358,13 +638,9 @@ class VirtualBroker:
             if exit_reason == "TAKE_PROFIT"
             else "PAPER_TRADE_EXIT"
         )
-        icon = "🔴" if net_pnl < Decimal("0") else "🟢"
         self._alert_manager.trigger_alert(
             event=alert_event,
-            message=(
-                f"{icon} Cierre simulado {sym} [{exit_reason}]: {pos.qty} @ ${exec_exit_price:.4f} USDT | "
-                f"Net PnL: ${net_pnl:+.4f} USDT ({net_pnl_pct:+.2f}%) | Saldo: ${self._cash:.2f} USDT"
-            ),
+            message=f"Cierre simulado {sym} [{exit_reason}]: Net PnL ${net_pnl:+.4f}",
             symbol=sym,
             exit_price=str(exec_exit_price),
             net_pnl=str(net_pnl),
@@ -373,7 +649,6 @@ class VirtualBroker:
             total_fees=str(total_fees),
             remaining_balance=str(self._cash),
         )
-
         return trade
 
     def execute_signal(
@@ -390,38 +665,30 @@ class VirtualBroker:
         price_dec = Decimal(str(target_price))
 
         if signal.signal_type == SignalType.BUY:
-            if sym in self._positions:
-                self._log.debug("paper_trading.signal_ignored_already_in_pos", symbol=sym)
-                return self._positions[sym]
+            if sym in self._positions or sym in self._open_positions:
+                return self._positions.get(sym)
 
             if signal.stop_loss is None or signal.take_profit is None:
-                self._log.warning("paper_trading.buy_signal_missing_sl_tp", symbol=sym)
                 return None
 
-            # Calcular tamaño de posición
-            if signal.suggested_qty is not None and signal.suggested_qty > Decimal("0"):
-                qty = signal.suggested_qty
-            else:
-                # Money Management defensivo: 2.5% de riesgo
-                dollar_risk = self._cash * Decimal("0.025")
-                stop_dist = abs(price_dec - signal.stop_loss)
-                if stop_dist <= Decimal("0"):
-                    return None
-                qty = dollar_risk / stop_dist
-                notional = qty * price_dec
-                if notional < self._min_notional:
-                    min_qty = self._min_notional / price_dec
-                    if (min_qty * stop_dist) <= (self._cash * Decimal("0.06")) and (
-                        min_qty * price_dec
-                    ) <= self._cash:
-                        qty = min_qty
-                    else:
-                        qty = Decimal("0")
-                elif notional > self._cash:
-                    qty = self._cash / price_dec
+            dollar_risk = self._cash * Decimal("0.025")
+            stop_dist = abs(price_dec - signal.stop_loss)
+            if stop_dist <= Decimal("0"):
+                return None
+            qty = dollar_risk / stop_dist
+            notional = qty * price_dec
+            if notional < self._min_notional:
+                min_qty = self._min_notional / price_dec
+                if (min_qty * stop_dist) <= (self._cash * Decimal("0.06")) and (
+                    min_qty * price_dec
+                ) <= self._cash:
+                    qty = min_qty
+                else:
+                    qty = Decimal("0")
+            elif notional > self._cash:
+                qty = self._cash / price_dec
 
             if qty <= Decimal("0"):
-                self._log.warning("paper_trading.qty_zero_or_not_viable", symbol=sym)
                 return None
 
             try:
@@ -435,8 +702,7 @@ class VirtualBroker:
                     timestamp=signal.timestamp,
                     reason=signal.reason,
                 )
-            except Exception as exc:
-                self._log.error("paper_trading.open_failed", symbol=sym, error=str(exc))
+            except Exception:
                 return None
 
         elif signal.signal_type == SignalType.SELL:
@@ -462,22 +728,20 @@ class VirtualBroker:
         sym = symbol.upper()
         closed_trades: list[PaperTradeExecution] = []
 
-        # 1. Chequeo intrabarra de posición activa
         pos = self._positions.get(sym)
         if pos is not None:
-            sl_hit = candle.low <= pos.stop_loss
-            tp_hit = candle.high >= pos.take_profit
+            sl_hit = pos.stop_loss is not None and candle.low <= pos.stop_loss
+            tp_hit = pos.take_profit is not None and candle.high >= pos.take_profit
 
             if sl_hit or tp_hit:
                 if sl_hit and tp_hit:
-                    # En caso de coincidencia intrabarra extrema, conservadurismo: Stop Loss primero
-                    raw_exit = pos.stop_loss
+                    raw_exit = pos.stop_loss or candle.low
                     reason = "STOP_LOSS"
                 elif sl_hit:
-                    raw_exit = pos.stop_loss
+                    raw_exit = pos.stop_loss or candle.low
                     reason = "STOP_LOSS"
                 else:
-                    raw_exit = pos.take_profit
+                    raw_exit = pos.take_profit or candle.high
                     reason = "TAKE_PROFIT"
 
                 trade = self.close_position(
@@ -489,8 +753,7 @@ class VirtualBroker:
                 if trade:
                     closed_trades.append(trade)
 
-        # 2. Evaluación de señal si no estamos en posición
-        if sym not in self._positions and signal is not None and signal.symbol.upper() == sym:
+        if sym not in self._positions and sym not in self._open_positions and signal is not None and signal.symbol.upper() == sym:
             self.execute_signal(signal, current_price=candle.close)
 
         return closed_trades
@@ -506,6 +769,6 @@ class VirtualBroker:
 
         self._cash = self._initial_balance
         self._positions.clear()
+        self._open_positions.clear()
         self._trade_history.clear()
         self._trade_id_seq = 1
-        self._log.info("paper_trading.broker_reset", balance=str(self._cash))

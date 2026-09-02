@@ -1,0 +1,271 @@
+{
+  "metadata": {
+    "initial_cash": 100.0,
+    "fee_rate": 0.001,
+    "slippage_pct": 0.0005,
+    "timestamp": "2026-09-02T08:51:32.520462"
+  },
+  "comparisons": [
+    {
+      "symbol": "SOLUSDT",
+      "interval": "1h",
+      "candle_count": 1440,
+      "start_time": "2026-06-24T01:00:00",
+      "end_time": "2026-08-23T00:00:00",
+      "blind_tp": {
+        "final_equity": 93.1137964113105,
+        "net_profit_usd": -6.886203588689501,
+        "total_return_pct": -6.886203588689501,
+        "total_trades": 10,
+        "winning_trades": 3,
+        "losing_trades": 7,
+        "win_rate_pct": 30.0,
+        "profit_factor": 0.27763240520813876,
+        "max_drawdown_pct": 8.763563043028672,
+        "sortino_ratio": -5.0599778313822785,
+        "calmar_ratio": -4.783463399944869,
+        "avg_trade_pnl": -0.68862035886895,
+        "exit_reasons": {
+          "STOP_LOSS": 7,
+          "TAKE_PROFIT": 3
+        }
+      },
+      "structural_tp_75": {
+        "final_equity": 93.1137964113105,
+        "net_profit_usd": -6.886203588689501,
+        "total_return_pct": -6.886203588689501,
+        "total_trades": 10,
+        "winning_trades": 3,
+        "losing_trades": 7,
+        "win_rate_pct": 30.0,
+        "profit_factor": 0.27763240520813876,
+        "max_drawdown_pct": 8.763563043028672,
+        "sortino_ratio": -5.0599778313822785,
+        "calmar_ratio": -4.783463399944869,
+        "avg_trade_pnl": -0.68862035886895,
+        "exit_reasons": {
+          "STOP_LOSS": 7,
+          "TAKE_PROFIT": 3
+        }
+      }
+    },
+    {
+      "symbol": "SOLUSDT",
+      "interval": "15m",
+      "candle_count": 5760,
+      "start_time": "2026-06-24T00:15:00",
+      "end_time": "2026-08-23T00:00:00",
+      "blind_tp": {
+        "final_equity": 84.52401732608898,
+        "net_profit_usd": -15.475982673911014,
+        "total_return_pct": -15.475982673911014,
+        "total_trades": 46,
+        "winning_trades": 16,
+        "losing_trades": 30,
+        "win_rate_pct": 34.78260869565217,
+        "profit_factor": 0.3790155567912262,
+        "max_drawdown_pct": 18.71342785293208,
+        "sortino_ratio": -8.689755636456633,
+        "calmar_ratio": -5.03178303621979,
+        "avg_trade_pnl": -0.33643440595458723,
+        "exit_reasons": {
+          "STOP_LOSS": 30,
+          "TAKE_PROFIT": 16
+        }
+      },
+      "structural_tp_75": {
+        "final_equity": 85.05075955476093,
+        "net_profit_usd": -14.949240445239067,
+        "total_return_pct": -14.949240445239067,
+        "total_trades": 45,
+        "winning_trades": 16,
+        "losing_trades": 29,
+        "win_rate_pct": 35.55555555555556,
+        "profit_factor": 0.37914088964363957,
+        "max_drawdown_pct": 17.897089686588238,
+        "sortino_ratio": -8.651782480462503,
+        "calmar_ratio": -5.082223168563648,
+        "avg_trade_pnl": -0.3322053432275348,
+        "exit_reasons": {
+          "STOP_LOSS": 29,
+          "TAKE_PROFIT": 16
+        }
+      }
+    },
+    {
+      "symbol": "BTCUSDT",
+      "interval": "1h",
+      "candle_count": 1440,
+      "start_time": "2026-06-24T01:00:00",
+      "end_time": "2026-08-23T00:00:00",
+      "blind_tp": {
+        "final_equity": 99.06822611183969,
+        "net_profit_usd": -0.9317738881603075,
+        "total_return_pct": -0.9317738881603075,
+        "total_trades": 12,
+        "winning_trades": 5,
+        "losing_trades": 7,
+        "win_rate_pct": 41.666666666666664,
+        "profit_factor": 0.8777879503021768,
+        "max_drawdown_pct": 3.7932264019804616,
+        "sortino_ratio": -0.7013057206576446,
+        "calmar_ratio": -1.4953576719715185,
+        "avg_trade_pnl": -0.07764782401335896,
+        "exit_reasons": {
+          "TAKE_PROFIT": 5,
+          "STOP_LOSS": 7
+        }
+      },
+      "structural_tp_75": {
+        "final_equity": 99.46867390969462,
+        "net_profit_usd": -0.531326090305383,
+        "total_return_pct": -0.531326090305383,
+        "total_trades": 13,
+        "winning_trades": 6,
+        "losing_trades": 7,
+        "win_rate_pct": 46.15384615384615,
+        "profit_factor": 0.9300606715806131,
+        "max_drawdown_pct": 3.956253414127526,
+        "sortino_ratio": -0.36118637477020293,
+        "calmar_ratio": -0.8175613501044801,
+        "avg_trade_pnl": -0.04087123771579869,
+        "exit_reasons": {
+          "TAKE_PROFIT": 4,
+          "STOP_LOSS": 7,
+          "RSI_OVERBOUGHT": 2
+        }
+      }
+    },
+    {
+      "symbol": "BTCUSDT",
+      "interval": "15m",
+      "candle_count": 5760,
+      "start_time": "2026-06-24T00:15:00",
+      "end_time": "2026-08-23T00:00:00",
+      "blind_tp": {
+        "final_equity": 81.30744426165136,
+        "net_profit_usd": -18.69255573834864,
+        "total_return_pct": -18.69255573834864,
+        "total_trades": 53,
+        "winning_trades": 14,
+        "losing_trades": 39,
+        "win_rate_pct": 26.41509433962264,
+        "profit_factor": 0.18802581204243013,
+        "max_drawdown_pct": 18.934909671684064,
+        "sortino_ratio": -15.258671500621093,
+        "calmar_ratio": -6.006513611991262,
+        "avg_trade_pnl": -0.3526897309122385,
+        "exit_reasons": {
+          "STOP_LOSS": 38,
+          "TAKE_PROFIT": 15
+        }
+      },
+      "structural_tp_75": {
+        "final_equity": 81.30744426165136,
+        "net_profit_usd": -18.69255573834864,
+        "total_return_pct": -18.69255573834864,
+        "total_trades": 53,
+        "winning_trades": 14,
+        "losing_trades": 39,
+        "win_rate_pct": 26.41509433962264,
+        "profit_factor": 0.18802581204243013,
+        "max_drawdown_pct": 18.934909671684064,
+        "sortino_ratio": -15.258671500621093,
+        "calmar_ratio": -6.006513611991262,
+        "avg_trade_pnl": -0.3526897309122385,
+        "exit_reasons": {
+          "STOP_LOSS": 38,
+          "TAKE_PROFIT": 15
+        }
+      }
+    },
+    {
+      "symbol": "ETHUSDT",
+      "interval": "1h",
+      "candle_count": 1440,
+      "start_time": "2026-06-24T01:00:00",
+      "end_time": "2026-08-23T00:00:00",
+      "blind_tp": {
+        "final_equity": 94.85096764330304,
+        "net_profit_usd": -5.149032356696962,
+        "total_return_pct": -5.149032356696962,
+        "total_trades": 10,
+        "winning_trades": 3,
+        "losing_trades": 7,
+        "win_rate_pct": 30.0,
+        "profit_factor": 0.46806666667782765,
+        "max_drawdown_pct": 7.333972170941978,
+        "sortino_ratio": -3.1815936141889014,
+        "calmar_ratio": -4.273952345802567,
+        "avg_trade_pnl": -0.5149032356696962,
+        "exit_reasons": {
+          "STOP_LOSS": 7,
+          "TAKE_PROFIT": 3
+        }
+      },
+      "structural_tp_75": {
+        "final_equity": 92.97145682701334,
+        "net_profit_usd": -7.0285431729866525,
+        "total_return_pct": -7.0285431729866525,
+        "total_trades": 10,
+        "winning_trades": 3,
+        "losing_trades": 7,
+        "win_rate_pct": 30.0,
+        "profit_factor": 0.2670276622650976,
+        "max_drawdown_pct": 8.621957425550505,
+        "sortino_ratio": -4.991680140393689,
+        "calmar_ratio": -4.962525541725385,
+        "avg_trade_pnl": -0.7028543172986652,
+        "exit_reasons": {
+          "STOP_LOSS": 7,
+          "TAKE_PROFIT": 2,
+          "RSI_OVERBOUGHT": 1
+        }
+      }
+    },
+    {
+      "symbol": "ETHUSDT",
+      "interval": "15m",
+      "candle_count": 5760,
+      "start_time": "2026-06-24T00:15:00",
+      "end_time": "2026-08-23T00:00:00",
+      "blind_tp": {
+        "final_equity": 79.45143439231254,
+        "net_profit_usd": -20.548565607687472,
+        "total_return_pct": -20.548565607687472,
+        "total_trades": 56,
+        "winning_trades": 16,
+        "losing_trades": 40,
+        "win_rate_pct": 28.571428571428573,
+        "profit_factor": 0.28833785662955425,
+        "max_drawdown_pct": 21.907437785471306,
+        "sortino_ratio": -12.6443312706627,
+        "calmar_ratio": -5.706987788815465,
+        "avg_trade_pnl": -0.3669386715658477,
+        "exit_reasons": {
+          "TAKE_PROFIT": 17,
+          "STOP_LOSS": 39
+        }
+      },
+      "structural_tp_75": {
+        "final_equity": 81.18089579528072,
+        "net_profit_usd": -18.819104204719277,
+        "total_return_pct": -18.819104204719277,
+        "total_trades": 58,
+        "winning_trades": 19,
+        "losing_trades": 39,
+        "win_rate_pct": 32.758620689655174,
+        "profit_factor": 0.3377168358081548,
+        "max_drawdown_pct": 20.207555672053005,
+        "sortino_ratio": -11.682739508653727,
+        "calmar_ratio": -5.66633415353077,
+        "avg_trade_pnl": -0.3244673138744703,
+        "exit_reasons": {
+          "TAKE_PROFIT": 19,
+          "STOP_LOSS": 38,
+          "RSI_OVERBOUGHT": 1
+        }
+      }
+    }
+  ]
+}

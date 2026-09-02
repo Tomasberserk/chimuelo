@@ -121,3 +121,35 @@ class Snapshot(Base):
             f"Snapshot(snapshot_id={self.snapshot_id}, symbol={self.symbol!r}, "
             f"equity={self.equity})"
         )
+
+
+class PaperTradeRecord(Base):
+    """Registro persistente en SQLite de una operación cerrada de Paper Trading."""
+
+    __tablename__ = "paper_trades"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    trade_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    symbol: Mapped[str] = mapped_column(String(20), nullable=False)
+    side: Mapped[str] = mapped_column(String(10), default="BUY", nullable=False)
+    entry_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    exit_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    entry_price: Mapped[Decimal] = mapped_column(Numeric(precision=20, scale=8), nullable=False)
+    exit_price: Mapped[Decimal] = mapped_column(Numeric(precision=20, scale=8), nullable=False)
+    qty: Mapped[Decimal] = mapped_column(Numeric(precision=20, scale=8), nullable=False)
+    notional: Mapped[Decimal] = mapped_column(Numeric(precision=20, scale=8), nullable=False)
+    stop_loss: Mapped[Decimal] = mapped_column(Numeric(precision=20, scale=8), nullable=False)
+    take_profit: Mapped[Decimal] = mapped_column(Numeric(precision=20, scale=8), nullable=False)
+    gross_pnl: Mapped[Decimal] = mapped_column(Numeric(precision=20, scale=8), nullable=False)
+    total_fees: Mapped[Decimal] = mapped_column(Numeric(precision=20, scale=8), nullable=False)
+    net_pnl: Mapped[Decimal] = mapped_column(Numeric(precision=20, scale=8), nullable=False)
+    net_pnl_pct: Mapped[Decimal] = mapped_column(Numeric(precision=20, scale=8), nullable=False)
+    exit_reason: Mapped[str] = mapped_column(String(50), nullable=False)
+    reason: Mapped[str] = mapped_column(String(255), default="", nullable=False)
+
+    def __repr__(self) -> str:
+        return (
+            f"PaperTradeRecord(id={self.id}, trade_id={self.trade_id}, symbol={self.symbol!r}, "
+            f"net_pnl={self.net_pnl}, exit_reason={self.exit_reason!r})"
+        )
+

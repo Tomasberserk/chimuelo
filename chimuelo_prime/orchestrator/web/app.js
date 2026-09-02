@@ -21,8 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
         isRunning: true,
         activePosition: null,
         trades: [],
+        persistentTrades: [],
         candles: [],
         autoscroll: true,
+        needsChartFit: true,
         ws: null,
         wsLatency: 12,
         lastPingTime: 0,
@@ -394,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ============================================================
-    // 4. DETECCIÓN DE DIVERGENCIAS ALCISTAS Y GENERACIÓN DE SEÑALES
+    // 4. DETECCIÓN DE SEÑALES: DIVERGENCIA RSI + REBOTE EN SOBREVENTA
     // ============================================================
     function analyzeStrategyAndSignals(candles, emaTrend, emaFast, rsiData) {
         if (!candles || candles.length < 50 || !rsiData || rsiData.length < 30) {
@@ -407,29 +409,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const emaTrendMap = new Map();
         emaTrend.forEach(e => emaTrendMap.set(e.time, e.value));
 
+        const emaFastMap = new Map();
+        emaFast.forEach(e => emaFastMap.set(e.time, e.value));
+
         const atrVal = calculateATR(candles, 14);
         const markers = [];
         const simulatedTrades = [];
         let divergenceFound = false;
-
-        // Búsqueda de divergencias alcistas históricas
-        // Condición: Precio hace Lower Low o Equal Low mientras RSI hace Higher Low (con RSI <= 38)
-        // y Precio > EMA 200 (Filtro Tendencia Macro)
         const lookback = 20;
 
         for (let i = lookback; i < candles.length - 2; i++) {
             const currentCandle = candles[i];
             const currentRsi = rsiMap.get(currentCandle.time);
             const currentEma200 = emaTrendMap.get(currentCandle.time);
+            const currentEma20 = emaFastMap.get(currentCandle.time);
 
-            if (!currentRsi || !currentEma200) continue;
+            if (currentRsi === undefined || currentEma200 === undefined) continue;
 
-            // 1. Filtro Macro: Precio > EMA 200
-            if (currentCandle.close < currentEma200) continue;
+            let signalTriggered = null; // 'DIVERGENCE' | 'OVERSOLD_BOUNCE'
+            let signalReason = '';
 
-            // 2. Umbral Chimuelo: RSI en zona de sobreventa (<= 38.0)
-            if (currentRsi <= 38.0) {
-                // Comprobar si hay un valle previo más bajo en precio pero más bajo en RSI
+            // --- SETUP A: Divergencia Alcista en Tendencia (Precio > EMA 200) ---
+            if (currentCandle.close >= currentEma200 && currentRsi <= 38.0) {
                 let prevLowIdx = -1;
                 for (let j = i - 4; j >= i - lookback && j >= 0; j--) {
                     const c = candles[j];
@@ -439,120 +440,235 @@ document.addEventListener('DOMContentLoaded', () => {
                         break;
                     }
                 }
-
                 if (prevLowIdx !== -1) {
                     divergenceFound = true;
-                    const entryPrice = currentCandle.close;
-                    const slDist = Math.max(atrVal * 1.5, entryPrice * 0.015);
-                    const slPrice = entryPrice - slDist;
-                    
-                    // 1. Target Matemático ATR (R:R = 1:2.0)
-                    let mathTp = entryPrice + (slDist * 2.0);
+                    signalTriggered = 'DIVERGENCE';
+                    signalReason = 'DIVERGENCIA RSI';
+                }
+            }
 
-                    // 2. Techo Estructural (Máximo de las últimas 48 velas)
+            // --- SETUP B: Rebote en Sobreventa Extrema (Oversold Bounce / Mean Reversion) ---
+            if (!signalTriggered) {
+                const prevRsi = rsiMap.get(candles[i - 1].time) || 100;
+                const candleRange = currentCandle.high - currentCandle.low;
+                const lowerWick = Math.min(currentCandle.open, currentCandle.close) - currentCandle.low;
+                const isBullishCandle = currentCandle.close > currentCandle.open;
+                const isHammer = candleRange > 0 && (lowerWick / candleRange) >= 0.35;
+
+                // RSI en sobreventa extrema (<= 30.0) y girando al alza con confirmación
+                if (currentRsi <= 30.0 || (prevRsi <= 30.0 && currentRsi > prevRsi)) {
+                    if (isBullishCandle || isHammer) {
+                        signalTriggered = 'OVERSOLD_BOUNCE';
+                        signalReason = 'REBOTE SOBREVENTA';
+                    }
+                }
+            }
+
+            if (signalTriggered) {
+                const entryPrice = currentCandle.close;
+                const slDist = Math.max(atrVal * 1.5, entryPrice * 0.015);
+                const slPrice = entryPrice - slDist;
+                
+                let mathTp = entryPrice + (slDist * 2.0);
+                let tpPrice = mathTp;
+
+                if (signalTriggered === 'OVERSOLD_BOUNCE' && currentEma20 && currentEma20 > entryPrice + slDist) {
+                    tpPrice = Math.min(mathTp, currentEma20);
+                } else {
                     const lookbackHighWindow = candles.slice(Math.max(0, i - 48), i + 1);
                     const localSwingHigh = Math.max(...lookbackHighWindow.map(c => c.high));
-
-                    // 3. Take Profit Realista: 75% del recorrido hacia el techo local para garantizar alta probabilidad
-                    let tpPrice = mathTp;
                     if (localSwingHigh > entryPrice) {
                         const structuralTp = entryPrice + ((localSwingHigh - entryPrice) * 0.75);
-                        // Limitar el TP para nunca proyectar por encima de la resistencia sin confirmación
                         tpPrice = Math.min(mathTp, structuralTp);
                         if (tpPrice <= entryPrice + slDist) {
-                            tpPrice = mathTp; // Mantener objetivo mínimo saludable
+                            tpPrice = mathTp;
                         }
                     }
+                }
 
-                    // Marker de Compra
-                    markers.push({
-                        time: currentCandle.time,
-                        position: 'belowBar',
-                        color: '#0ECB81',
-                        shape: 'arrowUp',
-                        text: `BUY $${entryPrice.toFixed(2)}`,
-                        size: 2,
-                    });
+                // Marker de Compra
+                markers.push({
+                    time: currentCandle.time,
+                    position: 'belowBar',
+                    color: signalTriggered === 'OVERSOLD_BOUNCE' ? '#00d2ff' : '#0ECB81',
+                    shape: 'arrowUp',
+                    text: `BUY $${entryPrice.toFixed(2)}`,
+                    size: 2,
+                });
 
-                    // Simular progresión de trade en velas siguientes
-                    let tradeClosed = false;
-                    let exitPrice = entryPrice;
-                    let exitTime = currentCandle.time;
-                    let exitReason = 'ACTIVE';
+                // Simular progresión de trade en velas siguientes
+                let tradeClosed = false;
+                let exitPrice = entryPrice;
+                let exitTime = currentCandle.time;
+                let exitReason = 'ACTIVE';
 
-                    for (let k = i + 1; k < candles.length; k++) {
-                        const forwardCandle = candles[k];
-                        if (forwardCandle.high >= tpPrice) {
-                            tradeClosed = true;
-                            exitPrice = tpPrice;
-                            exitTime = forwardCandle.time;
-                            exitReason = 'TAKE PROFIT';
-                            markers.push({
-                                time: forwardCandle.time,
-                                position: 'aboveBar',
-                                color: '#0ECB81',
-                                shape: 'circle',
-                                text: 'TP',
-                            });
-                            break;
-                        } else if (forwardCandle.low <= slPrice) {
-                            tradeClosed = true;
-                            exitPrice = slPrice;
-                            exitTime = forwardCandle.time;
-                            exitReason = 'STOP LOSS';
-                            markers.push({
-                                time: forwardCandle.time,
-                                position: 'belowBar',
-                                color: '#F6465D',
-                                shape: 'circle',
-                                text: 'SL',
-                            });
-                            break;
-                        }
+                for (let k = i + 1; k < candles.length; k++) {
+                    const forwardCandle = candles[k];
+                    if (forwardCandle.high >= tpPrice) {
+                        tradeClosed = true;
+                        exitPrice = tpPrice;
+                        exitTime = forwardCandle.time;
+                        exitReason = 'TAKE PROFIT';
+                        markers.push({
+                            time: forwardCandle.time,
+                            position: 'aboveBar',
+                            color: '#0ECB81',
+                            shape: 'circle',
+                            text: 'TP',
+                        });
+                        break;
+                    } else if (forwardCandle.low <= slPrice) {
+                        tradeClosed = true;
+                        exitPrice = slPrice;
+                        exitTime = forwardCandle.time;
+                        exitReason = 'STOP LOSS';
+                        markers.push({
+                            time: forwardCandle.time,
+                            position: 'belowBar',
+                            color: '#F6465D',
+                            shape: 'circle',
+                            text: 'SL',
+                        });
+                        break;
                     }
+                }
 
-                    const tradePnl = tradeClosed 
-                        ? ((exitPrice - entryPrice) / entryPrice) * state.initialBalance
-                        : ((candles[candles.length - 1].close - entryPrice) / entryPrice) * state.initialBalance;
+                const tradePnl = tradeClosed 
+                    ? ((exitPrice - entryPrice) / entryPrice) * state.initialBalance
+                    : ((candles[candles.length - 1].close - entryPrice) / entryPrice) * state.initialBalance;
 
-                    const tradePnlPct = ((exitPrice - entryPrice) / entryPrice) * 100;
+                const tradePnlPct = ((exitPrice - entryPrice) / entryPrice) * 100;
 
-                    simulatedTrades.push({
+                simulatedTrades.push({
+                    symbol: state.symbol,
+                    side: 'LONG',
+                    entryPrice,
+                    exitPrice: tradeClosed ? exitPrice : candles[candles.length - 1].close,
+                    slPrice,
+                    tpPrice,
+                    pnl: tradePnl,
+                    pnlPct: tradePnlPct,
+                    status: exitReason,
+                    entryTime: new Date(currentCandle.time * 1000).toISOString().replace('T', ' ').substring(0, 16),
+                    exitTime: tradeClosed ? new Date(exitTime * 1000).toISOString().replace('T', ' ').substring(0, 16) : 'En curso',
+                    isOpen: !tradeClosed,
+                    reason: signalReason,
+                });
+
+                if (!tradeClosed) {
+                    state.activePosition = {
                         symbol: state.symbol,
                         side: 'LONG',
                         entryPrice,
-                        exitPrice: tradeClosed ? exitPrice : candles[candles.length - 1].close,
                         slPrice,
                         tpPrice,
+                        size: state.initialBalance / entryPrice,
                         pnl: tradePnl,
                         pnlPct: tradePnlPct,
-                        status: exitReason,
-                        entryTime: new Date(currentCandle.time * 1000).toISOString().replace('T', ' ').substring(0, 16),
-                        exitTime: tradeClosed ? new Date(exitTime * 1000).toISOString().replace('T', ' ').substring(0, 16) : 'En curso',
-                        isOpen: !tradeClosed,
-                    });
-
-                    // Si el trade está abierto en la última vela, marcarlo como posición activa
-                    if (!tradeClosed) {
-                        state.activePosition = {
-                            symbol: state.symbol,
-                            side: 'LONG',
-                            entryPrice,
-                            slPrice,
-                            tpPrice,
-                            size: state.initialBalance / entryPrice,
-                            pnl: tradePnl,
-                            pnlPct: tradePnlPct,
-                        };
-                    }
-
-                    // Saltar algunas velas para no sobre-apalancar señales duplicadas en la misma zona
-                    i += 10;
+                    };
                 }
+
+                i += 10;
             }
         }
 
         return { markers, simulatedTrades, divergenceFound, latestATR: atrVal };
+    }
+
+    // ============================================================
+    // 4.1 SINCRONIZACIÓN DE TRADES PERSISTENTES Y MARCADORES MULTITEMPORALES
+    // ============================================================
+    async function fetchRealTrades() {
+        try {
+            const res = await fetch('/api/paper/trades');
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data && Array.isArray(data.trades) && data.trades.length > 0) {
+                state.persistentTrades = data.trades.map(t => {
+                    const entryDate = new Date(t.entry_time);
+                    const exitDate = t.exit_time ? new Date(t.exit_time) : null;
+                    return {
+                        symbol: t.symbol,
+                        side: t.side || 'LONG',
+                        entryPrice: Number(t.entry_price),
+                        exitPrice: Number(t.exit_price),
+                        slPrice: Number(t.stop_loss),
+                        tpPrice: Number(t.take_profit),
+                        pnl: Number(t.net_pnl),
+                        pnlPct: Number(t.net_pnl_pct),
+                        status: t.exit_reason === 'TAKE_PROFIT' ? 'TAKE PROFIT' : t.exit_reason === 'STOP_LOSS' ? 'STOP LOSS' : (t.exit_reason || 'CLOSED'),
+                        entryTime: t.entry_time.replace('T', ' ').substring(0, 16),
+                        exitTime: t.exit_time ? t.exit_time.replace('T', ' ').substring(0, 16) : 'En curso',
+                        entryTimestampSec: Math.floor(entryDate.getTime() / 1000),
+                        exitTimestampSec: exitDate ? Math.floor(exitDate.getTime() / 1000) : null,
+                        isOpen: false,
+                        reason: t.reason || '',
+                    };
+                });
+            }
+        } catch (err) {
+            console.warn('[Chimuelo] Error consultando trades persistentes:', err);
+        }
+    }
+
+    function findNearestCandle(candles, timestampSec) {
+        if (!candles || candles.length === 0 || !timestampSec) return null;
+        let closest = null;
+        let minDiff = Infinity;
+        for (let i = 0; i < candles.length; i++) {
+            const c = candles[i];
+            const diff = Math.abs(c.time - timestampSec);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closest = c;
+            }
+        }
+        return closest;
+    }
+
+    function generateUnifiedMarkers(candles, simulatedMarkers) {
+        const markers = [];
+        if (!candles || candles.length === 0) return markers;
+
+        // Mapear trades persistentes reales a las velas actuales según timestamp
+        if (state.persistentTrades && state.persistentTrades.length > 0) {
+            const symbolTrades = state.persistentTrades.filter(t => t.symbol === state.symbol);
+            symbolTrades.forEach(t => {
+                const entryCandle = findNearestCandle(candles, t.entryTimestampSec);
+                if (entryCandle) {
+                    markers.push({
+                        time: entryCandle.time,
+                        position: 'belowBar',
+                        color: '#0ECB81',
+                        shape: 'arrowUp',
+                        text: `BUY $${t.entryPrice.toFixed(2)}`,
+                        size: 2,
+                    });
+                }
+                if (t.exitTimestampSec) {
+                    const exitCandle = findNearestCandle(candles, t.exitTimestampSec);
+                    if (exitCandle) {
+                        const isTp = t.status === 'TAKE PROFIT' || t.pnl >= 0;
+                        markers.push({
+                            time: exitCandle.time,
+                            position: isTp ? 'aboveBar' : 'belowBar',
+                            color: isTp ? '#0ECB81' : '#F6465D',
+                            shape: 'circle',
+                            text: isTp ? 'TP' : 'SL',
+                            size: 1,
+                        });
+                    }
+                }
+            });
+        }
+
+        // Si no hay trades persistentes o se desea complementar con señales simuladas
+        if (markers.length === 0 && simulatedMarkers && simulatedMarkers.length > 0) {
+            markers.push(...simulatedMarkers);
+        }
+
+        markers.sort((a, b) => a.time - b.time);
+        return markers;
     }
 
     // ============================================================
@@ -573,6 +689,9 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (state.interval === '4h') days = 50;
 
         try {
+            // Cargar trades persistentes desde SQLite en paralelo
+            await fetchRealTrades();
+
             const res = await fetch(`/api/candles?symbol=${state.symbol}&interval=${state.interval}&days=${days}`);
             if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
             const data = await res.json();
@@ -604,10 +723,16 @@ document.addEventListener('DOMContentLoaded', () => {
             state.emaFastSeries.setData(ema20);
             state.rsiSeries.setData(rsi14);
 
-            // Marcadores en Velas (Limpiar siempre para evitar que queden rastros de otros pares)
-            state.candleSeries.setMarkers(analysis.markers || []);
+            // Marcadores Unificados en Velas
+            const unifiedMarkers = generateUnifiedMarkers(state.candles, analysis.markers);
+            state.candleSeries.setMarkers(unifiedMarkers);
 
-            state.mainChart.timeScale().fitContent();
+            // Únicamente ajustar vista (fitContent) en la primera carga o cambio de par/temporalidad
+            if (state.needsChartFit && state.mainChart) {
+                state.mainChart.timeScale().fitContent();
+                if (state.rsiChart) state.rsiChart.timeScale().fitContent();
+                state.needsChartFit = false;
+            }
 
             // 5.5 Actualizar Panel de Estrategia
             updateStrategyStatusUI(lastCandle, ema200, ema20, rsi14, analysis);
@@ -615,8 +740,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // 5.6 Actualizar Posición Activa UI
             updateActivePositionUI(lastCandle.close);
 
-            // 5.7 Actualizar Historial de Trades & KPIs
-            state.trades = analysis.simulatedTrades;
+            // 5.7 Actualizar Historial de Trades & KPIs (Prioridad a base de datos)
+            if (state.persistentTrades && state.persistentTrades.length > 0) {
+                state.trades = state.persistentTrades;
+            } else {
+                state.trades = analysis.simulatedTrades;
+            }
             updateTradesHistoryUI();
             updateFinancialKPIs();
 
@@ -1160,6 +1289,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dom.pairButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             state.symbol = btn.getAttribute('data-symbol') || 'SOLUSDT';
+            state.needsChartFit = true;
             appendLog(`[*] Cambiando instrumento a ${state.symbol}...`, 'info');
             fetchCandlesAndRender();
         });
@@ -1171,6 +1301,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dom.tfButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             state.interval = btn.getAttribute('data-interval') || '15m';
+            state.needsChartFit = true;
             appendLog(`[*] Cambiando temporalidad a ${state.interval}...`, 'info');
             fetchCandlesAndRender();
         });

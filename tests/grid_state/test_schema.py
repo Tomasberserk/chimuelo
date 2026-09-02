@@ -46,9 +46,13 @@ class TestTablesCreated:
         insp = inspect(engine)
         assert "snapshots" in insp.get_table_names()
 
-    def test_exactly_three_tables(self, engine: Engine) -> None:
+    def test_paper_trades_table_exists(self, engine: Engine) -> None:
         insp = inspect(engine)
-        assert len(insp.get_table_names()) == 3
+        assert "paper_trades" in insp.get_table_names()
+
+    def test_all_expected_tables(self, engine: Engine) -> None:
+        insp = inspect(engine)
+        assert len(insp.get_table_names()) == 4
 
 
 # --------------------------------------------------------------------------- #

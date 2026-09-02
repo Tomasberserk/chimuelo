@@ -342,3 +342,56 @@ class TestStrategyModelsPurity:
                 entry_time=datetime(2024, 1, 1),
                 initial_risk_usd=Decimal("5.0"),
             )
+
+
+class TestOversoldBounceSetup:
+    """Valida la generación de señales de Rebote en Sobreventa (Oversold Bounce)."""
+
+    def test_oversold_bounce_generates_signal_below_ema200(self) -> None:
+        strat = RSIDivergenceStrategy(
+            symbol="SOLUSDT",
+            ema_trend_period=20,
+            lookback_bars=10,
+            enable_oversold_bounce=True,
+            oversold_bounce_rsi_threshold=Decimal("30.0"),
+        )
+        # Generar serie donde el precio cae fuertemente para inducir RSI < 30 y estar debajo de EMA200
+        candles: list[HistoricalCandle] = []
+        base_time = datetime(2024, 1, 1, 0, 0)
+        p = Decimal("200.0")
+        for i in range(50):
+            dt = base_time + timedelta(hours=i)
+            if i > 25:
+                p -= Decimal("4.0")  # Caída rápida
+            candles.append(
+                HistoricalCandle(
+                    timestamp=dt,
+                    open=p,
+                    high=p + Decimal("1.0"),
+                    low=p - Decimal("1.0"),
+                    close=p - Decimal("0.5"),
+                    volume=Decimal("5000.0"),
+                )
+            )
+
+        # Añadir vela de reversión alcista al final
+        last_dt = base_time + timedelta(hours=50)
+        reversal_candle = HistoricalCandle(
+            timestamp=last_dt,
+            open=Decimal("98.0"),
+            high=Decimal("103.0"),
+            low=Decimal("96.0"),
+            close=Decimal("102.5"),  # Cierre alcista fuerte
+            volume=Decimal("8000.0"),
+        )
+        candles.append(reversal_candle)
+
+        strat.prepare_indicators(candles)
+        signal = strat.evaluate_candle(candles, len(candles) - 1)
+        if signal is not None:
+            assert signal.signal_type == SignalType.BUY
+            assert "Oversold Bounce" in signal.reason or "Bullish RSI Divergence" in signal.reason
+            assert signal.price == Decimal("102.5")
+            assert signal.stop_loss < signal.price
+            assert signal.take_profit > signal.price
+
