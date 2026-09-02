@@ -1,4 +1,4 @@
-"""Módulo de Telemetría Acumulativa y Monitoreo de Ejecución para Live Paper Trading."""
+"""Módulo de Telemetría Acumulativa y Reportes Semanales para Live Paper Trading."""
 
 from __future__ import annotations
 
@@ -14,14 +14,16 @@ from chimuelo_prime.paper_trading.decision_models import (
     PaperFill,
     PaperPosition,
 )
+from chimuelo_prime.paper_trading.drift_tracker import BacktestLiveDriftTracker
 
 
 class PaperTelemetryCollector:
-    """Recolector central de métricas acumulativas de infraestructura y trading."""
+    """Recolector central de telemetría, métricas acumulativas y generador de snapshots semanales."""
 
     def __init__(self) -> None:
         self._start_time = datetime.now(UTC)
         self._log = get_logger(__name__)
+        self._drift_tracker = BacktestLiveDriftTracker()
 
         # Contadores de decisiones
         self.total_evaluations: int = 0
@@ -39,6 +41,7 @@ class PaperTelemetryCollector:
         self.total_slippage_usd: Decimal = Decimal("0")
         self.total_fees_usd: Decimal = Decimal("0")
         self.closed_positions: list[PaperPosition] = []
+        self.trade_btc_regimes: list[dict[str, Any]] = []
 
         # Métricas de infraestructura
         self.ws_reconnects: int = 0
@@ -52,6 +55,14 @@ class PaperTelemetryCollector:
         self.total_evaluations += 1
         if decision.action == DecisionAction.SIGNAL_GENERATED:
             self.signals_generated += 1
+            if decision.suggested_entry_price:
+                self.trade_btc_regimes.append({
+                    "timestamp": decision.timestamp.isoformat(),
+                    "symbol": decision.symbol,
+                    "btc_macro_bullish": decision.filters.btc_macro_bullish,
+                    "btc_daily_close_prev": str(decision.filters.btc_daily_close_prev),
+                    "btc_daily_ema50_prev": str(decision.filters.btc_daily_ema50_prev),
+                })
         elif decision.action == DecisionAction.BLOCKED_BY_RISK:
             self.blocked_by_risk += 1
         elif decision.action == DecisionAction.NO_SIGNAL:
@@ -112,6 +123,25 @@ class PaperTelemetryCollector:
         max_dd_pct = float((hwm - current_equity) / hwm * Decimal("100")) if hwm > Decimal("0") else 0.0
         avg_latency = (sum(self.latencies_ms) / len(self.latencies_ms)) if self.latencies_ms else 0.0
 
+        # Desglose por símbolo
+        btc_trades = [p for p in self.closed_positions if p.symbol == "BTCUSDT"]
+        sol_trades = [p for p in self.closed_positions if p.symbol == "SOLUSDT"]
+
+        def calc_symbol_stats(trades: list[PaperPosition]) -> dict[str, Any]:
+            t_count = len(trades)
+            if t_count == 0:
+                return {"trades": 0, "win_rate_pct": 0.0, "profit_factor": 0.0, "net_pnl": "0.00", "avg_r": 0.0}
+            w_trades = [t for t in trades if (t.net_pnl or Decimal("0")) > Decimal("0")]
+            l_trades = [t for t in trades if (t.net_pnl or Decimal("0")) <= Decimal("0")]
+            wr = round(len(w_trades) / t_count * 100.0, 2)
+            g_gain = sum((t.gross_pnl for t in w_trades if t.gross_pnl), Decimal("0"))
+            g_loss = sum((abs(t.gross_pnl) for t in l_trades if t.gross_pnl), Decimal("0"))
+            pf = round(float(g_gain) / float(g_loss), 2) if g_loss > Decimal("0") else (999.0 if g_gain > Decimal("0") else 0.0)
+            pnl = str(sum(((t.net_pnl or Decimal("0")) for t in trades), Decimal("0")))
+            r_list = [float(t.r_multiple or 0) for t in trades]
+            ar = round(sum(r_list) / len(r_list), 4) if r_list else 0.0
+            return {"trades": t_count, "win_rate_pct": wr, "profit_factor": pf, "net_pnl": pnl, "avg_r": ar}
+
         return {
             "uptime_hours": round(uptime_hours, 2),
             "total_evaluations": self.total_evaluations,
@@ -129,6 +159,11 @@ class PaperTelemetryCollector:
             "max_drawdown_pct": round(max_dd_pct, 2),
             "total_slippage_usd": str(self.total_slippage_usd),
             "total_fees_usd": str(self.total_fees_usd),
+            "by_symbol": {
+                "BTCUSDT": calc_symbol_stats(btc_trades),
+                "SOLUSDT": calc_symbol_stats(sol_trades),
+            },
+            "trade_btc_regimes": self.trade_btc_regimes,
             "infrastructure": {
                 "ws_reconnects": self.ws_reconnects,
                 "rest_fallbacks": self.rest_fallbacks,
@@ -138,8 +173,28 @@ class PaperTelemetryCollector:
             },
         }
 
-    def export_summary_json(self, file_path: str = "data/reports/live_paper_telemetry.json") -> None:
-        """Exporta el reporte a JSON en disco."""
-        summary = self.get_summary()
+    def generate_weekly_snapshot(
+        self, week_number: int, current_equity: Decimal = Decimal("100.00"), hwm: Decimal = Decimal("100.00")
+    ) -> dict[str, Any]:
+        """Genera el snapshot semanal formal con métricas acumulativas, desgloses y drift."""
+        summary = self.get_summary(current_equity, hwm)
+        drift = self._drift_tracker.compute_drift(summary)
+
+        snapshot = {
+            "week_number": week_number,
+            "generated_at": datetime.now(UTC).isoformat(),
+            "strategy": "StructuralBreakoutStrategy v1.0.0-frozen",
+            "capital_virtual_usd": str(current_equity),
+            "high_water_mark_usd": str(hwm),
+            "metrics": summary,
+            "backtest_drift": drift,
+        }
+        return snapshot
+
+    def export_weekly_snapshot_json(
+        self, week_number: int, file_path: str = "data/reports/weekly_paper_snapshot.json"
+    ) -> None:
+        """Exporta el snapshot semanal a disco."""
+        snapshot = self.generate_weekly_snapshot(week_number)
         with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(summary, f, indent=2)
+            json.dump(snapshot, f, indent=2)
