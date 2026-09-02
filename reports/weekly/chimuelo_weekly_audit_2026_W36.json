@@ -1,18 +1,38 @@
 {
   "identity": {
-    "report_id": "audit_2026_W36_1788381382",
+    "report_id": "audit_2026_W36_1788383112",
+    "report_schema_version": "1.0.0",
     "week_identifier": "2026_W36",
     "week_number": 36,
     "year": 2026,
-    "period_start": "2026-08-26T20:36:22.678146+00:00",
-    "period_end": "2026-09-02T20:36:22.678146+00:00",
-    "generated_at": "2026-09-02T20:36:22.678146+00:00",
+    "period_start": "2026-08-26T21:05:12.866664+00:00",
+    "period_end": "2026-09-02T21:05:12.866664+00:00",
+    "generated_at": "2026-09-02T21:05:12.866664+00:00",
     "strategy_version": "v1.0.0-frozen",
     "config_hash": "12c68c1a40b27329cb63cea9a38dcd9904875780ab5d4fae605308633eeb6a83",
-    "code_version_git_sha": "1ad3f3fb4b813984961349a5b587b84642c46ae9",
+    "code_version_git_sha": "4040a27adfed0cb696c79cfb1e42b4e9c9c9c5b2",
     "initial_capital_usd": "100.00",
-    "current_equity_usd": "25.00",
+    "current_equity_usd": "100.00",
     "high_water_mark_usd": "100.00"
+  },
+  "data_quality_reconciliation": {
+    "status": "PASS",
+    "total_inconsistencies": 0,
+    "checks": {
+      "signals_orders_reconciled": true,
+      "orders_fills_reconciled": true,
+      "fills_positions_reconciled": true,
+      "positions_pnl_reconciled": true,
+      "risk_events_state_reconciled": true
+    },
+    "metrics": {
+      "orphan_events_count": 0,
+      "missing_fills_count": 0,
+      "duplicate_ids_count": 0,
+      "inconsistent_states_count": 0,
+      "pnl_mismatches_count": 0
+    },
+    "summary_verdict": "PASS / 0 inconsistencies"
   },
   "performance": {
     "total_signals_evaluated": 0,
@@ -32,7 +52,7 @@
     "largest_winner_usd": 0.0,
     "largest_loser_usd": 0.0,
     "total_net_pnl_usd": "0",
-    "max_drawdown_pct": 75.0,
+    "max_drawdown_pct": 0.0,
     "open_positions_count": 0
   },
   "trade_ledger": [],
@@ -76,7 +96,7 @@
       "profit_factor": 0.0,
       "average_r": 0.0,
       "expectancy_usd": 0.0,
-      "max_drawdown_pct": 75.0
+      "max_drawdown_pct": 0.0
     },
     "comparison_vs_historical_full_sample_2024_2026": {
       "metadata": {
@@ -115,8 +135,8 @@
         },
         "max_drawdown_pct": {
           "historical": 17.13,
-          "live": 75.0,
-          "drift_delta": 57.87
+          "live": 0.0,
+          "drift_delta": -17.13
         }
       }
     },
@@ -157,13 +177,31 @@
         },
         "max_drawdown_pct": {
           "historical": 20.66,
-          "live": 75.0,
-          "drift_delta": 54.34
+          "live": 0.0,
+          "drift_delta": -20.66
         }
       }
     },
     "audit_status": "DESCRIPTIVE_MONITORING_NO_RULES_MUTATION",
     "governance_rule": "No se modifican parámetros estratégicos en vivo independientemente de la magnitud de la desviación. Toda diferencia empírica se registra para la auditoría final de 60 días."
   },
-  "data_integrity_sha256": "646523772613458a016d6c1b1345a4ddf77ae1c08b1795b6115cc7271c594721"
+  "weekly_equity_series": [
+    {
+      "timestamp": "2026-08-26T21:05:12.866664+00:00",
+      "equity": "100.00",
+      "daily_drawdown_pct": 0.0,
+      "peak_drawdown_pct": 0.0,
+      "btc_price": "60000.00",
+      "sol_price": "140.00"
+    },
+    {
+      "timestamp": "2026-09-02T21:05:12.866664+00:00",
+      "equity": "100.00",
+      "daily_drawdown_pct": 0.0,
+      "peak_drawdown_pct": 0.0,
+      "btc_price": "61000.00",
+      "sol_price": "145.00"
+    }
+  ],
+  "data_integrity_sha256": "1946a275f4cef1491170eabd43b43dac15eecd72c871a5e16b88b979ce94221a"
 }

@@ -662,36 +662,47 @@ def generate_weekly_audit(
     year: int | None = Query(None, description="Año opcional"),
 ) -> dict[str, Any]:
     """Genera el paquete de auditoría semanal reproducible (Markdown, JSON, XLSX)."""
-    from chimuelo_prime.paper_trading.persistence import SQLitePersistenceBackend
-    from chimuelo_prime.paper_trading.weekly_audit import WeeklyAuditReportGenerator
+    try:
+        from chimuelo_prime.paper_trading.persistence import SQLitePersistenceBackend
+        from chimuelo_prime.paper_trading.weekly_audit import WeeklyAuditReportGenerator
 
-    manager = PaperTradingManager.get_instance()
-    persistence = SQLitePersistenceBackend("data/live_paper.db")
-    generator = WeeklyAuditReportGenerator(
-        persistence=persistence,
-        broker=manager._broker,
-        output_base_dir="reports/weekly",
-    )
-    result = generator.generate_and_save_package(
-        week_number=week_number,
-        year=year,
-        initial_capital=manager._initial_balance,
-    )
-    return {
-        "success": True,
-        "message": f"Reporte de auditoría semanal {result['week_identifier']} generado exitosamente.",
-        "week_identifier": result["week_identifier"],
-        "report_id": result["report_id"],
-        "sha256": result["sha256"],
-        "files": result["files"],
-        "archive_dir": result["archive_dir"],
-    }
+        manager = PaperTradingManager.get_instance()
+        persistence = SQLitePersistenceBackend("data/live_paper.db")
+        generator = WeeklyAuditReportGenerator(
+            persistence=persistence,
+            broker=manager._broker,
+            output_base_dir="reports/weekly",
+        )
+        result = generator.generate_and_save_package(
+            week_number=week_number,
+            year=year,
+            initial_capital=manager._initial_balance,
+        )
+        return {
+            "success": True,
+            "message": f"Reporte de auditoría semanal {result['week_identifier']} generado exitosamente.",
+            "week_identifier": result["week_identifier"],
+            "report_id": result["report_id"],
+            "sha256": result["sha256"],
+            "files": result["files"],
+            "archive_dir": result["archive_dir"],
+        }
+    except Exception as exc:
+        logger.error("dashboard.generate_weekly_audit_failed", error=str(exc), exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "message": f"Error al generar reporte de auditoría: {exc}",
+                "detail": str(exc),
+            },
+        )
 
 
 @app.get("/api/audit/download")
 def download_audit_file(
     week: str = Query(..., description="Identificador de semana, ej. 2026_W36"),
-    format: str = Query("md", regex="^(md|json|xlsx)$", description="Formato del archivo: md, json o xlsx"),
+    format: str = Query("md", pattern="^(md|json|xlsx)$", description="Formato del archivo: md, json o xlsx"),
 ) -> FileResponse:
     """Descarga el archivo de reporte semanal en formato Markdown, JSON o XLSX."""
     base_dir = Path("reports/weekly")

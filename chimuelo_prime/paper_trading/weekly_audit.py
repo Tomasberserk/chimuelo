@@ -182,7 +182,13 @@ class WeeklyAuditReportGenerator:
             median_r = (sorted_r[mid] if len(sorted_r) % 2 != 0 else (sorted_r[mid - 1] + sorted_r[mid]) / 2.0)
 
         # 3. Reconciliación de Calidad de Datos
-        open_positions = list(self._broker._open_positions.values()) if self._broker else []
+        open_positions = []
+        if self._broker:
+            if hasattr(self._broker, "_open_positions") and isinstance(self._broker._open_positions, dict):
+                open_positions = list(self._broker._open_positions.values())
+            elif hasattr(self._broker, "_positions") and isinstance(self._broker._positions, dict):
+                open_positions = list(self._broker._positions.values())
+
         reconciliation = self._reconcile_data_quality(self._telemetry.closed_positions, open_positions)
 
         # 4. Serie de Equity

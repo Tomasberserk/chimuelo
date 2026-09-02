@@ -1,9 +1,10 @@
 # Chimuelo Prime — Reporte de Auditoría Semanal (2026_W36)
 
-> **ID de Reporte:** `audit_2026_W36_1788381382`  
-> **Generado:** `2026-09-02T20:36:22.678146+00:00` | **Git Commit SHA:** `1ad3f3fb4b81`  
+> **ID de Reporte:** `audit_2026_W36_1788383112` | **Schema:** `v1.0.0`  
+> **Generado:** `2026-09-02T21:05:12.866664+00:00` | **Git Commit SHA:** `4040a27adfed`  
 > **Estrategia:** `v1.0.0-frozen` | **Config Hash:** `12c68c1a40b27329...`  
-> **Hash de Integridad (SHA-256):** `646523772613458a016d6c1b1345a4ddf77ae1c08b1795b6115cc7271c594721`  
+> **Hash de Integridad (SHA-256):** `1946a275f4cef1491170eabd43b43dac15eecd72c871a5e16b88b979ce94221a`  
+> **Data Quality Reconciliation:** `PASS / 0 inconsistencies`  
 
 ---
 
@@ -11,8 +12,8 @@
 
 | Métrica | Valor | Métrica | Valor |
 | :--- | :--- | :--- | :--- |
-| **Capital Inicial** | \$100.00 USD | **Patrimonio Actual** | \$25.00 USD |
-| **High-Water Mark** | \$100.00 USD | **Max Drawdown** | 75.0% |
+| **Capital Inicial** | \$100.00 USD | **Patrimonio Actual** | \$100.00 USD |
+| **High-Water Mark** | \$100.00 USD | **Max Drawdown** | 0.0% |
 | **PnL Neto Acumulado** | \$0 USD | **Profit Factor** | 0.0 |
 | **Win Rate** | 0.0% (0W / 0L) | **Expectancy** | \$0.0 USD / trade |
 | **Average R** | 0.0R | **Median R** | 0.0R |
@@ -21,7 +22,19 @@
 
 ---
 
-## 2. Auditoría de Señales y Riesgo
+## 2. Reconciliación de Calidad de Datos (Data Quality)
+
+* **Veredicto:** **`PASS`** (0 inconsistencias)
+* **Signals $\leftrightarrow$ Orders Reconciled:** `True`
+* **Orders $\leftrightarrow$ Fills Reconciled:** `True`
+* **Fills $\leftrightarrow$ Positions Reconciled:** `True`
+* **Positions $\leftrightarrow$ PnL Reconciled:** `True`
+* **Risk Events $\leftrightarrow$ State Reconciled:** `True`
+* **Eventos Huérfanos / Missing Fills / IDs Duplicados:** `0 / 0 / 0`
+
+---
+
+## 3. Auditoría de Señales y Riesgo
 
 * **Velas / Barras Evaluadas:** `0`
 * **Señales Aprobadas para Ejecución:** `0`
@@ -31,7 +44,7 @@
 
 ---
 
-## 3. Desempeño por Activo
+## 4. Desempeño por Activo
 
 | Símbolo | Trades | Win Rate | Profit Factor | PnL Neto | Average R |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -40,7 +53,7 @@
 
 ---
 
-## 4. Comparativa de Desviación (Drift Tracker vs Backtest)
+## 5. Comparativa de Desviación (Drift Tracker vs Backtest)
 
 ### A. vs Historical Full-Sample (2024–2026 Walk-Forward)
 * **Frecuencia Mensual:** Observada `0.0` vs Esperada `5.63` (Delta: `-5.63`)
@@ -55,7 +68,7 @@
 
 ---
 
-## 5. Calidad de Ejecución e Infraestructura
+## 6. Calidad de Ejecución e Infraestructura
 
 * **Slippage Acumulado:** `\$0 USD`
 * **Comisiones Simuladas (Fees):** `\$0 USD`
@@ -66,7 +79,7 @@
 
 ---
 
-## 6. Trade Ledger Completo de la Semana
+## 7. Trade Ledger Completo de la Semana
 
 _No se registraron cierres de operaciones durante el período auditado._
 
