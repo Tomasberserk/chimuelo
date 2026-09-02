@@ -118,8 +118,10 @@ class VirtualBroker:
         alert_manager: AlertManager | None = None,
         persistence: BasePersistenceBackend | None = None,
         db_engine: Any = None,
+        db_url: str | None = None,
         api_key: str | None = None,
         api_secret: str | None = None,
+        **kwargs: Any,
     ) -> None:
         # HARD KILL SWITCH
         if api_key is not None or api_secret is not None:
@@ -148,6 +150,9 @@ class VirtualBroker:
         self._alert_manager = alert_manager or AlertManager()
         self._persistence = persistence
         self._db_engine = db_engine
+        if db_url and not self._db_engine:
+            from chimuelo_prime.grid_state.database import build_engine
+            self._db_engine = build_engine(db_url)
         self._log = get_logger(__name__)
 
         self._cash = self._initial_balance
