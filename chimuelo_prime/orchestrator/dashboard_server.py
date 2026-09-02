@@ -131,9 +131,12 @@ class PaperTradingManager:
         self._initial_balance: Decimal = Decimal("100.00")
         self._alert_manager = AlertManager()
         self._db_url: str = "sqlite:///chimuelo.db"
+        from chimuelo_prime.grid_state.database import build_engine
+        self._db_engine = build_engine(self._db_url)
         self._broker = VirtualBroker(
             initial_balance=self._initial_balance,
             alert_manager=self._alert_manager,
+            db_engine=self._db_engine,
             db_url=self._db_url,
         )
         self._strategy = RSIDivergenceStrategy(
