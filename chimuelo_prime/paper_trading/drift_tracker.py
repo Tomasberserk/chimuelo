@@ -162,12 +162,28 @@ class BacktestLiveDriftTracker:
                     },
                 },
             },
-            "audit_status": "DESCRIPTIVE_MONITORING_NO_RULES_MUTATION",
-            "governance_rule": (
+        }
+
+        # Determinación de estado de muestra
+        MIN_TRADES_FOR_DRIFT = 3
+        if trades_count < MIN_TRADES_FOR_DRIFT:
+            audit_status = "INSUFFICIENT_SAMPLE"
+            sample_notes = (
+                f"Muestra insuficiente ({int(trades_count)} trades cerrados de {MIN_TRADES_FOR_DRIFT} mínimos requeridos). "
+                "Los cálculos de Profit Factor y Win Rate en cero no representan degradación estratégica, sino falta de observaciones iniciales."
+            )
+        else:
+            audit_status = "DESCRIPTIVE_MONITORING_NO_RULES_MUTATION"
+            sample_notes = (
                 "No se modifican parámetros estratégicos en vivo independientemente de la magnitud de la desviación. "
                 "Toda diferencia empírica se registra para la auditoría final de 60 días."
-            ),
-        }
+            )
+
+        drift_report["audit_status"] = audit_status
+        drift_report["sample_status_explanation"] = sample_notes
+        drift_report["governance_rule"] = (
+            "Inmutabilidad de Strategy C v1.0.0-frozen: Cero cambios de reglas o filtros durante Live Paper Trading."
+        )
         return drift_report
 
     def export_drift_report(

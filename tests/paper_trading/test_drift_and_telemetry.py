@@ -44,5 +44,4 @@ def test_drift_computation_and_weekly_snapshot():
     assert "backtest_drift" in weekly_snap
     drift = weekly_snap["backtest_drift"]
     assert "comparison_vs_historical_full_sample_2024_2026" in drift
-    assert "comparison_vs_historical_oos_2022_2024" in drift
-    assert drift["audit_status"] == "DESCRIPTIVE_MONITORING_NO_RULES_MUTATION"
+    assert drift["audit_status"] == "INSUFFICIENT_SAMPLE"

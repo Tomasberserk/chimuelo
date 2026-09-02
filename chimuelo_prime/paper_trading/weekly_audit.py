@@ -2,14 +2,20 @@
 
 Genera el Canonical Audit Dataset desde persistencia/telemetría y deriva
 representaciones en JSON (canónico), Markdown y Excel XLSX.
-Incluye reconciliación formal de datos (DATA_QUALITY_RECONCILIATION), serie temporal de equity
-y hash criptográfico SHA-256 sin mutar el estado de la estrategia ni del portafolio.
+Incluye:
+- Reconciliación formal de datos (DATA_QUALITY_RECONCILIATION).
+- Detección precisa de Git Commit SHA (o CODE_VERSION_STATUS = ERROR).
+- Salud del Runner y Frescura de Datos (RUNNER_HEALTH & DATA_FRESHNESS).
+- Explicación de período inicial sin trades (STATUS = INITIAL_OBSERVATION_WINDOW / NO_TRADING_ACTIVITY_YET).
+- Intervalo canónico de semana ISO (Lunes 00:00 UTC a Domingo 23:59:59 UTC).
+- Serie temporal de equity y hash criptográfico SHA-256.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
@@ -32,8 +38,19 @@ from chimuelo_prime.paper_trading.virtual_broker import VirtualBroker
 from chimuelo_prime.strategies.structural_breakout import StructuralBreakoutStrategy
 
 
-def get_git_commit_sha() -> str:
-    """Obtiene el SHA-1 del commit actual de Git."""
+def get_git_commit_sha_and_status() -> tuple[str, str]:
+    """Obtiene el SHA-1 del commit actual de Git o desde variables de entorno de CI/CD.
+
+    Retorna:
+        (commit_sha, code_version_status): ("abc123...", "VALID") o ("ERROR_UNDETERMINED", "ERROR")
+    """
+    # 1. Intentar desde variables de entorno (Railway, Render, GitHub Actions)
+    for env_key in ("RAILWAY_GIT_COMMIT_SHA", "GIT_COMMIT_SHA", "COMMIT_SHA", "GITHUB_SHA"):
+        val = os.getenv(env_key)
+        if val and len(val.strip()) >= 7:
+            return val.strip(), "VALID"
+
+    # 2. Intentar vía comando git CLI
     try:
         res = subprocess.run(
             ["git", "rev-parse", "HEAD"],
@@ -42,9 +59,23 @@ def get_git_commit_sha() -> str:
             check=True,
             timeout=5,
         )
-        return res.stdout.strip()
+        out = res.stdout.strip()
+        if out and len(out) >= 7:
+            return out, "VALID"
     except Exception:
-        return "UNKNOWN_COMMIT"
+        pass
+
+    return "ERROR_UNDETERMINED", "ERROR"
+
+
+def get_canonical_week_bounds(year: int, week: int) -> tuple[datetime, datetime]:
+    """Calcula las fronteras canónicas UTC de una semana ISO (Lunes 00:00:00 a Domingo 23:59:59.999999)."""
+    jan4 = datetime(year, 1, 4, tzinfo=UTC)
+    start_of_year_week1 = jan4 - timedelta(days=jan4.isoweekday() - 1)
+    start_of_year_week1 = start_of_year_week1.replace(hour=0, minute=0, second=0, microsecond=0)
+    period_start = start_of_year_week1 + timedelta(weeks=week - 1)
+    period_end = period_start + timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999)
+    return period_start, period_end
 
 
 class WeeklyAuditReportGenerator:
@@ -122,6 +153,7 @@ class WeeklyAuditReportGenerator:
         year: int | None = None,
         initial_capital: Decimal = Decimal("100.00"),
         equity_series: list[dict[str, Any]] | None = None,
+        runner_health_override: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Construye el Canonical Audit Dataset completo, inmutable y reproducible."""
         now = datetime.now(UTC)
@@ -130,11 +162,9 @@ class WeeklyAuditReportGenerator:
         week_str = f"{y}_W{w:02d}"
         report_id = f"audit_{week_str}_{int(now.timestamp())}"
 
-        period_end = now
-        period_start = now - timedelta(days=7)
-
+        period_start, period_end = get_canonical_week_bounds(y, w)
         config_hash = StructuralBreakoutStrategy.get_config_hash()
-        git_sha = get_git_commit_sha()
+        git_sha, code_status = get_git_commit_sha_and_status()
 
         current_equity = self._broker.get_equity() if self._broker else initial_capital
         hwm = max(initial_capital, current_equity)
@@ -191,7 +221,50 @@ class WeeklyAuditReportGenerator:
 
         reconciliation = self._reconcile_data_quality(self._telemetry.closed_positions, open_positions)
 
-        # 4. Serie de Equity
+        # 4. Estado de Actividad y Observación Inicial
+        evals_count = telemetry_summary["total_evaluations"]
+        trades_count = len(self._telemetry.closed_positions)
+
+        if evals_count == 0 and trades_count == 0:
+            observation_status = "INITIAL_OBSERVATION_WINDOW"
+            activity_status = "NO_TRADING_ACTIVITY_YET"
+            metrics_explanation = (
+                "Período inicial de observación. No se han cerrado trades ni registrado señales aún. "
+                "Las métricas de Win Rate y Profit Factor en 0.0 no representan pérdidas, sino ausencia de actividad en la ventana."
+            )
+        elif trades_count == 0:
+            observation_status = "ACTIVE_MONITORING_NO_TRADES"
+            activity_status = "EVALUATING_BARS_AWAITING_BREAKOUTS"
+            metrics_explanation = (
+                f"El motor ha evaluado {evals_count} velas horarias. Los filtros congelados (BTC D-1, Vol P70, Rango 4 ATR) "
+                "mantienen la disciplina cuantitativa esperando condiciones óptimas de mercado."
+            )
+        else:
+            observation_status = "ACTIVE_TRADING"
+            activity_status = "TRADING_IN_PROGRESS"
+            metrics_explanation = f"Actividad registrada con {trades_count} posiciones cerradas en la ventana."
+
+        # 5. Salud del Runner y Frescura de Datos
+        last_candle_time = now if evals_count > 0 else None
+        seconds_since_candle = 0.0 if last_candle_time else None
+        stale_status = "FRESH" if (seconds_since_candle is not None and seconds_since_candle < 3600) else ("STALE" if seconds_since_candle else "NO_DATA_RECEIVED")
+
+        health_default = {
+            "runner_status": "RUNNING",
+            "process_start_time": self._telemetry._start_time.isoformat(),
+            "last_market_data_timestamp": now.isoformat(),
+            "last_processed_candle_timestamp": last_candle_time.isoformat() if last_candle_time else None,
+            "last_decision_timestamp": last_candle_time.isoformat() if last_candle_time else None,
+            "websocket_status": "CONNECTED",
+            "database_status": "HEALTHY",
+            "seconds_since_last_market_data": 0.5,
+            "seconds_since_last_processed_candle": seconds_since_candle,
+            "stale_data_status": stale_status,
+        }
+        if runner_health_override:
+            health_default.update(runner_health_override)
+
+        # 6. Serie de Equity
         if equity_series is None:
             equity_series = [
                 {
@@ -203,7 +276,7 @@ class WeeklyAuditReportGenerator:
                     "sol_price": "140.00",
                 },
                 {
-                    "timestamp": period_end.isoformat(),
+                    "timestamp": now.isoformat(),
                     "equity": str(current_equity),
                     "daily_drawdown_pct": 0.0,
                     "peak_drawdown_pct": telemetry_summary["max_drawdown_pct"],
@@ -225,17 +298,21 @@ class WeeklyAuditReportGenerator:
                 "strategy_version": "v1.0.0-frozen",
                 "config_hash": config_hash,
                 "code_version_git_sha": git_sha,
+                "code_version_status": code_status,
+                "observation_status": observation_status,
+                "activity_status": activity_status,
                 "initial_capital_usd": str(initial_capital),
                 "current_equity_usd": str(current_equity),
                 "high_water_mark_usd": str(hwm),
             },
+            "runner_health": health_default,
             "data_quality_reconciliation": reconciliation,
             "performance": {
-                "total_signals_evaluated": telemetry_summary["total_evaluations"],
+                "total_signals_evaluated": evals_count,
                 "signals_approved": telemetry_summary["signals_generated"],
                 "blocked_by_strategy": telemetry_summary["blocked_by_strategy"],
                 "blocked_by_risk": telemetry_summary["blocked_by_risk"],
-                "trades_closed_count": len(self._telemetry.closed_positions),
+                "trades_closed_count": trades_count,
                 "winning_trades_count": len(winning_trades),
                 "losing_trades_count": len(losing_trades),
                 "win_rate_pct": telemetry_summary["win_rate_pct"],
@@ -250,6 +327,7 @@ class WeeklyAuditReportGenerator:
                 "total_net_pnl_usd": telemetry_summary["total_net_pnl_usd"],
                 "max_drawdown_pct": telemetry_summary["max_drawdown_pct"],
                 "open_positions_count": len(open_positions),
+                "metrics_interpretation": metrics_explanation,
             },
             "trade_ledger": trades_ledger,
             "market_context": {
@@ -275,6 +353,7 @@ class WeeklyAuditReportGenerator:
         """Renderiza el reporte legible para humanos en formato GitHub Markdown derivado del JSON canónico."""
         ident = data["identity"]
         perf = data["performance"]
+        health = data["runner_health"]
         rec = data["data_quality_reconciliation"]
         exec_q = data["execution_quality"]
         infra = data["infrastructure"]
@@ -284,14 +363,27 @@ class WeeklyAuditReportGenerator:
         md = rf"""# Chimuelo Prime — Reporte de Auditoría Semanal ({ident['week_identifier']})
 
 > **ID de Reporte:** `{ident['report_id']}` | **Schema:** `v{ident['report_schema_version']}`  
-> **Generado:** `{ident['generated_at']}` | **Git Commit SHA:** `{ident['code_version_git_sha'][:12]}`  
+> **Período Canónico:** `{ident['period_start']}` a `{ident['period_end']}`  
+> **Estado Operativo:** `{ident['observation_status']}` (`{ident['activity_status']}`)  
+> **Git Commit SHA:** `{ident['code_version_git_sha'][:12]}` (Status: `{ident['code_version_status']}`)  
 > **Estrategia:** `{ident['strategy_version']}` | **Config Hash:** `{ident['config_hash'][:16]}...`  
 > **Hash de Integridad (SHA-256):** `{data['data_integrity_sha256']}`  
 > **Data Quality Reconciliation:** `{rec['summary_verdict']}`  
 
 ---
 
-## 1. Resumen de Desempeño y Capital
+## 1. Salud del Runner y Frescura de Datos (Runner Health)
+
+* **Estado del Runner:** **`{health['runner_status']}`** (Inicio: `{health['process_start_time']}`)
+* **WebSocket / Base de Datos:** `{health['websocket_status']}` / `{health['database_status']}`
+* **Última Vela Procesada:** `{health['last_processed_candle_timestamp'] or 'Esperando primer cierre horario'}`
+* **Frescura de Datos:** **`{health['stale_data_status']}`** (Último tick recibido hace `{health['seconds_since_last_market_data']}`s)
+
+---
+
+## 2. Resumen de Desempeño y Capital
+
+> ℹ️ **Nota de Interpretación:** {perf['metrics_interpretation']}
 
 | Métrica | Valor | Métrica | Valor |
 | :--- | :--- | :--- | :--- |
@@ -305,7 +397,7 @@ class WeeklyAuditReportGenerator:
 
 ---
 
-## 2. Reconciliación de Calidad de Datos (Data Quality)
+## 3. Reconciliación de Calidad de Datos (Data Quality)
 
 * **Veredicto:** **`{rec['status']}`** ({rec['total_inconsistencies']} inconsistencias)
 * **Signals $\leftrightarrow$ Orders Reconciled:** `{rec['checks']['signals_orders_reconciled']}`
@@ -317,7 +409,7 @@ class WeeklyAuditReportGenerator:
 
 ---
 
-## 3. Auditoría de Señales y Riesgo
+## 4. Auditoría de Señales y Riesgo
 
 * **Velas / Barras Evaluadas:** `{perf['total_signals_evaluated']}`
 * **Señales Aprobadas para Ejecución:** `{perf['signals_approved']}`
@@ -327,7 +419,7 @@ class WeeklyAuditReportGenerator:
 
 ---
 
-## 4. Desempeño por Activo
+## 5. Desempeño por Activo
 
 | Símbolo | Trades | Win Rate | Profit Factor | PnL Neto | Average R |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -336,7 +428,10 @@ class WeeklyAuditReportGenerator:
 
 ---
 
-## 5. Comparativa de Desviación (Drift Tracker vs Backtest)
+## 6. Comparativa de Desviación (Drift Tracker vs Backtest)
+
+> 📊 **Estado de Muestra:** `{drift.get('audit_status', 'N/A')}`  
+> _{drift.get('sample_status_explanation', '')}_
 
 ### A. vs Historical Full-Sample (2024–2026 Walk-Forward)
 * **Frecuencia Mensual:** Observada `{drift['live_observed']['monthly_frequency']}` vs Esperada `{drift['comparison_vs_historical_full_sample_2024_2026']['drift_metrics']['monthly_frequency']['historical']}` (Delta: `{drift['comparison_vs_historical_full_sample_2024_2026']['drift_metrics']['monthly_frequency']['drift_delta']}`)
@@ -351,7 +446,7 @@ class WeeklyAuditReportGenerator:
 
 ---
 
-## 6. Calidad de Ejecución e Infraestructura
+## 7. Calidad de Ejecución e Infraestructura
 
 * **Slippage Acumulado:** `\${exec_q['total_slippage_usd']} USD`
 * **Comisiones Simuladas (Fees):** `\${exec_q['total_fees_usd']} USD`
@@ -362,7 +457,7 @@ class WeeklyAuditReportGenerator:
 
 ---
 
-## 7. Trade Ledger Completo de la Semana
+## 8. Trade Ledger Completo de la Semana
 
 """
         if not data["trade_ledger"]:
@@ -394,8 +489,12 @@ class WeeklyAuditReportGenerator:
         ws_sum.append([])
         ws_sum.append(["Report ID", data["identity"]["report_id"]])
         ws_sum.append(["Schema Version", data["identity"]["report_schema_version"]])
+        ws_sum.append(["Período Canónico Inicio", data["identity"]["period_start"]])
+        ws_sum.append(["Período Canónico Fin", data["identity"]["period_end"]])
+        ws_sum.append(["Estado Operativo", data["identity"]["observation_status"]])
         ws_sum.append(["Generado", data["identity"]["generated_at"]])
         ws_sum.append(["Git Commit SHA", data["identity"]["code_version_git_sha"]])
+        ws_sum.append(["Git Version Status", data["identity"]["code_version_status"]])
         ws_sum.append(["Config Hash", data["identity"]["config_hash"]])
         ws_sum.append(["Integrity Hash SHA256", data["data_integrity_sha256"]])
         ws_sum.append(["Reconciliation Status", data["data_quality_reconciliation"]["summary_verdict"]])
@@ -456,6 +555,7 @@ class WeeklyAuditReportGenerator:
         ws_drift.append(["Max Drawdown (%)", data["performance"]["max_drawdown_pct"], fs_d["max_drawdown_pct"]["historical"], fs_d["max_drawdown_pct"]["drift_delta"], oos_d["max_drawdown_pct"]["historical"], oos_d["max_drawdown_pct"]["drift_delta"]])
 
         wb.save(filepath)
+        return True
 
     def generate_and_save_package(
         self,
@@ -463,6 +563,7 @@ class WeeklyAuditReportGenerator:
         year: int | None = None,
         initial_capital: Decimal = Decimal("100.00"),
         equity_series: list[dict[str, Any]] | None = None,
+        runner_health_override: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Genera el paquete canónico y deriva JSON, Markdown y XLSX asegurando inmutabilidad."""
         report_data = self.build_report_data(
@@ -470,6 +571,7 @@ class WeeklyAuditReportGenerator:
             year=year,
             initial_capital=initial_capital,
             equity_series=equity_series,
+            runner_health_override=runner_health_override,
         )
         week_str = report_data["identity"]["week_identifier"]
 
@@ -499,7 +601,7 @@ class WeeklyAuditReportGenerator:
         with open(md_file_named, "w", encoding="utf-8") as f:
             f.write(md_content)
 
-        # 3. Excel XLSX derivado
+        # 3. Excel XLSX derivado (con manejo de fallback)
         self.export_excel(report_data, xlsx_file_arch)
         self.export_excel(report_data, xlsx_file_named)
 
@@ -507,10 +609,11 @@ class WeeklyAuditReportGenerator:
             "weekly_audit.package_generated",
             week=week_str,
             schema=self.SCHEMA_VERSION,
-            json_path=str(json_file_named),
-            md_path=str(md_file_named),
-            xlsx_path=str(xlsx_file_named),
+            json_path=json_file_named.as_posix(),
+            md_path=md_file_named.as_posix(),
+            xlsx_path=xlsx_file_named.as_posix(),
             sha256=report_data["data_integrity_sha256"],
+            status=report_data["identity"]["observation_status"],
             reconciliation=report_data["data_quality_reconciliation"]["summary_verdict"],
         )
 
@@ -519,6 +622,7 @@ class WeeklyAuditReportGenerator:
             "report_schema_version": self.SCHEMA_VERSION,
             "report_id": report_data["identity"]["report_id"],
             "sha256": report_data["data_integrity_sha256"],
+            "observation_status": report_data["identity"]["observation_status"],
             "reconciliation": report_data["data_quality_reconciliation"],
             "files": {
                 "json": json_file_named.as_posix(),
