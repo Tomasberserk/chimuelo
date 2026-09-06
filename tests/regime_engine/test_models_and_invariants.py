@@ -1,11 +1,12 @@
 """Tests unitarios para los Modelos e Invariantes de Dominio del Regime Engine (Fase 0)."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from decimal import Decimal
+
 import pytest
+from pydantic import ValidationError
 
 from chimuelo_prime.regime_engine.models import (
-    AlphaMotorId,
     DerivativesRegime,
     ForensicDecisionLog,
     MarketStateVector,
@@ -20,7 +21,7 @@ from chimuelo_prime.regime_engine.models import (
 )
 
 
-def test_ensure_utc_aware_rejects_naive_datetime():
+def test_ensure_utc_aware_rejects_naive_datetime() -> None:
     """Verifica que el contrato cuantitativo rechace estrictamente datetimes naive sin timezone."""
     naive_dt = datetime(2026, 9, 6, 12, 0, 0)
     with pytest.raises(ValueError, match="Timestamp naive rechazado"):
@@ -31,7 +32,7 @@ def test_ensure_utc_aware_rejects_naive_datetime():
     assert res.tzinfo == UTC
 
 
-def test_market_state_vector_immutability_and_types():
+def test_market_state_vector_immutability_and_types() -> None:
     """Verifica que MarketStateVector sea inmutable (frozen) y preserve la pureza de sus 5 dimensiones."""
     now = datetime(2026, 9, 6, 12, 0, 0, tzinfo=UTC)
 
@@ -58,15 +59,15 @@ def test_market_state_vector_immutability_and_types():
     )
 
     # Inmutabilidad (frozen)
-    with pytest.raises(Exception):
-        msv.trend = TrendRegime.BEAR  # type: ignore
+    with pytest.raises(ValidationError):
+        msv.trend = TrendRegime.BEAR
 
     assert msv.trend == TrendRegime.STRONG_BULL
     assert msv.participation == ParticipationRegime.PARTICIPATION_EXPANSION
     assert msv.efficiency_ratio == Decimal("0.72")
 
 
-def test_forensic_decision_log_reason_codes():
+def test_forensic_decision_log_reason_codes() -> None:
     """Verifica que ForensicDecisionLog capture las razones explícitas de abstención (NO_TRADE)."""
     now = datetime(2026, 9, 6, 12, 0, 0, tzinfo=UTC)
 

@@ -7,11 +7,12 @@ y sincronización temporal verificada entre series 1h, 4h y derivados.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
-from decimal import Decimal
 import math
-from typing import Sequence
+from collections.abc import Sequence
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from decimal import Decimal
+from typing import Any
 
 from chimuelo_prime.backtesting.data_loader import HistoricalCandle
 from chimuelo_prime.regime_engine.models import ensure_utc_aware
@@ -340,9 +341,10 @@ def get_last_closed_4h_context(
     for c_4h in candles_4h:
         t_4h_open = ensure_utc_aware(c_4h.timestamp)
         t_4h_close = t_4h_open + timedelta(hours=4)
-        if t_4h_close <= t_1h:
-            if latest_closed is None or c_4h.timestamp > latest_closed.timestamp:
-                latest_closed = c_4h
+        if t_4h_close <= t_1h and (
+            latest_closed is None or c_4h.timestamp > latest_closed.timestamp
+        ):
+            latest_closed = c_4h
 
     return latest_closed
 

@@ -10,9 +10,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 def ensure_utc_aware(dt: datetime) -> datetime:

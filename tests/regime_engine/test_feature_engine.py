@@ -10,6 +10,7 @@ Verifica:
 
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+
 import pytest
 
 from chimuelo_prime.backtesting.data_loader import HistoricalCandle
@@ -22,9 +23,6 @@ from chimuelo_prime.regime_engine.feature_engine import (
     calculate_delta_oi_4h,
     calculate_efficiency_ratio,
     calculate_funding_zscore,
-    calculate_rolling_realized_volatility,
-    calculate_slope_50,
-    calculate_trend_spread,
     get_last_causal_derivative_observation,
     get_last_closed_4h_context,
 )
@@ -38,13 +36,13 @@ def _generate_synthetic_candles(count: int, start_time: datetime, step_hours: in
         t = start_time + timedelta(hours=i * step_hours)
         c = base_price + Decimal(str(i % 10))
         h = c + Decimal("2.00")
-        l = c - Decimal("2.00")
+        low_val = c - Decimal("2.00")
         vol = Decimal("1000.0") + Decimal(str((i * 17) % 500))
-        candles.append(HistoricalCandle(timestamp=t, open=c, high=h, low=l, close=c, volume=vol))
+        candles.append(HistoricalCandle(timestamp=t, open=c, high=h, low=low_val, close=c, volume=vol))
     return candles
 
 
-def test_feature_warmup_policy_dynamic_calculation():
+def test_feature_warmup_policy_dynamic_calculation() -> None:
     """Verifica que el warmup se calcule dinámicamente: max(W_i) + safety_margin."""
     policy = FeatureWarmupPolicy(
         window_atr_percentile=500,
@@ -66,7 +64,7 @@ def test_feature_warmup_policy_dynamic_calculation():
     policy.validate_buffer_size(1000)
 
 
-def test_efficiency_ratio_properties():
+def test_efficiency_ratio_properties() -> None:
     """Verifica que el Kaufman Efficiency Ratio sea 1.0 en tendencia pura y tienda a 0 en rango/ruido."""
     # Caso 1: Tendencia estrictamente alcista monotónica (100, 101, 102, ..., 120)
     monotonic_closes = [Decimal(str(100 + i)) for i in range(25)]
@@ -80,7 +78,7 @@ def test_efficiency_ratio_properties():
     assert er_chop == Decimal("0.0")
 
 
-def test_causal_rolling_percentile_zero_lookahead():
+def test_causal_rolling_percentile_zero_lookahead() -> None:
     """Prueba formal de Cero Data Leakage: modificar datos futuros no altera el percentil en t."""
     series_original = [Decimal(str(10 + (i % 20))) for i in range(600)]
     t_idx = 520
@@ -98,7 +96,7 @@ def test_causal_rolling_percentile_zero_lookahead():
     assert pct_before == pct_after
 
 
-def test_strict_1h_4h_causal_temporal_alignment():
+def test_strict_1h_4h_causal_temporal_alignment() -> None:
     """Invariante Crítica de Look-Ahead: a las 10:00 1h, la vela 4h de las 08:00 (que cierra a las 12:00) es INVISIBLE.
 
     La única vela 4h visible es la de las 04:00 (que cerró a las 08:00).
@@ -133,7 +131,7 @@ def test_strict_1h_4h_causal_temporal_alignment():
     assert last_closed_at_12.close == Decimal("104")
 
 
-def test_derivative_timestamp_causal_filtering():
+def test_derivative_timestamp_causal_filtering() -> None:
     """Verifica que las observaciones de derivados posteriores a la vela 1h sean estrictamente filtradas."""
     t_base = datetime(2026, 9, 6, 12, 0, 0, tzinfo=UTC)
 
@@ -151,7 +149,7 @@ def test_derivative_timestamp_causal_filtering():
     assert selected.open_interest != Decimal("99999")
 
 
-def test_funding_zscore_and_delta_oi():
+def test_funding_zscore_and_delta_oi() -> None:
     """Verifica el cálculo estadístico de Z-score de fondeo y variación delta OI."""
     # Crear serie con media 0.0001 y varianza constante
     fundings = [Decimal("0.0001") for _ in range(720)]
@@ -166,7 +164,7 @@ def test_funding_zscore_and_delta_oi():
     assert delta_oi == Decimal("-0.0800")
 
 
-def test_quantitative_feature_engine_integration():
+def test_quantitative_feature_engine_integration() -> None:
     """Test de integración del FeatureEngine procesando velas sintéticas que superan el warmup."""
     policy = FeatureWarmupPolicy(
         window_atr_percentile=500,
