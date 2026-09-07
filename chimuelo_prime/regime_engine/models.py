@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 def ensure_utc_aware(dt: datetime) -> datetime:
@@ -176,6 +176,104 @@ class ForensicDecisionLog(BaseModel):
     fsm_states: dict[str, RouterStrategyState]
     regime_confidence: Decimal
     hermes_veto: bool = False
+    details: str = ""
+
+    @field_validator("timestamp")
+    @classmethod
+    def validate_utc(cls, v: datetime) -> datetime:
+        return ensure_utc_aware(v)
+
+
+# ==============================================================================
+# MODELOS DE DOMINIO DEL ROUTER (FASE 3)
+# ==============================================================================
+
+
+class TradeDirection(str, Enum):
+    """Dirección de la operación propuesta."""
+
+    LONG = "LONG"
+    SHORT = "SHORT"
+
+
+class ScoreComponentBreakdown(BaseModel):
+    """Desglose granular de los componentes de score para auditoría forense."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    trend_component: Decimal = Field(default=Decimal("0.0"))
+    volatility_component: Decimal = Field(default=Decimal("0.0"))
+    structure_component: Decimal = Field(default=Decimal("0.0"))
+    participation_component: Decimal = Field(default=Decimal("0.0"))
+    derivatives_component: Decimal = Field(default=Decimal("0.0"))
+    transition_component: Decimal = Field(default=Decimal("0.0"))
+    composite_score: Decimal = Field(default=Decimal("0.0"))
+
+
+class DirectionalScore(BaseModel):
+    """Puntajes de compatibilidad desacoplados por dirección operativa."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    long_score: Decimal
+    short_score: Decimal
+    combined_score: Decimal
+    long_breakdown: ScoreComponentBreakdown
+    short_breakdown: ScoreComponentBreakdown
+
+
+class TradeCandidate(BaseModel):
+    """Candidato de trade emitido por un Alpha Motor (no por el Router)."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    candidate_id: str
+    strategy_id: AlphaMotorId
+    symbol: str
+    direction: TradeDirection
+    entry_price: Decimal
+    stop_loss: Decimal
+    take_profit: Decimal
+    confidence_score: Decimal
+    timestamp: datetime
+
+    @field_validator("timestamp")
+    @classmethod
+    def validate_utc(cls, v: datetime) -> datetime:
+        return ensure_utc_aware(v)
+
+
+class StrategyEvaluationLog(BaseModel):
+    """Registro forense detallado del estado y score de una estrategia específica."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    strategy_id: AlphaMotorId
+    state_before: RouterStrategyState
+    state_after: RouterStrategyState
+    score: DirectionalScore
+    hard_gate_passed: bool
+    dwell_bars_before: int
+    dwell_bars_after: int
+    cooldown_remaining: int
+    authorized_for_trigger: bool
+    rejection_reason: NoTradeReasonCode | None = None
+
+
+class RouterEvaluationResult(BaseModel):
+    """Snapshot determinista e inmutable de la evaluación del Router en una barra t."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    timestamp: datetime
+    symbol: str
+    market_state: MarketStateVector
+    strategy_evaluations: dict[AlphaMotorId, StrategyEvaluationLog]
+    armed_strategies: list[AlphaMotorId]
+    active_strategies: list[AlphaMotorId]
+    cooldown_strategies: list[AlphaMotorId]
+    hermes_entry_veto: bool
+    global_action: str
     details: str = ""
 
     @field_validator("timestamp")
