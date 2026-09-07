@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import inspect
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
 import pytest
 
+import chimuelo_prime.research.alpha_forensics as af
 from chimuelo_prime.backtesting.data_loader import HistoricalCandle
 from chimuelo_prime.regime_engine.models import (
     AlphaMotorId,
@@ -16,7 +18,7 @@ from chimuelo_prime.regime_engine.models import (
 from chimuelo_prime.research.alpha_forensics import (
     AlphaForensicsAnalyzer,
     aggregate_forensic_metrics,
-    calculate_moving_block_bootstrap_diff,
+    calculate_stratified_mbb_diff,
 )
 
 
@@ -72,10 +74,10 @@ def test_forensic_metrics_causality_and_lookback() -> None:
     assert record.executed_entry == float(candles[6].open)
     assert record.time_to_mfe_24h_bars >= 1
     assert record.time_to_mae_24h_bars >= 1
+    assert record.path_barrier_1_0_r in ("FAVORABLE_FIRST", "ADVERSE_FIRST", "AMBIGUOUS_STOP_FIRST", "NEITHER")
 
 
 def test_mfe_mae_r_multiples_consistency() -> None:
-    # Synthetic scenario: Entry at 100, SL at 90 (risk = 10), High reaches 120 (MFE = +20 = +2R), Low drops to 95 (MAE = -5 = -0.5R)
     base_time = datetime(2025, 1, 1, 0, 0, tzinfo=UTC)
     candles = [
         HistoricalCandle(
@@ -95,7 +97,6 @@ def test_mfe_mae_r_multiples_consistency() -> None:
             volume=Decimal("100.0"),
         ),
     ]
-    # Add dummy forward bars
     for i in range(2, 26):
         candles.append(
             HistoricalCandle(
@@ -133,21 +134,28 @@ def test_mfe_mae_r_multiples_consistency() -> None:
     assert record is not None
     assert record.risk_unit == 10.0
     assert record.risk_pct == 10.0
-    # Entry at 100, High 120 -> MFE = +20% -> +2.0R
     assert pytest.approx(record.mfe_1h_r, 0.01) == 2.0
-    # Entry at 100, Low 95 -> MAE = -5% -> -0.5R
     assert pytest.approx(record.mae_1h_r, 0.01) == -0.5
     assert record.would_hit_tp_before_sl is True
     assert record.would_hit_sl_before_tp is False
+    assert record.path_barrier_1_0_r == "FAVORABLE_FIRST"
+    assert record.path_barrier_2_0_r == "FAVORABLE_FIRST"
 
 
-def test_moving_block_bootstrap_diff() -> None:
-    series_a = [1.0, 1.2, 0.8, 1.1, 0.9, 1.5, 1.0, 1.3] * 10
-    series_b = [0.0, -0.2, 0.1, -0.1, 0.0, 0.2, -0.1, 0.0] * 10
+def test_stratified_mbb_diff() -> None:
+    # 2 símbolos con distribuciones conocidas
+    dict_trig = {
+        "BTCUSDT": [1.0, 1.2, 0.8, 1.1] * 10,
+        "ETHUSDT": [0.9, 1.3, 1.0, 1.2] * 10,
+    }
+    dict_non = {
+        "BTCUSDT": [0.0, -0.2, 0.1, -0.1] * 10,
+        "ETHUSDT": [0.0, 0.2, -0.1, 0.0] * 10,
+    }
 
-    res = calculate_moving_block_bootstrap_diff(
-        series_trigger=series_a,
-        series_non_trigger=series_b,
+    res = calculate_stratified_mbb_diff(
+        dict_trigger=dict_trig,
+        dict_non_trigger=dict_non,
         block_length=4,
         iterations=200,
         seed=42,
@@ -157,11 +165,11 @@ def test_moving_block_bootstrap_diff() -> None:
     assert res["delta_mean"] > 0.0
     assert res["ci_95_lower"] > 0.0
     assert res["p_value_permutation"] < 0.05
+    assert res["seed"] == 42
 
 
 def test_sweep_microstructure_attributes() -> None:
     base_time = datetime(2025, 1, 1, 0, 0, tzinfo=UTC)
-    # Lookback 24 bars: Low is 95.0
     candles: list[HistoricalCandle] = []
     for i in range(24):
         candles.append(
@@ -174,7 +182,6 @@ def test_sweep_microstructure_attributes() -> None:
                 volume=Decimal("100.0"),
             )
         )
-    # Bar 24: Sweeps to 92.0 (depth = 3.0), closes at 97.0 (reclaim)
     candles.append(
         HistoricalCandle(
             timestamp=base_time + timedelta(hours=24),
@@ -182,10 +189,9 @@ def test_sweep_microstructure_attributes() -> None:
             high=Decimal("98.0"),
             low=Decimal("92.0"),
             close=Decimal("97.0"),
-            volume=Decimal("300.0"),  # 3x volume
+            volume=Decimal("300.0"),
         )
     )
-    # Next 10 forward bars: 2 bars re-test <= 95.0
     for i in range(25, 35):
         l_val = Decimal("94.0") if i in (26, 27) else Decimal("98.0")
         candles.append(
@@ -223,14 +229,18 @@ def test_sweep_microstructure_attributes() -> None:
     )
 
     assert record is not None
-    # Sweep depth: 95.0 - 92.0 = 3.0. In ATR (2.0): 3.0 / 2.0 = 1.5
     assert record.sweep_depth_atr == 1.5
-    # Wick: 97.0 - 92.0 = 5.0. Range: 98.0 - 92.0 = 6.0. Wick ratio: 5/6 ~= 0.833
     assert pytest.approx(record.wick_rejection_ratio or 0, 0.01) == 0.83
-    # Relative volume: 300 / 100 = 3.0
     assert pytest.approx(record.relative_volume or 0, 0.1) == 3.0
-    # Re-tests within 4h: bar 26 and 27 have Low 94.0 <= 95.0 -> 2 re-tests
     assert record.second_tests_4h == 2
+
+    # Probar agregación y análisis condicional
+    agg = aggregate_forensic_metrics([record])
+    assert "oracle_envelope" in agg
+    assert "alpha_0.50" in agg["oracle_envelope"]
+    assert "path_classification" in agg
+    assert "conditional_association_retest" in agg["microstructure_c"]
+    assert agg["microstructure_c"]["conditional_association_retest"]["window_4h"]["with_retest"]["n"] == 1
 
 
 def test_aggregate_forensic_metrics_empty() -> None:
@@ -239,10 +249,6 @@ def test_aggregate_forensic_metrics_empty() -> None:
 
 
 def test_zero_production_imports() -> None:
-    import inspect
-
-    import chimuelo_prime.research.alpha_forensics as af
-
     src = inspect.getsource(af)
     assert "live_runner" not in src
     assert "StructuralBreakoutStrategy" not in src

@@ -1,21 +1,23 @@
-"""Módulo de Diagnóstico Forense y Oracle Envelope de Alpha Motors (Fase 4.1).
+"""Módulo de Diagnóstico Forense y Oracle Envelope de Alpha Motors (Fase 4.1.1).
 
 Implementa la descomposición causal de la cadena de decisión:
 MarketState -> Router Score -> ARMED -> Trigger -> Entry Timing -> MFE/MAE -> Exit -> Net R.
 
 Incluye:
 - Perfil multitemporal MFE / MAE (1h, 4h, 8h, 24h) en % y múltiplos R.
-- Medición de latencia de entrada t -> t+1.
-- Microestructura de barrido (penetración, mechas, volumen y re-tests).
-- Oracle Envelope estrictamente diagnóstico.
-- Gate 0 disjunto con Moving Block Bootstrap (L=24) para corregir autocorrelación.
+- Retorno forward a 24h puro (%), normalizado por ATR y normalizado por R.
+- Clasificación temporal de path sobre barreras diagnósticas congeladas (+1R/-1R, +1.5R/-1R, +2R/-1R).
+- Oracle Envelope explícito para alpha in {0.25, 0.50, 0.75, 1.00} (media, mediana, p25, p75, % pos).
+- Medición de latencia de entrada t -> t+1 (intervalo discreto).
+- Microestructura de barrido y análisis condicional de re-tests (4h, 8h, 24h).
+- Gate 0 disjunto con Moving Block Bootstrap (L=24) ESTRATIFICADO POR SÍMBOLO (sin cruce de fronteras).
 """
 
 from __future__ import annotations
 
 import math
 import random
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from decimal import Decimal
 from typing import Any
@@ -66,12 +68,13 @@ class ForensicSignalRecord:
     mae_4h_r: float
     mae_8h_r: float
     mae_24h_r: float
-    # Retornos de cierre en % y R
+    # Retornos de cierre a 24h
     return_1h_pct: float
     return_4h_pct: float
     return_8h_pct: float
-    return_24h_pct: float
-    return_24h_r: float
+    return_24h_pct: float       # r_{24h} puro
+    return_24h_atr: float       # r^{ATR}_{24h} normalizado por ATR
+    return_24h_r: float         # r^R_{24h} normalizado por RiskUnit del baseline
     # Timing
     time_to_mfe_24h_bars: int
     time_to_mae_24h_bars: int
@@ -79,11 +82,15 @@ class ForensicSignalRecord:
     dir_hit_4h: bool
     dir_hit_8h: bool
     dir_hit_24h: bool
-    # Comportamiento mecánico bajo SL/TP
+    # Comportamiento mecánico bajo SL/TP baseline
     would_hit_tp_before_sl: bool
     would_hit_sl_before_tp: bool
     neither_hit_24h: bool
-    # Latencia t -> t+1
+    # Clasificación temporal de path para barreras congeladas (+1R/-1R, +1.5R/-1R, +2R/-1R)
+    path_barrier_1_0_r: str     # "FAVORABLE_FIRST", "ADVERSE_FIRST", "AMBIGUOUS_STOP_FIRST", "NEITHER"
+    path_barrier_1_5_r: str
+    path_barrier_2_0_r: str
+    # Latencia discreta Close_t -> Open_{t+1}
     mfe_t_to_next_open_pct: float
     mfe_t_to_next_open_r: float
     gap_open_close_pct: float
@@ -102,21 +109,24 @@ class ForensicSignalRecord:
         return asdict(self)
 
 
-def calculate_moving_block_bootstrap_diff(
-    series_trigger: Sequence[float],
-    series_non_trigger: Sequence[float],
+def calculate_stratified_mbb_diff(
+    dict_trigger: Mapping[str, Sequence[float]],
+    dict_non_trigger: Mapping[str, Sequence[float]],
     block_length: int = 24,
     iterations: int = 1000,
     seed: int = 42,
 ) -> dict[str, Any]:
-    """Calcula el Moving Block Bootstrap (MBB) para la diferencia de medias.
+    """Calcula el Moving Block Bootstrap (MBB) estratificado estrictamente por símbolo.
 
-    Diseñado para preservar la dependencia temporal y autocorrelación en series solapadas.
+    Garantiza que ningún bloque de resampleo cruce las fronteras entre símbolos
+    (BTCUSDT -> ETHUSDT -> SOLUSDT), preservando la estructura temporal intra-activo
+    y ponderando cada activo por su tamaño muestral real.
     """
-    n_trig = len(series_trigger)
-    n_non = len(series_non_trigger)
+    symbols = sorted(dict_trigger.keys())
+    total_trig = sum(len(dict_trigger[s]) for s in symbols)
+    total_non = sum(len(dict_non_trigger[s]) for s in symbols)
 
-    if n_trig == 0 or n_non == 0:
+    if total_trig == 0 or total_non == 0:
         return {
             "mean_trigger": 0.0,
             "mean_non_trigger": 0.0,
@@ -128,28 +138,40 @@ def calculate_moving_block_bootstrap_diff(
         }
 
     rng = random.Random(seed)
-    mean_trig_obs = sum(series_trigger) / n_trig
-    mean_non_obs = sum(series_non_trigger) / n_non
+
+    # Medias observadas globales
+    sum_trig_obs = sum(sum(dict_trigger[s]) for s in symbols)
+    sum_non_obs = sum(sum(dict_non_trigger[s]) for s in symbols)
+    mean_trig_obs = sum_trig_obs / total_trig
+    mean_non_obs = sum_non_obs / total_non
     delta_obs = mean_trig_obs - mean_non_obs
 
-    # Construcción de bloques para series independientes o combinadas
-    def sample_blocks(series: Sequence[float], target_len: int) -> list[float]:
+    # Función auxiliar para extraer bloques dentro de una serie de un símbolo único
+    def sample_blocks_single_symbol(series: Sequence[float], target_len: int) -> list[float]:
         n = len(series)
+        if n == 0:
+            return []
         if n <= block_length:
             return rng.choices(list(series), k=target_len)
-        resampled: list[float] = []
+        res: list[float] = []
         max_start = n - block_length
-        while len(resampled) < target_len:
+        while len(res) < target_len:
             start = rng.randint(0, max_start)
-            resampled.extend(series[start : start + block_length])
-        return resampled[:target_len]
+            res.extend(series[start : start + block_length])
+        return res[:target_len]
 
     boot_diffs: list[float] = []
     for _ in range(iterations):
-        sample_trig = sample_blocks(series_trigger, n_trig)
-        sample_non = sample_blocks(series_non_trigger, n_non)
-        m_t = sum(sample_trig) / n_trig
-        m_nt = sum(sample_non) / n_non
+        res_trig: list[float] = []
+        res_non: list[float] = []
+        for s in symbols:
+            s_trig = dict_trigger[s]
+            s_non = dict_non_trigger[s]
+            res_trig.extend(sample_blocks_single_symbol(s_trig, len(s_trig)))
+            res_non.extend(sample_blocks_single_symbol(s_non, len(s_non)))
+
+        m_t = sum(res_trig) / total_trig
+        m_nt = sum(res_non) / total_non
         boot_diffs.append(m_t - m_nt)
 
     boot_diffs.sort()
@@ -158,23 +180,28 @@ def calculate_moving_block_bootstrap_diff(
     ci_lower = boot_diffs[idx_lower]
     ci_upper = boot_diffs[idx_upper]
 
-    # Test de permutación por bloques bajo H0 (delta = 0)
-    # Concatenamos y re-muestreamos etiquetas por bloques
-    combined = list(series_trigger) + list(series_non_trigger)
+    # Test de permutación estratificado por símbolo bajo H0 (delta = 0)
     perm_count = 0
     perm_iterations = min(iterations, 1000)
 
     for _ in range(perm_iterations):
-        shuffled = sample_blocks(combined, n_trig + n_non)
-        perm_trig = shuffled[:n_trig]
-        perm_non = shuffled[n_trig:]
-        perm_delta = (sum(perm_trig) / n_trig) - (sum(perm_non) / n_non)
+        perm_trig_all: list[float] = []
+        perm_non_all: list[float] = []
+        for s in symbols:
+            s_combined = list(dict_trigger[s]) + list(dict_non_trigger[s])
+            n_t = len(dict_trigger[s])
+            n_nt = len(dict_non_trigger[s])
+            shuffled = sample_blocks_single_symbol(s_combined, n_t + n_nt)
+            perm_trig_all.extend(shuffled[:n_t])
+            perm_non_all.extend(shuffled[n_t:])
+
+        perm_delta = (sum(perm_trig_all) / total_trig) - (sum(perm_non_all) / total_non)
         if abs(perm_delta) >= abs(delta_obs):
             perm_count += 1
 
     p_value = perm_count / perm_iterations
 
-    # Error estándar
+    # Error estándar bootstrap
     mean_boot = sum(boot_diffs) / iterations
     variance = sum((x - mean_boot) ** 2 for x in boot_diffs) / (iterations - 1)
     std_error = math.sqrt(variance)
@@ -187,6 +214,9 @@ def calculate_moving_block_bootstrap_diff(
         "ci_95_upper": round(ci_upper, 4),
         "p_value_permutation": round(p_value, 4),
         "std_error": round(std_error, 4),
+        "block_length": block_length,
+        "bootstrap_iterations": iterations,
+        "seed": seed,
     }
 
 
@@ -237,7 +267,7 @@ class AlphaForensicsAnalyzer:
             risk_unit = exec_entry * Decimal("0.01")
         risk_pct = (risk_unit / exec_entry) * Decimal("100.0")
 
-        # 2. Latencia y excursión entre Close_t y Open_{t+1}
+        # 2. Latencia discreta entre Close_t y Open_{t+1}
         gap_pct = ((raw_open - close_t) / close_t) * Decimal("100.0")
         mfe_pre_pct = max(Decimal("0.0"), gap_pct) if is_long else max(Decimal("0.0"), -gap_pct)
         mfe_pre_r = mfe_pre_pct / risk_pct if risk_pct > Decimal("0.0") else Decimal("0.0")
@@ -300,18 +330,26 @@ class AlphaForensicsAnalyzer:
             time_mfe = peak_idx + 1
             time_mae = trough_idx + 1
 
-        # Ratios R
+        # Ratios R y ATR de cierre a 24h
         mfe_24_pct = mfe_h_pct[24]
         mae_24_pct = mae_h_pct[24]
         mfe_24_r = mfe_24_pct / risk_pct if risk_pct > Decimal("0.0") else Decimal("0.0")
         mae_24_r = mae_24_pct / risk_pct if risk_pct > Decimal("0.0") else Decimal("0.0")
-        ret_24_r = ret_h_pct[24] / risk_pct if risk_pct > Decimal("0.0") else Decimal("0.0")
+
+        # Variables diferenciadas de retorno forward a 24h
+        fwd_close_24 = closes_forward[min(24, available_bars) - 1] if available_bars > 0 else exec_entry
+        dir_mult = Decimal("1.0") if is_long else Decimal("-1.0")
+        diff_entry = dir_mult * (fwd_close_24 - exec_entry)
+
+        ret_24_pct = (diff_entry / exec_entry) * Decimal("100.0")
+        ret_24_atr = diff_entry / atr_trig if atr_trig > Decimal("0.0") else Decimal("0.0")
+        ret_24_r = diff_entry / risk_unit if risk_unit > Decimal("0.0") else Decimal("0.0")
 
         # Excursion before entry ratio
         denom = mfe_24_pct + mfe_pre_pct
         excursion_ratio = float(mfe_pre_pct / denom) if denom > Decimal("0.0001") else 0.0
 
-        # 4. Evaluación de SL/TP mecánico en 24h bajo Stop-First
+        # 4. Evaluación de SL/TP mecánico baseline en 24h bajo Stop-First
         would_hit_tp = False
         would_hit_sl = False
 
@@ -338,7 +376,40 @@ class AlphaForensicsAnalyzer:
 
         neither_hit = not (would_hit_tp or would_hit_sl)
 
-        # 5. Atributos de Microestructura para C (Liquidity Sweep)
+        # 5. Clasificación temporal de Path para barreras diagnósticas (+1R/-1R, +1.5R/-1R, +2R/-1R)
+        def evaluate_barrier_path(target_r: Decimal, stop_r: Decimal = Decimal("1.0")) -> str:
+            t_dist = risk_unit * target_r
+            s_dist = risk_unit * stop_r
+            if is_long:
+                target_px = exec_entry + t_dist
+                stop_px = exec_entry - s_dist
+            else:
+                target_px = exec_entry - t_dist
+                stop_px = exec_entry + s_dist
+
+            for k in range(available_bars):
+                hb = highs_forward[k]
+                lb = lows_forward[k]
+                if is_long:
+                    hit_target = hb >= target_px
+                    hit_stop = lb <= stop_px
+                else:
+                    hit_target = lb <= target_px
+                    hit_stop = hb >= stop_px
+
+                if hit_target and hit_stop:
+                    return "AMBIGUOUS_STOP_FIRST"
+                if hit_stop:
+                    return "ADVERSE_FIRST"
+                if hit_target:
+                    return "FAVORABLE_FIRST"
+            return "NEITHER"
+
+        path_1_0 = evaluate_barrier_path(Decimal("1.0"))
+        path_1_5 = evaluate_barrier_path(Decimal("1.5"))
+        path_2_0 = evaluate_barrier_path(Decimal("2.0"))
+
+        # 6. Atributos de Microestructura para C (Liquidity Sweep)
         sweep_depth_pct: float | None = None
         sweep_depth_atr: float | None = None
         wick_rejection: float | None = None
@@ -356,7 +427,6 @@ class AlphaForensicsAnalyzer:
             if rng_trig <= Decimal("0.0"):
                 rng_trig = Decimal("0.0001")
 
-            # SMA 20 volumen
             vol_win = [c.volume for c in candles[max(0, trigger_idx - 20) : trigger_idx]]
             sma_vol = (sum(vol_win) / Decimal(len(vol_win))) if vol_win else Decimal("1.0")
             if sma_vol <= Decimal("0.0"):
@@ -371,7 +441,6 @@ class AlphaForensicsAnalyzer:
                 wick_rejection = float(wick / rng_trig)
                 reclaim_eff = float((c_trig.close - low_prior) / rng_trig)
 
-                # Re-tests de nivel Low_prior en las siguientes barras
                 tests_4h = sum(1 for k in range(min(4, available_bars)) if lows_forward[k] <= low_prior)
                 tests_8h = sum(1 for k in range(min(8, available_bars)) if lows_forward[k] <= low_prior)
                 tests_24h = sum(1 for k in range(available_bars) if lows_forward[k] <= low_prior)
@@ -423,7 +492,8 @@ class AlphaForensicsAnalyzer:
             return_1h_pct=round(float(ret_h_pct[1]), 3),
             return_4h_pct=round(float(ret_h_pct[4]), 3),
             return_8h_pct=round(float(ret_h_pct[8]), 3),
-            return_24h_pct=round(float(ret_h_pct[24]), 3),
+            return_24h_pct=round(float(ret_24_pct), 3),
+            return_24h_atr=round(float(ret_24_atr), 3),
             return_24h_r=round(float(ret_24_r), 3),
             time_to_mfe_24h_bars=time_mfe,
             time_to_mae_24h_bars=time_mae,
@@ -434,6 +504,9 @@ class AlphaForensicsAnalyzer:
             would_hit_tp_before_sl=would_hit_tp,
             would_hit_sl_before_tp=would_hit_sl,
             neither_hit_24h=neither_hit,
+            path_barrier_1_0_r=path_1_0,
+            path_barrier_1_5_r=path_1_5,
+            path_barrier_2_0_r=path_2_0,
             mfe_t_to_next_open_pct=round(float(mfe_pre_pct), 3),
             mfe_t_to_next_open_r=round(float(mfe_pre_r), 3),
             gap_open_close_pct=round(float(gap_pct), 3),
@@ -449,13 +522,27 @@ class AlphaForensicsAnalyzer:
         )
 
 
-def aggregate_forensic_metrics(records: list[ForensicSignalRecord]) -> dict[str, Any]:
-    """Genera las estadísticas agregadas del Oracle Envelope y métricas diagnósticas."""
+def _percentile(data: list[float], pct: float) -> float:
+    if not data:
+        return 0.0
+    sorted_d = sorted(data)
+    k = (len(sorted_d) - 1) * (pct / 100.0)
+    f = math.floor(k)
+    c = math.ceil(k)
+    if f == c:
+        return sorted_d[int(k)]
+    return sorted_d[f] * (c - k) + sorted_d[c] * (k - f)
+
+
+def aggregate_forensic_metrics(
+    records: list[ForensicSignalRecord],
+    friction_pct: float = 0.20,  # 20 bps round trip
+) -> dict[str, Any]:
+    """Genera las estadísticas agregadas de diagnóstico forense, Oracle Envelope y Path temporal."""
     n = len(records)
     if n == 0:
         return {"n_signals": 0}
 
-    # Distribución MFE / MAE en R
     mfe_24_r = [r.mfe_24h_r for r in records]
     mae_24_r = [r.mae_24h_r for r in records]
     mfe_24_pct = [r.mfe_24h_pct for r in records]
@@ -478,7 +565,7 @@ def aggregate_forensic_metrics(records: list[ForensicSignalRecord]) -> dict[str,
     dir_8h = (sum(1 for r in records if r.dir_hit_8h) / n) * 100.0
     dir_24h = (sum(1 for r in records if r.dir_hit_24h) / n) * 100.0
 
-    # Comportamiento mecánico SL/TP
+    # Comportamiento mecánico SL/TP baseline
     p_tp_first = (sum(1 for r in records if r.would_hit_tp_before_sl) / n) * 100.0
     p_sl_first = (sum(1 for r in records if r.would_hit_sl_before_tp) / n) * 100.0
     p_neither = (sum(1 for r in records if r.neither_hit_24h) / n) * 100.0
@@ -487,14 +574,68 @@ def aggregate_forensic_metrics(records: list[ForensicSignalRecord]) -> dict[str,
     mean_time_mfe = sum(r.time_to_mfe_24h_bars for r in records) / n
     mean_time_mae = sum(r.time_to_mae_24h_bars for r in records) / n
 
-    # Latencia pre-entry
+    # Latencia discreta pre-entry
     mean_pre_mfe_pct = sum(r.mfe_t_to_next_open_pct for r in records) / n
     mean_gap_pct = sum(r.gap_open_close_pct for r in records) / n
     mean_excursion_ratio = sum(r.excursion_before_entry_ratio for r in records) / n
 
+    # 1. Oracle Envelope explícito para alpha in {0.25, 0.50, 0.75, 1.00}
+    # Oracle_alpha = alpha * MFE_24h - friction
+    alphas = [0.25, 0.50, 0.75, 1.00]
+    oracle_envelope_results: dict[str, Any] = {
+        "disclaimer": (
+            "VALORES EXCLUSIVAMENTE DIAGNÓSTICOS DE LÍMITE SUPERIOR TEÓRICO. "
+            "PROHIBIDO USAR PARA SELECCIONAR RETROSPECTIVAMENTE UN NUEVO EXIT O MODELO."
+        )
+    }
+
+    for a in alphas:
+        # En porcentaje
+        or_pct_list = [(a * r.mfe_24h_pct) - friction_pct for r in records]
+        # En R (fricción en R = friction_pct / risk_pct)
+        or_r_list = [(a * r.mfe_24h_r) - (friction_pct / r.risk_pct if r.risk_pct > 0 else 0.0) for r in records]
+
+        oracle_envelope_results[f"alpha_{a:.2f}"] = {
+            "percent": {
+                "mean": round(sum(or_pct_list) / n, 3),
+                "median": round(_percentile(or_pct_list, 50.0), 3),
+                "p25": round(_percentile(or_pct_list, 25.0), 3),
+                "p75": round(_percentile(or_pct_list, 75.0), 3),
+                "pct_positive": round((sum(1 for x in or_pct_list if x > 0) / n) * 100.0, 1),
+            },
+            "r_multiple": {
+                "mean": round(sum(or_r_list) / n, 3),
+                "median": round(_percentile(or_r_list, 50.0), 3),
+                "p25": round(_percentile(or_r_list, 25.0), 3),
+                "p75": round(_percentile(or_r_list, 75.0), 3),
+                "pct_positive": round((sum(1 for x in or_r_list if x > 0) / n) * 100.0, 1),
+            },
+        }
+
+    # 2. Clasificación temporal de Path para barreras congeladas (+1R/-1R, +1.5R/-1R, +2R/-1R)
+    def summarize_path_barrier(attr_name: str) -> dict[str, float]:
+        paths = [getattr(r, attr_name) for r in records]
+        fav = (sum(1 for p in paths if p == "FAVORABLE_FIRST") / n) * 100.0
+        adv = (sum(1 for p in paths if p == "ADVERSE_FIRST") / n) * 100.0
+        amb = (sum(1 for p in paths if p == "AMBIGUOUS_STOP_FIRST") / n) * 100.0
+        nei = (sum(1 for p in paths if p == "NEITHER") / n) * 100.0
+        return {
+            "pct_favorable_first": round(fav, 1),
+            "pct_adverse_first": round(adv, 1),
+            "pct_ambiguous_stop_first": round(amb, 1),
+            "pct_adverse_total_stop_first": round(adv + amb, 1),
+            "pct_neither_24h": round(nei, 1),
+        }
+
+    path_classification = {
+        "barrier_plus_1_0_minus_1_0_r": summarize_path_barrier("path_barrier_1_0_r"),
+        "barrier_plus_1_5_minus_1_0_r": summarize_path_barrier("path_barrier_1_5_r"),
+        "barrier_plus_2_0_minus_1_0_r": summarize_path_barrier("path_barrier_2_0_r"),
+    }
+
     res: dict[str, Any] = {
         "n_signals": n,
-        "oracle_envelope": {
+        "excursion_diagnostics": {
             "mean_mfe_24h_r": round(mean_mfe_r, 3),
             "mean_mae_24h_r": round(mean_mae_r, 3),
             "mean_mfe_24h_pct": round(mean_mfe_pct, 2),
@@ -505,6 +646,8 @@ def aggregate_forensic_metrics(records: list[ForensicSignalRecord]) -> dict[str,
             "p_mfe_ge_2r_pct": round(p_mfe_ge_2r, 1),
             "p_mae_le_minus_1r_pct": round(p_mae_le_minus_1r, 1),
         },
+        "oracle_envelope": oracle_envelope_results,
+        "path_classification": path_classification,
         "directional_hit_rates": {
             "1h_pct": round(dir_1h, 1),
             "4h_pct": round(dir_4h, 1),
@@ -520,14 +663,18 @@ def aggregate_forensic_metrics(records: list[ForensicSignalRecord]) -> dict[str,
             "mean_bars_to_mfe": round(mean_time_mfe, 1),
             "mean_bars_to_mae": round(mean_time_mae, 1),
         },
-        "entry_latency": {
+        "discrete_latency": {
             "mean_pre_entry_mfe_pct": round(mean_pre_mfe_pct, 3),
             "mean_gap_pct": round(mean_gap_pct, 3),
             "mean_excursion_before_entry_ratio": round(mean_excursion_ratio, 3),
+            "note": (
+                "Evalúa únicamente el intervalo discreto Close_t -> Open_{t+1}. "
+                "No evalúa la latencia de completar la vela de 1h frente a señales intrabarra."
+            ),
         },
     }
 
-    # Métricas de microestructura si existen (Strategy C)
+    # Métricas de microestructura y Test Condicional para Strategy C
     sweeps = [r for r in records if r.sweep_depth_pct is not None]
     if sweeps:
         n_sw = len(sweeps)
@@ -540,6 +687,32 @@ def aggregate_forensic_metrics(records: list[ForensicSignalRecord]) -> dict[str,
         p_retest_8h = (sum(1 for r in sweeps if (r.second_tests_8h or 0) > 0) / n_sw) * 100.0
         p_retest_24h = (sum(1 for r in sweeps if (r.second_tests_24h or 0) > 0) / n_sw) * 100.0
 
+        # Análisis condicional observacional: Re-test vs No-Retest
+        def conditional_retest_stats(attr_name: str) -> dict[str, Any]:
+            group_retest = [r for r in sweeps if (getattr(r, attr_name) or 0) > 0]
+            group_no_retest = [r for r in sweeps if (getattr(r, attr_name) or 0) == 0]
+
+            def sub_stats(sub: list[ForensicSignalRecord]) -> dict[str, Any]:
+                k = len(sub)
+                if k == 0:
+                    return {"n": 0}
+                p_sl = (sum(1 for r in sub if r.would_hit_sl_before_tp) / k) * 100.0
+                m_mfe_r = sum(r.mfe_24h_r for r in sub) / k
+                m_mae_r = sum(r.mae_24h_r for r in sub) / k
+                m_fwd_ret = sum(r.return_24h_pct for r in sub) / k
+                return {
+                    "n": k,
+                    "pct_sl_first": round(p_sl, 1),
+                    "mean_mfe_24h_r": round(m_mfe_r, 3),
+                    "mean_mae_24h_r": round(m_mae_r, 3),
+                    "mean_forward_return_24h_pct": round(m_fwd_ret, 3),
+                }
+
+            return {
+                "with_retest": sub_stats(group_retest),
+                "without_retest": sub_stats(group_no_retest),
+            }
+
         res["microstructure_c"] = {
             "mean_sweep_depth_pct": round(mean_depth_pct, 3),
             "mean_sweep_depth_atr": round(mean_depth_atr, 2),
@@ -549,6 +722,15 @@ def aggregate_forensic_metrics(records: list[ForensicSignalRecord]) -> dict[str,
             "p_retest_prior_level_4h_pct": round(p_retest_4h, 1),
             "p_retest_prior_level_8h_pct": round(p_retest_8h, 1),
             "p_retest_prior_level_24h_pct": round(p_retest_24h, 1),
+            "conditional_association_retest": {
+                "disclaimer": (
+                    "ASOCIACIÓN OBSERVACIONAL CONDICIONAL, NO PRUEBA DE CAUSA RAÍZ. "
+                    "Útil para evaluar correlación entre re-vulneraciones y salidas por stop."
+                ),
+                "window_4h": conditional_retest_stats("second_tests_4h"),
+                "window_8h": conditional_retest_stats("second_tests_8h"),
+                "window_24h": conditional_retest_stats("second_tests_24h"),
+            },
         }
 
     return res
